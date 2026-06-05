@@ -6,7 +6,7 @@ export default defineConfig({
   site: 'https://solarbynumbers.co.uk',
   markdown: {
     shikiConfig: {
-      theme: 'vitesse-dark',
+      theme: 'vitesse-light',
     },
   },
 });

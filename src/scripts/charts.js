@@ -11,12 +11,12 @@ Chart.register(
 );
 
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const AMBER = css('--amber') || '#ffb02e';
-const EXPORT = css('--export') || '#57c785';
-const IMPORT = css('--import') || '#e5604d';
-const BATTERY = css('--battery') || '#6aa9e9';
-const CREAM_DIM = css('--cream-dim') || '#b8ad8d';
-const LINE = 'rgba(243,233,205,0.10)';
+const AMBER = css('--gen') || '#f0a400'; // generation — sun gold
+const EXPORT = css('--export') || '#1d9e61';
+const IMPORT = css('--import') || '#e0452e';
+const BATTERY = css('--battery') || '#2e8fdf';
+const CREAM_DIM = css('--ink-600') || '#4d5159';
+const LINE = 'rgba(22,24,29,0.07)';
 
 Chart.defaults.font.family = "'IBM Plex Mono', monospace";
 Chart.defaults.font.size = 11;
@@ -72,7 +72,7 @@ new Chart(document.getElementById('chart-battery'), {
     labels,
     datasets: [
       { label: 'Charged (kWh)', data: e('battery_charge'), backgroundColor: BATTERY, borderRadius: 3 },
-      { label: 'Discharged (kWh)', data: e('battery_discharge').map((v) => (v == null ? null : -v)), backgroundColor: 'rgba(106,169,233,0.45)', borderRadius: 3 },
+      { label: 'Discharged (kWh)', data: e('battery_discharge').map((v) => (v == null ? null : -v)), backgroundColor: 'rgba(46,143,223,0.45)', borderRadius: 3 },
     ],
   },
   options: {
@@ -110,7 +110,7 @@ new Chart(document.getElementById('chart-payback'), {
       label: 'Cumulative savings (£)',
       data: cumulative,
       borderColor: AMBER,
-      backgroundColor: 'rgba(255,176,46,0.12)',
+      backgroundColor: 'rgba(240,164,0,0.12)',
       fill: true,
       pointRadius: 0,
       borderWidth: 2,
