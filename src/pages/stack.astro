@@ -19,7 +19,7 @@ import Base from '../layouts/Base.astro';
     <thead><tr><th>Layer</th><th>What</th><th>Job</th></tr></thead>
     <tbody>
       <tr><td>OS</td><td>Home Assistant OS (x86-64)</td><td>Runs on the OptiPlex's SSD, which the statistics database is far happier on than a Pi's SD card</td></tr>
-      <tr><td>Inverter link</td><td>Sigenergy ESS integration (HACS)</td><td>Modbus TCP to the EC 8.0SP on port 502. Over 250 entities, all local, no cloud</td></tr>
+      <tr><td>Inverter link</td><td>Sigenergy ESS integration (HACS)</td><td>Modbus TCP to the inverter on port 502. Over 250 entities, all local, no cloud</td></tr>
       <tr><td>Tariff</td><td>Octopus Energy integration (HACS)</td><td>Live Agile half-hourly rates, export rate, Saving Sessions, consumption</td></tr>
       <tr><td>Forecast</td><td>Solcast (HACS)</td><td>7-day rooftop PV forecast, both roof faces, free hobbyist tier</td></tr>
       <tr><td>Brain</td><td><strong>Predbat</strong> (add-on mode)</td><td>Plans charge/discharge against prices + forecast + learned consumption</td></tr>

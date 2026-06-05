@@ -33,3 +33,6 @@ in [the stack](/stack/) possible.
 The sales projection says this system should generate around 7,500 kWh a year and return
 somewhere near £1,900 to £2,000 of value in year one against an £11,999 price. Whether that
 survives contact with reality is what [the stats page](/stats/) is for.
+
+**Update, 5 June:** it turns out the inverter on the wall is not the one we ordered.
+[That story has its own post](/journey/2026-06-05-wrong-inverter/).

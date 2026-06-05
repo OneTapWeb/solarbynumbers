@@ -10,7 +10,7 @@ import energyPrefs from '../../public/configs/energy_prefs.json?raw';
 const files = [
   {
     name: 'apps.yaml', lang: 'yaml', code: appsYaml, dl: '/configs/apps.yaml',
-    blurb: 'The full Predbat configuration for a Sigenergy EC 8.0SP (inverter_type: SIG) on Octopus Agile + fixed export, with Solcast forecasting and Saving Session support. The regex entity matchers mean it should drop onto most single-inverter Sigenergy installs unchanged.',
+    blurb: 'The full Predbat configuration for a Sigenergy EC-series hybrid (inverter_type: SIG) on Octopus Agile + fixed export, with Solcast forecasting and Saving Session support. The regex entity matchers mean it should drop onto most single-inverter Sigenergy installs unchanged, and the rate limits are read from sensors rather than hard-coded, which paid off when our inverter turned out to be a different model than ordered.',
   },
   {
     name: 'predbat_sigenergy_bridge.yaml', lang: 'yaml', code: bridgeYaml, dl: '/configs/predbat_sigenergy_bridge.yaml',
@@ -31,7 +31,7 @@ const files = [
 ];
 ---
 
-<Base title="The configs" description="The exact sanitized Predbat apps.yaml, Sigenergy bridge automations, helpers and energy dashboard config running a UK Sigenergy EC 8.0SP + Octopus Agile install.">
+<Base title="The configs" description="The exact sanitized Predbat apps.yaml, Sigenergy bridge automations, helpers and energy dashboard config running a UK Sigenergy and Octopus Agile install.">
   <section class="reveal">
     <p class="kicker">Copy-paste ready · sanitized</p>
     <h1>The configs</h1>
