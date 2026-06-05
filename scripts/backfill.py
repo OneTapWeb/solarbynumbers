@@ -37,7 +37,9 @@ ENERGY_SENSORS = {
     "sensor.sigen_plant_daily_battery_charge_energy": "battery_charge",
     "sensor.sigen_plant_daily_battery_discharge_energy": "battery_discharge",
 }
-EXPORT_RATE_GBP = 0.12  # flat Outgoing rate — export revenue is computed, not metered
+# Export tariff not live yet (final certification pending, ~Jul-Aug 2026).
+# Set to 0.12 once the Outgoing tariff is active. Revenue is computed, not metered.
+EXPORT_RATE_GBP = 0.0
 
 
 def api(path: str) -> object:

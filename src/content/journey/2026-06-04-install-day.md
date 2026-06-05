@@ -1,15 +1,15 @@
 ---
 title: "Install day: 22 panels where 21 should have fit"
-date: 2026-04-20
-summary: "EVLM Renewables fit the system in two days, and managed to squeeze a 22nd panel onto the roof. We went from 9.98 to 10.45 kWp for free."
+date: 2026-06-04
+summary: "The system went in on 4 June, and the installers managed to squeeze a 22nd panel onto the roof. We went from 9.98 to 10.45 kWp for free."
 tags: [install, hardware]
 ---
 
-The scaffolding went up on a Monday. By Wednesday evening the roof was generating.
+By the evening of 4 June the roof was generating.
 
 The quote was for **21 Aiko 475W panels**, 9.98 kWp across our east/west roof. On the day, the
 installers measured up and decided there was room for one more on the west face. No drama and no
-extra charge, just **22 panels and 10.45 kWp**. It pays to have an installer who treats the roof
+extra charge, just **22 panels and 10.45 kWp**. It pays to have installers who treat the roof
 as the spec rather than the paperwork.
 
 The rest of the kit:
@@ -17,7 +17,13 @@ The rest of the kit:
 - **Sigenergy EC 8.0SP** hybrid inverter. 8 kW, with the energy management system built in.
 - **SigenStor BAT 6.0 and BAT 10.0** stacked together. 15.06 kWh nominal, 14.6 usable.
 - G99 approval came back from the DNO with **no export limit**, which matters more than it
-  sounds. The full 8 kW can flow out during VPP events and Saving Sessions.
+  sounds. The full 8 kW will be able to flow out during VPP events and Saving Sessions.
+
+One catch: we can't actually export yet. The final installation certification takes a month or
+two to go through, and until it does the export tariff sits dormant and surplus solar earns
+nothing. The battery soaks up most of it anyway, so the sting is smaller than it sounds, but
+it's worth knowing about if you're planning your own install. The first weeks are
+self-consumption only.
 
 First impressions of the Sigenergy kit: the stack design is genuinely tidy (the battery modules
 and inverter click together like oversized LEGO), the app is fine, and it speaks **Modbus TCP
