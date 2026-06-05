@@ -14,6 +14,13 @@ const OUT = join(root, 'src', 'data', 'stats.json');
 
 const SYSTEM_COST_GBP = 11999;
 
+// Export tariff status: until final certification clears, surplus is exported
+// to the grid unpaid. Days before EXPORT_PAID_FROM count toward the "foregone
+// export earnings" stat at the would-be flat rate. Set the date (YYYY-MM-DD)
+// when paid export goes live.
+const EXPORT_PAID_FROM = null;
+const EXPORT_RATE_GBP = 0.12;
+
 async function loadDaily() {
   let files = [];
   try {
@@ -99,6 +106,7 @@ function aggregate(days) {
     house_consumption: 0, battery_charge: 0, battery_discharge: 0,
     import_cost: 0, export_revenue: 0, net_cost: 0,
     baseline_no_solar_cost: 0, savings: 0,
+    unpaid_export_kwh: 0, foregone_export_gbp: 0,
   };
   for (const d of days) {
     const m = d.date.slice(0, 7);
@@ -126,6 +134,11 @@ function aggregate(days) {
       const s = c.baseline_no_solar_cost - c.net_cost;
       mo.savings += s;
       totals.savings += s;
+    }
+    // export given away unpaid while certification is pending
+    if ((!EXPORT_PAID_FROM || d.date < EXPORT_PAID_FROM) && e.grid_export != null) {
+      totals.unpaid_export_kwh += e.grid_export;
+      totals.foregone_export_gbp += e.grid_export * EXPORT_RATE_GBP;
     }
   }
   const monthlyArr = [...monthly.values()].map((m) => {

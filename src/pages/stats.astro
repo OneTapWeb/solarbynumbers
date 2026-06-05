@@ -52,6 +52,26 @@ const range = stats.meta.first_date && stats.meta.last_date
     </div>
   </section>
 
+  {(t.unpaid_export_kwh ?? 0) > 0.05 && (
+    <section class="reveal" style="margin-top:1.2rem">
+      <div class="panel" style="border-left:4px solid var(--import)">
+        <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:0.6rem 2rem">
+          <div class="stat imp">
+            <span class="stat-label">Given away unpaid</span>
+            <span class="stat-value">£{fmt(t.foregone_export_gbp, 2)}</span>
+            <span class="stat-sub">{fmt(t.unpaid_export_kwh, 1)} kWh exported for free</span>
+          </div>
+          <p class="muted" style="max-width:36rem; margin:0">
+            Until the final installation certification clears we earn nothing for export, but
+            the inverter still pushes surplus to the grid once the battery is full. This is what
+            that donated energy would have earned at the 12p rate.
+            <a href="/tariff/">The certification story →</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  )}
+
   <section class="chart-panel panel reveal">
     <p class="chart-title">Daily generation vs consumption</p>
     <canvas id="chart-energy" height="120"></canvas>
