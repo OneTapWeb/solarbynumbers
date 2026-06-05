@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "date": "2026-06-04",
+  "tz": "Europe/London",
+  "generated_at": "2026-06-05T07:43:51+01:00",
+  "source": "backfill",
+  "energy_kwh": {
+    "pv_generation": 11.81,
+    "grid_import": 0.07,
+    "grid_export": 0.0,
+    "house_consumption": 8.05,
+    "battery_charge": 8.34,
+    "battery_discharge": 4.93
+  },
+  "cost_gbp": {
+    "import_cost": null,
+    "export_revenue": 0.0,
+    "net_cost": null,
+    "baseline_no_solar_cost": null
+  }
+}
