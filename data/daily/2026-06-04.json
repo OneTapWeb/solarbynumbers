@@ -13,9 +13,9 @@
     "battery_discharge": 4.93
   },
   "cost_gbp": {
-    "import_cost": null,
+    "import_cost": 0.46,
     "export_revenue": 0.0,
-    "net_cost": null,
-    "baseline_no_solar_cost": null
+    "net_cost": 0.46,
+    "baseline_no_solar_cost": 5.44
   }
 }
