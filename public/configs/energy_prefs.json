@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "minor_version": 3,
+  "key": "energy",
+  "data": {
+    "energy_sources": [
+      {
+        "type": "grid",
+        "stat_energy_from": "sensor.sigen_plant_total_imported_energy",
+        "stat_energy_to": "sensor.sigen_plant_total_exported_energy",
+        "stat_cost": null,
+        "stat_compensation": null,
+        "entity_energy_price": "sensor.octopus_energy_electricity_YOUR_MPAN_YOUR_SERIAL_current_rate",
+        "number_energy_price": null,
+        "entity_energy_price_export": null,
+        "number_energy_price_export": null,
+        "cost_adjustment_day": 0.0
+      },
+      {
+        "type": "solar",
+        "stat_energy_from": "sensor.sigen_plant_total_pv_generation",
+        "config_entry_solar_forecast": ["YOUR_SOLCAST_CONFIG_ENTRY_ID"]
+      },
+      {
+        "type": "battery",
+        "stat_energy_from": "sensor.sigen_plant_total_discharged_energy_of_the_ess",
+        "stat_energy_to": "sensor.sigen_plant_total_charged_energy_of_the_ess"
+      }
+    ],
+    "device_consumption": [],
+    "device_consumption_water": []
+  }
+}

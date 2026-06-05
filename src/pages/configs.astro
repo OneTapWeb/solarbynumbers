@@ -1,0 +1,72 @@
+---
+import { Code } from 'astro:components';
+import Base from '../layouts/Base.astro';
+import appsYaml from '../../public/configs/apps.yaml?raw';
+import bridgeYaml from '../../public/configs/predbat_sigenergy_bridge.yaml?raw';
+import helpersYaml from '../../public/configs/helpers.yaml?raw';
+import enableJq from '../../public/configs/enable_entities.jq?raw';
+import energyPrefs from '../../public/configs/energy_prefs.json?raw';
+
+const files = [
+  {
+    name: 'apps.yaml', lang: 'yaml', code: appsYaml, dl: '/configs/apps.yaml',
+    blurb: 'The full Predbat configuration for a Sigenergy EC 8.0SP (inverter_type: SIG) on Octopus Agile + fixed export, with Solcast forecasting and Saving Session support. The regex entity matchers mean it should drop onto most single-inverter Sigenergy installs unchanged.',
+  },
+  {
+    name: 'predbat_sigenergy_bridge.yaml', lang: 'yaml', code: bridgeYaml, dl: '/configs/predbat_sigenergy_bridge.yaml',
+    blurb: 'The three automations that bridge Predbat to the Sigenergy EMS. Predbat sets input_select.predbat_requested_mode; the first automation maps each mode (Demand / Charging / Discharging / both Freezes) onto sigen_plant_remote_ems_control_mode and the charge/discharge cut-off registers. The other two clamp Predbat\'s requested W rates onto the inverter\'s kW limit registers.',
+  },
+  {
+    name: 'helpers.yaml', lang: 'yaml', code: helpersYaml, dl: '/configs/helpers.yaml',
+    blurb: 'The input_select and input_number helpers the bridge automations depend on. Append to configuration.yaml (or your packages).',
+  },
+  {
+    name: 'enable_entities.jq', lang: 'text', code: enableJq, dl: '/configs/enable_entities.jq',
+    blurb: 'The Sigenergy integration ships several control entities disabled by default — including the remote EMS mode select that the whole bridge depends on. This jq filter flips them on in the entity registry (run against core.entity_registry with HA stopped, or just enable them by hand in the UI).',
+  },
+  {
+    name: 'energy_prefs.json', lang: 'json', code: energyPrefs, dl: '/configs/energy_prefs.json',
+    blurb: 'Energy dashboard source config: grid import/export and battery from the Sigenergy cumulative meters, live import pricing from the Octopus integration, solar forecast from Solcast. Replace the MPAN/serial and Solcast config-entry placeholders with your own.',
+  },
+];
+---
+
+<Base title="The configs" description="The exact sanitized Predbat apps.yaml, Sigenergy bridge automations, helpers and energy dashboard config running a UK Sigenergy EC 8.0SP + Octopus Agile install.">
+  <section class="reveal">
+    <p class="kicker">Copy-paste ready · sanitized</p>
+    <h1>The configs</h1>
+    <p style="max-width:46rem">
+      These are the <em>actual</em> files running this system — not examples. Only credentials and
+      meter identifiers have been replaced with placeholders. If you're putting Predbat on a
+      Sigenergy inverter, this page is the shortcut: the mode-bridge automations took the most
+      trial and error and are, as far as we know, not documented anywhere else.
+    </p>
+    <div class="note">
+      <p><strong>Before you copy:</strong> entity IDs assume the HACS Sigenergy ESS integration's
+      default naming (<code>sigen_plant_*</code>) and a single plant. Verify yours in
+      Developer Tools → States. Nothing here contains secrets — API keys live in
+      <code>secrets.yaml</code>, which is never published.</p>
+    </div>
+  </section>
+
+  {files.map((f) => (
+    <section style="margin-top:3rem">
+      <h2 style="margin-bottom:0.4rem">{f.name}</h2>
+      <p style="max-width:46rem">{f.blurb}</p>
+      <div class="codeblock">
+        <span class="codetab">{f.name} <a href={f.dl} download style="color:inherit">↓ raw</a></span>
+        <Code code={f.code} lang={f.lang as any} theme="vitesse-dark" />
+      </div>
+    </section>
+  ))}
+
+  <section style="margin-top:3rem">
+    <h2>The stats-publishing pipeline</h2>
+    <p style="max-width:46rem">
+      The utility_meter helpers, cost-snapshot automation and the 00:15 GitHub push that feed the
+      <a href="/stats/">stats page</a> are being finalised on the live system now — they'll be
+      published here once they've survived a few real midnights. The design is described on the
+      <a href="/stack/#pipeline">stack page</a>.
+    </p>
+  </section>
+</Base>

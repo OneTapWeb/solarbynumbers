@@ -1,0 +1,119 @@
+- id: predbat_requested_mode_action
+  alias: "Predbat Requested Mode Action"
+  description: "Maps input_select.predbat_requested_mode to select.sigen_plant_remote_ems_control_mode (Predbat <-> Sigenergy bridge)"
+  mode: restart
+  triggers:
+    - trigger: state
+      entity_id:
+        - input_select.predbat_requested_mode
+  conditions: []
+  actions:
+    - action: select.select_option
+      metadata: {}
+      target:
+        entity_id: select.sigen_plant_remote_ems_control_mode
+      data:
+        option: >
+          {% if is_state('input_select.predbat_requested_mode', "Demand") %}Maximum Self Consumption
+          {% elif is_state('input_select.predbat_requested_mode', "Charging") %}Command Charging (PV First)
+          {% elif is_state('input_select.predbat_requested_mode', "Freeze Charging") %}Maximum Self Consumption
+          {% elif is_state('input_select.predbat_requested_mode', "Discharging") %}Command Discharging (PV First)
+          {% elif is_state('input_select.predbat_requested_mode', "Freeze Discharging") %}Maximum Self Consumption
+          {% endif %}
+    - choose:
+        # Freeze Charging: hold current SoC - self consumption with discharging prohibited
+        - conditions:
+            - condition: state
+              entity_id: input_select.predbat_requested_mode
+              state: "Freeze Charging"
+          sequence:
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_ess_charge_cut_off_state_of_charge
+              data:
+                value: 100
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_ess_discharge_cut_off_state_of_charge
+              data:
+                value: 100
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_grid_import_limitation
+              data:
+                value: 0
+        # Freeze Discharging: hold current SoC - self consumption with charging prohibited
+        - conditions:
+            - condition: state
+              entity_id: input_select.predbat_requested_mode
+              state: "Freeze Discharging"
+          sequence:
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_ess_charge_cut_off_state_of_charge
+              data:
+                value: 0
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_ess_discharge_cut_off_state_of_charge
+              data:
+                value: 0
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_grid_import_limitation
+              data:
+                value: 0
+        # Default: restore normal cut-off limits
+        - conditions:
+            - condition: not
+              conditions:
+                - condition: state
+                  entity_id: input_select.predbat_requested_mode
+                  state: "Freeze Charging"
+                - condition: state
+                  entity_id: input_select.predbat_requested_mode
+                  state: "Freeze Discharging"
+          sequence:
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_ess_charge_cut_off_state_of_charge
+              data:
+                value: 100
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_ess_discharge_cut_off_state_of_charge
+              data:
+                value: 0
+            - action: number.set_value
+              target:
+                entity_id: number.sigen_plant_grid_import_limitation
+              data:
+                value: 100
+
+- id: automation_sigen_ess_max_charging_limit_input_number_action
+  alias: "Predbat max charging limit action"
+  description: "Maps input_number.charge_rate (W) to number.sigen_plant_ess_max_charging_limit (kW), clamped to rated power"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_number.charge_rate
+  actions:
+    - action: number.set_value
+      target:
+        entity_id: number.sigen_plant_ess_max_charging_limit
+      data:
+        value: "{{ [(states('input_number.charge_rate') | float / 1000) | round(2), states('sensor.sigen_plant_ess_rated_charging_power') | float] | min }}"
+
+- id: automation_sigen_ess_max_discharging_limit_input_number_action
+  alias: "Predbat max discharging limit action"
+  description: "Maps input_number.discharge_rate (W) to number.sigen_plant_ess_max_discharging_limit (kW), clamped to rated power"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_number.discharge_rate
+  actions:
+    - action: number.set_value
+      target:
+        entity_id: number.sigen_plant_ess_max_discharging_limit
+      data:
+        value: "{{ [(states('input_number.discharge_rate') | float / 1000) | round(2), states('sensor.sigen_plant_ess_rated_discharging_power') | float] | min }}"

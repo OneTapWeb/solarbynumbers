@@ -1,0 +1,61 @@
+name: Build & deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # gitleaks scans full history
+
+      # Hard gate: no secrets ever reach the public repo / live site
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build (aggregate + astro)
+        run: npm run build
+
+      - name: Belt-and-braces secret grep of built output
+        run: |
+          ! grep -rEi 'github_pat_|ghp_[A-Za-z0-9]|sk-[A-Za-z0-9]{20}|eyJhbGciOi' dist/ \
+            || (echo 'Possible secret found in dist/ — refusing to deploy' && exit 1)
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 185.249.75.81 >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519" \
+            dist/ root@185.249.75.81:/var/www/solarbynumbers.co.uk/
+
+      - name: Verify
+        run: |
+          sleep 2
+          curl -fsSI https://solarbynumbers.co.uk/ | head -1 || echo "site not yet reachable (DNS/cert pending?)"

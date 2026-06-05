@@ -1,0 +1,120 @@
+---
+import Base from '../layouts/Base.astro';
+import stats from '../data/stats.json';
+
+const t = stats.totals;
+const fmt = (v: number | null | undefined, dp = 0) =>
+  v == null ? '—' : v.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+const months = [...stats.monthly].reverse();
+const monthName = (m: string) =>
+  new Date(m + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+const range = stats.meta.first_date && stats.meta.last_date
+  ? `${stats.meta.first_date} → ${stats.meta.last_date}`
+  : '';
+---
+
+<Base title="Live performance stats" description="Real daily solar generation, grid import/export, battery throughput and payback progress — auto-published nightly from Home Assistant.">
+  <section class="reveal">
+    <p class="kicker">{t.days} days of data · {range} {stats.meta.sample && <span class="badge-sample">demo data</span>}</p>
+    <h1>The numbers</h1>
+    <p style="max-width:46rem">
+      Every figure below is pushed automatically from Home Assistant at 00:15 each night — kWh from
+      the Sigenergy inverter's meters, costs from the Octopus Energy integration, and the no-solar
+      baseline from Predbat. Nothing is typed in by hand. <a href="/stack/#pipeline">How the pipeline works →</a>
+    </p>
+  </section>
+
+  <section class="reveal" style="margin-top:2.2rem">
+    <div class="panel ticks">
+      <p class="kicker" style="margin-bottom:1.2rem">Running totals</p>
+      <div class="grid-4">
+        <div class="stat gen">
+          <span class="stat-label">Generated</span>
+          <span class="stat-value">{fmt(t.pv_generation)}<span class="unit">kWh</span></span>
+        </div>
+        <div class="stat exp">
+          <span class="stat-label">Exported</span>
+          <span class="stat-value">{fmt(t.grid_export)}<span class="unit">kWh</span></span>
+        </div>
+        <div class="stat imp">
+          <span class="stat-label">Imported</span>
+          <span class="stat-value">{fmt(t.grid_import)}<span class="unit">kWh</span></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Saved</span>
+          <span class="stat-value">£{fmt(t.savings)}</span>
+          <span class="stat-sub">{((stats.meta.payback_progress ?? 0) * 100).toFixed(1)}% of £{fmt(stats.meta.system_cost_gbp)}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chart-panel panel reveal">
+    <p class="chart-title">Daily generation vs consumption</p>
+    <canvas id="chart-energy" height="120"></canvas>
+  </section>
+
+  <section class="chart-panel panel reveal">
+    <p class="chart-title">Grid flows — export ↑ / import ↓</p>
+    <canvas id="chart-grid" height="120"></canvas>
+  </section>
+
+  <section class="chart-panel panel reveal">
+    <p class="chart-title">Battery throughput — charged ↑ / discharged ↓</p>
+    <canvas id="chart-battery" height="120"></canvas>
+  </section>
+
+  <section class="chart-panel panel reveal">
+    <p class="chart-title">Daily net cost vs no-solar baseline</p>
+    <canvas id="chart-cost" height="120"></canvas>
+  </section>
+
+  <section class="chart-panel panel reveal">
+    <p class="chart-title">Cumulative savings → £{fmt(stats.meta.system_cost_gbp)} payback</p>
+    <canvas id="chart-payback" height="120"></canvas>
+  </section>
+
+  <section style="margin-top:3rem">
+    <h2>Monthly ledger</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th class="num">Days</th>
+          <th class="num">Gen kWh</th>
+          <th class="num">Export kWh</th>
+          <th class="num">Import kWh</th>
+          <th class="num">Net cost £</th>
+          <th class="num">Saved £</th>
+        </tr>
+      </thead>
+      <tbody>
+        {months.map((m) => (
+          <tr>
+            <td>{monthName(m.month)}</td>
+            <td class="num">{m.days}</td>
+            <td class="num">{fmt(m.pv_generation, 1)}</td>
+            <td class="num">{fmt(m.grid_export, 1)}</td>
+            <td class="num">{fmt(m.grid_import, 1)}</td>
+            <td class="num">{fmt(m.net_cost, 2)}</td>
+            <td class="num" style="color:var(--export)">{fmt(m.savings, 2)}</td>
+          </tr>
+        ))}
+        <tr class="total">
+          <td>All time</td>
+          <td class="num">{t.days}</td>
+          <td class="num">{fmt(t.pv_generation, 1)}</td>
+          <td class="num">{fmt(t.grid_export, 1)}</td>
+          <td class="num">{fmt(t.grid_import, 1)}</td>
+          <td class="num">{fmt(t.net_cost, 2)}</td>
+          <td class="num">{fmt(t.savings, 2)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted">A day's saving = Predbat's no-solar baseline (what that day's consumption
+    would have cost imported entirely at Agile rates) minus the actual net cost (import cost −
+    export revenue). Standing charges affect both sides equally so are excluded.</p>
+  </section>
+
+  <script src="../scripts/charts.js"></script>
+</Base>

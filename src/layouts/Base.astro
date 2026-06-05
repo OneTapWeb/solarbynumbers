@@ -1,0 +1,80 @@
+---
+import '@fontsource-variable/fraunces';
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/600.css';
+import '../styles/global.css';
+
+const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = 'A UK solar + battery install, documented in numbers. 10.45 kWp Aiko + Sigenergy, Octopus Agile, Home Assistant + Predbat — with real daily performance data, auto-published.' } = Astro.props;
+
+const nav = [
+  ['/', 'home'],
+  ['/stats/', 'stats'],
+  ['/system/', 'system'],
+  ['/stack/', 'stack'],
+  ['/configs/', 'configs'],
+  ['/journey/', 'journey'],
+  ['/tariff/', 'tariff'],
+];
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} — Solar by Numbers</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={`${title} — Solar by Numbers`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+  </head>
+  <body>
+    <header class="site">
+      <div class="bar">
+        <a href="/" class="wordmark"><span class="sun" aria-hidden="true"></span>solar <em>by numbers</em></a>
+        <input type="checkbox" id="nav-toggle" aria-hidden="true" />
+        <label for="nav-toggle" class="nav-burger" aria-label="Menu">≡</label>
+        <nav class="site" aria-label="Main">
+          <ul>
+            {nav.map(([href, label]) => (
+              <li><a href={href} aria-current={isCurrent(href) ? 'page' : undefined}>{label}</a></li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site">
+      <div class="wrap cols">
+        <div>
+          <p style="color:var(--cream)"><strong>Solar by Numbers</strong> — one UK household's solar + battery install, documented with real data. 10.45 kWp on an east/west roof in Hampshire, a 15 kWh battery, and a Home Assistant + Predbat brain. Numbers update nightly, straight from the inverter.</p>
+          <p class="muted">No sponsorships. The only money this site makes is the referral below — and it pays you too.</p>
+        </div>
+        <div>
+          <p><strong style="color:var(--cream)">Thinking of Octopus Energy?</strong><br />
+          We're on Agile import + fixed 12p export. Sign up with this link and we <em>both</em> get £50:</p>
+          <a class="btn" href={OCTOPUS_REFERRAL} rel="noopener">⚡ £50 Octopus referral</a>
+          <p class="muted" style="margin-top:1rem">
+            <a href="/journey/">Install diary</a> · <a href="/configs/">Predbat configs</a> · <a href="/stats/">Live stats</a>
+          </p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

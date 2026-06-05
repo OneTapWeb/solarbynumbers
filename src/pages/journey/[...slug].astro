@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('journey');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<Base title={post.data.title} description={post.data.summary}>
+  <article class="reveal" style="max-width:46rem">
+    <p class="kicker">{fmtDate(post.data.date)}</p>
+    <h1 style="font-size:clamp(2rem,5vw,3rem)">{post.data.title}</h1>
+    <div style="margin-top:1.5rem">
+      <Content />
+    </div>
+    <hr />
+    <p class="muted">
+      ← <a href="/journey/">All diary entries</a> ·
+      <a href="/stats/">Today's numbers</a>
+    </p>
+  </article>
+</Base>

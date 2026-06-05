@@ -1,0 +1,99 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="The system" description="Full specification: 22× Aiko 475W panels (10.45 kWp), Sigenergy EC 8.0SP hybrid inverter, 15.06 kWh SigenStor battery. £11,999 installed, Hampshire UK.">
+  <section class="reveal">
+    <p class="kicker">Part 1 — Hardware</p>
+    <h1>The system</h1>
+    <p style="max-width:46rem">
+      Installed April 2026 by EVLM Renewables on an east/west pitched roof in Hampshire.
+      The quote said 21 panels; the installers found room for 22 on the day —
+      a free 475W upgrade we'll happily take.
+    </p>
+  </section>
+
+  <section class="reveal" style="margin-top:2rem">
+    <div class="panel ticks">
+      <div class="grid-4">
+        <div class="stat gen">
+          <span class="stat-label">Array</span>
+          <span class="stat-value">10.45<span class="unit">kWp</span></span>
+          <span class="stat-sub">22× Aiko 475W N-type</span>
+        </div>
+        <div class="stat bat">
+          <span class="stat-label">Battery</span>
+          <span class="stat-value">15.06<span class="unit">kWh</span></span>
+          <span class="stat-sub">14.6 kWh usable</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Inverter</span>
+          <span class="stat-value">8.0<span class="unit">kW</span></span>
+          <span class="stat-sub">Sigenergy EC 8.0SP hybrid</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Total cost</span>
+          <span class="stat-value">£11,999</span>
+          <span class="stat-sub">installed · 0% VAT</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <h2>Specification</h2>
+  <table>
+    <tbody>
+      <tr><td>Panels</td><td>22 × Aiko 475W N-type ABC (as-built — proposal was 21), east/west split roof</td></tr>
+      <tr><td>System size</td><td class="num">10.45 kWp</td></tr>
+      <tr><td>Inverter</td><td>Sigenergy EC 8.0SP — 8 kW hybrid with built-in EMS, Modbus TCP over LAN</td></tr>
+      <tr><td>Battery</td><td>SigenStor BAT 6.0 + BAT 10.0 = 15.06 kWh LiFePO₄ nominal / 14.60 kWh usable, 10,000-cycle rated. Combined continuous ~7.6 kW, capped at 8 kW by the inverter.</td></tr>
+      <tr><td>Orientation</td><td>East group: azimuth 98°, tilt 30° · West group: azimuth 278°, tilt 32°</td></tr>
+      <tr><td>Est. annual generation</td><td class="num">~7,500 kWh (pre-loss, scaled for 22 panels; ~11.5% annual shading loss per survey)</td></tr>
+      <tr><td>Grid connection</td><td>G99 approved with <strong>no export limit</strong> — full 8 kW export allowed</td></tr>
+      <tr><td>Price per kWp</td><td class="num">£1,148</td></tr>
+      <tr><td>Tariff</td><td>Octopus Agile import + Outgoing fixed 12p export — <a href="/tariff/">why, and the Flux story →</a></td></tr>
+    </tbody>
+  </table>
+
+  <div class="note green">
+    <p><strong>Why an east/west split is better than it sounds.</strong> Peak output is lower than
+    a south-facing array, but generation is spread across the day — morning sun on the east face,
+    evening on the west. For a battery + Agile household that's a feature: the generation curve
+    matches consumption better and there's less midday clipping against the 8 kW inverter.</p>
+  </div>
+
+  <h2>Warranties</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Cover</th></tr></thead>
+    <tbody>
+      <tr><td>Panels (product)</td><td>25 years</td></tr>
+      <tr><td>Panels (performance)</td><td>30 years, ≥87% output</td></tr>
+      <tr><td>Inverter</td><td>10 years</td></tr>
+      <tr><td>Battery</td><td>10 years</td></tr>
+      <tr><td>Workmanship</td><td>10 years</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The original business case</h2>
+  <p style="max-width:46rem">
+    The pre-install modelling (based on actual Jan–Mar 2026 smart-meter data, ~3,667 kWh/yr
+    consumption) projected roughly <strong>£1,900–2,060 in year-1 value</strong> against the £11,999
+    cost — payback around year 6½. The whole point of this site is to test that projection in
+    public, daily, on the <a href="/stats/">stats page</a>.
+  </p>
+  <table>
+    <thead><tr><th>Revenue stream</th><th class="num">Year 1 est.</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td>Self-consumption</td><td class="num">£1,100</td><td>Avoid importing at Agile rates (peaks ~32–37p)</td></tr>
+      <tr><td>Battery peak-shifting</td><td class="num">£260</td><td>Discharge 4–7 pm to dodge the Agile peak</td></tr>
+      <tr><td>Cheap-slot charging</td><td class="num">£120</td><td>Charge in the cheapest overnight half-hours</td></tr>
+      <tr><td>Axle VPP events</td><td class="num">£150</td><td>£1/kWh grid-stress dispatches</td></tr>
+      <tr><td>Saving Sessions</td><td class="num">£120</td><td>Auto-join + force discharge</td></tr>
+      <tr><td>Weather optimisation</td><td class="num">£89</td><td>Solcast-driven charge planning (Predbat)</td></tr>
+      <tr><td>Load shifting</td><td class="num">£75</td><td>Appliances on solar surplus</td></tr>
+      <tr class="total"><td>Total</td><td class="num">~£1,914</td><td></td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Projections assume 4% energy inflation and 5% system losses, modelled before the
+  22nd panel was added. Treat them as the hypothesis; the stats page is the experiment.</p>
+</Base>

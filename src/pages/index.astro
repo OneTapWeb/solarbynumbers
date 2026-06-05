@@ -1,0 +1,100 @@
+---
+import Base from '../layouts/Base.astro';
+import stats from '../data/stats.json';
+
+const last = stats.daily[stats.daily.length - 1];
+const e = last?.energy_kwh ?? {};
+const c = last?.cost_gbp ?? {};
+const saving = c.baseline_no_solar_cost != null && c.net_cost != null
+  ? (c.baseline_no_solar_cost - c.net_cost).toFixed(2)
+  : null;
+const lastDate = last
+  ? new Date(last.date + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  : null;
+const pct = Math.round((stats.meta.payback_progress ?? 0) * 1000) / 10;
+const fmt = (v: number | null | undefined, dp = 1) => (v == null ? '—' : v.toFixed(dp));
+---
+
+<Base title="A solar install, in numbers">
+  <section class="reveal" style="padding-top:2.5rem">
+    <p class="kicker">22 panels · 15 kWh battery · Hampshire, UK</p>
+    <h1>One roof.<br />Every number published.</h1>
+    <p style="max-width:46rem; font-size:1.1rem">
+      This is the full, honest record of a 10.45 kWp solar + battery install on an ordinary UK
+      house — what it cost, how it's automated with <a href="/stack/">Home Assistant and Predbat</a>,
+      the <a href="/configs/">exact configs</a> that run it, and a nightly feed of real performance
+      data pushed straight from the inverter. No cherry-picked sunny days.
+    </p>
+  </section>
+
+  <section class="reveal" style="margin-top:3rem">
+    <div class="panel ticks">
+      <p class="kicker" style="margin-bottom:1.2rem">
+        Yesterday — {lastDate}
+        {stats.meta.sample && <span class="badge-sample">demo data</span>}
+      </p>
+      <div class="grid-4">
+        <div class="stat gen">
+          <span class="stat-label">Generated</span>
+          <span class="stat-value">{fmt(e.pv_generation)}<span class="unit">kWh</span></span>
+        </div>
+        <div class="stat exp">
+          <span class="stat-label">Exported</span>
+          <span class="stat-value">{fmt(e.grid_export)}<span class="unit">kWh</span></span>
+        </div>
+        <div class="stat imp">
+          <span class="stat-label">Imported</span>
+          <span class="stat-value">{fmt(e.grid_import)}<span class="unit">kWh</span></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Day's saving</span>
+          <span class="stat-value">{saving == null ? '—' : `£${saving}`}</span>
+          <span class="stat-sub">vs no-solar baseline</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal" style="margin-top:2.2rem">
+    <div class="panel">
+      <p class="kicker">Payback progress — £{stats.meta.system_cost_gbp.toLocaleString('en-GB')} system</p>
+      <div class="payback">
+        <div class="track"><div class="fill" style={`width:${Math.max(pct, 0.5)}%`}></div></div>
+        <div class="scale">
+          <span>£0</span>
+          <span class="num" style="color:var(--amber)">£{(stats.totals.savings ?? 0).toLocaleString('en-GB')} saved · {pct}%</span>
+          <span>£{stats.meta.system_cost_gbp.toLocaleString('en-GB')}</span>
+        </div>
+      </div>
+      <p class="muted">Cumulative savings vs what the same consumption would have cost with no solar or battery, tracked daily since commissioning. <a href="/stats/">Full charts →</a></p>
+    </div>
+  </section>
+
+  <section class="reveal" style="margin-top:3.5rem">
+    <h2>What's here</h2>
+    <div class="grid-3" style="margin-top:1.2rem">
+      <div class="panel">
+        <h3 style="margin-top:0">The system</h3>
+        <p>22× Aiko 475W panels on an east/west roof, a Sigenergy EC 8.0SP hybrid inverter and 15.06 kWh of battery. £11,999 fully installed. <a href="/system/">Specs & warranties →</a></p>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0">The brain</h3>
+        <p>Home Assistant on a £50 Dell OptiPlex, with Predbat planning every half-hour against Octopus Agile prices and a Solcast forecast. <a href="/stack/">How it works →</a></p>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0">The configs</h3>
+        <p>The exact <code>apps.yaml</code>, automations and helpers running this Sigenergy + Predbat setup — sanitized, annotated, copy-paste ready. <a href="/configs/">Steal them →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal" style="margin-top:3rem">
+    <div class="note">
+      <p><strong>Why publish all this?</strong> When we researched this install, the gap between
+      glossy sales projections and real-world numbers was the hardest thing to close — especially
+      for the newer Sigenergy kit. This site is the resource we wished existed: every day's data,
+      good and bad, plus the automation that squeezes the value out. Start at the
+      <a href="/journey/">install diary</a>.</p>
+    </div>
+  </section>
+</Base>

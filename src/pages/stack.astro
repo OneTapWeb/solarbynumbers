@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="The stack" description="How Home Assistant, Predbat, Sigenergy, Octopus Agile and Solcast run a UK solar + battery system automatically — including the pipeline that publishes this site's stats.">
+  <section class="reveal">
+    <p class="kicker">Part 2 — Software</p>
+    <h1>The stack</h1>
+    <p style="max-width:46rem">
+      Everything below runs on a <strong>£50 refurbished Dell OptiPlex 3050 Micro</strong> sitting
+      next to the router. It plans every half-hour of battery activity against live Agile prices and
+      a solar forecast, joins Saving Sessions by itself, and pushes this site's data every night.
+      Total software cost: £0.
+    </p>
+  </section>
+
+  <h2>The pieces</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>What</th><th>Job</th></tr></thead>
+    <tbody>
+      <tr><td>OS</td><td>Home Assistant OS (x86-64)</td><td>Runs on the OptiPlex's SSD — far happier than a Pi + SD card for the statistics database</td></tr>
+      <tr><td>Inverter link</td><td>Sigenergy ESS integration (HACS)</td><td>Modbus TCP to the EC 8.0SP on port 502 — 250+ entities, local, no cloud</td></tr>
+      <tr><td>Tariff</td><td>Octopus Energy integration (HACS)</td><td>Live Agile half-hourly rates, export rate, Saving Sessions, consumption</td></tr>
+      <tr><td>Forecast</td><td>Solcast (HACS)</td><td>7-day rooftop PV forecast, both roof faces, free hobbyist tier</td></tr>
+      <tr><td>Brain</td><td><strong>Predbat</strong> (add-on mode)</td><td>Plans charge/discharge against prices + forecast + learned consumption</td></tr>
+      <tr><td>Bridge</td><td>Three small HA automations</td><td>Map Predbat's requested mode onto Sigenergy's EMS controls — <a href="/configs/">see configs</a></td></tr>
+    </tbody>
+  </table>
+
+  <h2>How a typical day runs</h2>
+  <table>
+    <thead><tr><th>When</th><th>Typical Agile</th><th>What Predbat does</th></tr></thead>
+    <tbody>
+      <tr><td>Cheapest slots (dynamic, often overnight)</td><td class="num">~13–15p</td><td>Charge the battery from grid — only as much as tomorrow's forecast says we'll need</td></tr>
+      <tr><td>Morning / daytime</td><td class="num">~20p</td><td>Self-consume solar, store the surplus; export only true overflow at 12p</td></tr>
+      <tr><td>Evening peak (typ. 16:00–19:00)</td><td class="num">~32–37p</td><td><strong>Discharge to cover our own load</strong> — avoiding a 35p import beats a 12p export every time</td></tr>
+      <tr><td>Late evening</td><td class="num">varies</td><td>Run the house down on battery; repeat</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <p><strong>The one rule that explains everything:</strong> with a flat 12p export rate, the
+    battery is a <em>self-supply buffer</em>, not a grid-export asset. Per kWh the priority is:
+    avoid peak import (~35p) → capture £1/kWh VPP events → avoid standard import (~20p) → export
+    at 12p only as a last resort. Predbat works this out itself from the rates; nothing is
+    hard-coded.</p>
+  </div>
+
+  <h2>The extras</h2>
+  <h3>Octopus Saving Sessions</h3>
+  <p>The Octopus integration auto-joins every session. Predbat is session-aware: it pre-charges
+  beforehand, then force-discharges through the session window. A 1-hour session typically
+  shifts ~7 kWh — worth £3–4/kWh in Octopoints against the 10-day baseline.</p>
+
+  <h3>Axle VPP (events-only)</h3>
+  <p>Axle dispatches the battery 4–8× a month during grid stress at <strong>£1/kWh</strong>, talking
+  directly to Sigenergy's cloud — no HA involvement, minimum £10/month. If an Axle event lands
+  inside a Saving Session you legitimately earn from both: Axle pays for the dispatch, Octopus
+  rewards the metered export. They don't know about each other.</p>
+
+  <h3>Load shifting</h3>
+  <p>Tapo P110 smart plugs on the washing machine, dryer and dishwasher, plus a "solar surplus
+  &gt; 2 kW" phone notification. Low-tech, ~£65/yr.</p>
+
+  <h2 id="pipeline">The pipeline behind this site</h2>
+  <p style="max-width:46rem">
+    The <a href="/stats/">stats page</a> is fed by Home Assistant itself — no manual spreadsheets,
+    no cloud middleman:
+  </p>
+  <ol>
+    <li><strong>Six daily utility_meter helpers</strong> wrap the Sigenergy cumulative energy
+    sensors. When they reset at midnight, yesterday's total survives in the
+    <code>last_period</code> attribute — the trick that makes a 00:15 read reliable.</li>
+    <li><strong>At 23:59:30</strong> an automation snapshots the day's £ figures (Octopus costs,
+    Predbat's no-solar baseline) into <code>input_number</code> helpers.</li>
+    <li><strong>At 00:15</strong> an automation builds one JSON file for yesterday and pushes it to
+    this site's GitHub repo with a single <code>rest_command</code> against the GitHub Contents
+    API. One file per day, retried five times with backoff if the network blips.</li>
+    <li><strong>GitHub Actions</strong> rebuilds the site (Astro) and rsyncs it to the VPS. The
+    commit history doubles as an audit log of every day's data.</li>
+  </ol>
+  <p>The full pipeline YAML is on the <a href="/configs/">configs page</a> — copy it for your own
+  install.</p>
+
+  <h2>Maintenance reality</h2>
+  <table>
+    <thead><tr><th>Cadence</th><th>Task</th></tr></thead>
+    <tbody>
+      <tr><td>Weekly</td><td>Glance that HA is up (uptime monitor pings it)</td></tr>
+      <tr><td>Monthly</td><td>HACS updates; sanity-check earnings vs the Octopus bill</td></tr>
+      <tr><td>Quarterly</td><td>Compare flat 12p export earnings vs what Agile Outgoing would have paid — switching is free</td></tr>
+      <tr><td>Annually</td><td>Full backup, battery cycle count, panel inspection</td></tr>
+    </tbody>
+  </table>
+</Base>

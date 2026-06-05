@@ -1,0 +1,32 @@
+
+# ── Predbat ↔ Sigenergy helpers (added 2026-06-04) ──────────────────
+input_select:
+  predbat_requested_mode:
+    name: "Predbat Requested Mode"
+    options:
+      - "Demand"
+      - "Charging"
+      - "Freeze Charging"
+      - "Discharging"
+      - "Freeze Discharging"
+    initial: "Demand"
+    icon: mdi:battery-unknown
+
+input_number:
+  charge_rate:
+    name: Battery charge rate
+    initial: 7600
+    min: 0
+    max: 20000
+    step: 1
+    mode: box
+    unit_of_measurement: W
+
+  discharge_rate:
+    name: Battery discharge rate
+    initial: 7600
+    min: 0
+    max: 20000
+    step: 1
+    mode: box
+    unit_of_measurement: W
