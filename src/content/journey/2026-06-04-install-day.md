@@ -19,11 +19,12 @@ The rest of the kit:
 - G99 approval came back from the DNO with **no export limit**, which matters more than it
   sounds. The full 8 kW will be able to flow out during VPP events and Saving Sessions.
 
-One catch: we can't actually export yet. The final installation certification takes a month or
-two to go through, and until it does the export tariff sits dormant and surplus solar earns
-nothing. The battery soaks up most of it anyway, so the sting is smaller than it sounds, but
-it's worth knowing about if you're planning your own install. The first weeks are
-self-consumption only.
+One catch: we don't get paid for export yet. The final installation certification takes a
+month or two to go through, and until it does the export tariff sits dormant. The inverter
+still pushes surplus to the grid once the battery is full, we just earn nothing for it. On
+good days that's a couple of pounds given away, which is worth knowing about if you're
+planning your own install: the first month or two is effectively self-consumption only, so
+chase the certification paperwork early.
 
 First impressions of the Sigenergy kit: the stack design is genuinely tidy (the battery modules
 and inverter click together like oversized LEGO), the app is fine, and it speaks **Modbus TCP
