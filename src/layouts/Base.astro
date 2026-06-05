@@ -12,7 +12,7 @@ interface Props {
   title: string;
   description?: string;
 }
-const { title, description = 'A UK solar + battery install, documented in numbers. 10.45 kWp Aiko + Sigenergy, Octopus Agile, Home Assistant + Predbat — with real daily performance data, auto-published.' } = Astro.props;
+const { title, description = 'A UK solar and battery install, documented in numbers. 10.45 kWp of Aiko panels, a Sigenergy inverter, Octopus Agile, and Home Assistant with Predbat. Real daily performance data, published automatically.' } = Astro.props;
 
 const nav = [
   ['/', 'home'],
@@ -33,9 +33,9 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} — Solar by Numbers</title>
+    <title>{title} · Solar by Numbers</title>
     <meta name="description" content={description} />
-    <meta property="og:title" content={`${title} — Solar by Numbers`} />
+    <meta property="og:title" content={`${title} · Solar by Numbers`} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
@@ -63,13 +63,13 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
     <footer class="site">
       <div class="wrap cols">
         <div>
-          <p style="color:var(--cream)"><strong>Solar by Numbers</strong> — one UK household's solar + battery install, documented with real data. 10.45 kWp on an east/west roof in Hampshire, a 15 kWh battery, and a Home Assistant + Predbat brain. Numbers update nightly, straight from the inverter.</p>
-          <p class="muted">No sponsorships. The only money this site makes is the referral below — and it pays you too.</p>
+          <p style="color:var(--cream)"><strong>Solar by Numbers</strong> is the record of one household's solar and battery install: 10.45 kWp on an east/west roof in Hampshire, a 15 kWh battery, and Home Assistant with Predbat running the lot. The numbers update every night, straight from the inverter.</p>
+          <p class="muted">No sponsors. The referral link below is the only money this site makes, and it pays you as much as it pays us.</p>
         </div>
         <div>
-          <p><strong style="color:var(--cream)">Thinking of Octopus Energy?</strong><br />
-          We're on Agile import + fixed 12p export. Sign up with this link and we <em>both</em> get £50:</p>
-          <a class="btn" href={OCTOPUS_REFERRAL} rel="noopener">⚡ £50 Octopus referral</a>
+          <p><strong style="color:var(--cream)">Thinking of switching to Octopus?</strong><br />
+          We're on Agile import with fixed 12p export. Sign up through this link and we both get £50:</p>
+          <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><span aria-hidden="true">🐙</span> £50 Octopus referral</a>
           <p class="muted" style="margin-top:1rem">
             <a href="/journey/">Install diary</a> · <a href="/configs/">Predbat configs</a> · <a href="/stats/">Live stats</a>
           </p>

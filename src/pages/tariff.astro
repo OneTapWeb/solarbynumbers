@@ -3,60 +3,63 @@ import Base from '../layouts/Base.astro';
 const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
 ---
 
-<Base title="The tariff" description="Why this UK solar + battery + Predbat home runs Octopus Agile import with fixed 12p export — and what happened when Octopus Flux closed a month before our install.">
+<Base title="The tariff" description="Why this UK solar, battery and Predbat home runs Octopus Agile import with fixed 12p export, and what happened when Octopus Flux closed a month before our install.">
   <section class="reveal">
     <p class="kicker">Octopus Agile import · Outgoing fixed 12p export</p>
     <h1>The tariff</h1>
     <p style="max-width:46rem">
-      The tariff choice matters as much as the hardware: it decides what every stored kWh is
-      worth. Ours changed <em>one month before install day</em>, and the story is instructive if
-      you're planning a battery system around any time-of-use tariff.
+      The tariff matters as much as the hardware, because it decides what every stored kWh is
+      worth. Ours changed <em>one month before install day</em>. If you're planning a battery
+      system around any time-of-use tariff, this story is worth two minutes.
     </p>
   </section>
 
   <h2>The Flux plot twist</h2>
   <p style="max-width:46rem">
-    The original business case was built on <strong>Octopus Flux</strong> — the classic battery
-    tariff with a cheap overnight window and a 30p evening export peak. The plan: charge cheap,
-    force-export the battery into the 16:00–19:00 peak, profit. Then, in <strong>March 2026</strong>,
-    Flux (and Intelligent Octopus Flux) closed to new customers. Install: April 2026. Plan: dead.
+    The original business case was built on <strong>Octopus Flux</strong>, the classic battery
+    tariff with a cheap overnight window and a 30p evening export peak. The plan was simple:
+    charge cheap overnight, force-export the battery into the 4pm to 7pm peak, profit. Then in
+    <strong>March 2026</strong> Flux (and Intelligent Octopus Flux) closed to new customers.
+    Our install was April 2026. So much for the plan.
   </p>
   <div class="note red">
     <p><strong>Lesson one:</strong> never build a multi-year payback case on a single tariff
-    surviving. Tariffs are products; products get withdrawn. Model your second-best option too —
-    we hadn't, and re-planning under time pressure wasn't fun.</p>
+    surviving. Tariffs are products, and products get withdrawn. Model your second-best option
+    too. We hadn't, and re-planning under time pressure wasn't fun.</p>
   </div>
 
   <h2>What we run now</h2>
   <table>
     <thead><tr><th>Side</th><th>Tariff</th><th>Shape</th></tr></thead>
     <tbody>
-      <tr><td>Import</td><td>Octopus Agile</td><td>Half-hourly dynamic pricing, published ~16:00 for the next day, capped at £1/kWh. Cheapest slots ~13–15p, evening peak ~32–37p.</td></tr>
-      <tr><td>Export</td><td>Outgoing Octopus (fixed)</td><td>Flat 12p/kWh, any time. Boring on purpose — a guaranteed floor.</td></tr>
+      <tr><td>Import</td><td>Octopus Agile</td><td>Half-hourly dynamic pricing, published around 4pm for the next day, capped at £1/kWh. Cheap slots in the low teens; evening import peaks range from the mid-20s in summer to the high 30s in winter.</td></tr>
+      <tr><td>Export</td><td>Outgoing Octopus (fixed)</td><td>Flat 12p/kWh at all times. There are no export peaks on this tariff. Boring on purpose: it's a guaranteed floor.</td></tr>
     </tbody>
   </table>
   <p style="max-width:46rem">
-    Surprisingly, losing the 30p export peak cost only ~10% of the projected year-1 return.
-    The reason: under Agile the battery's job flips from <em>exporting at peak</em> to
-    <em>not importing at peak</em>. Avoiding a 35p import is worth more than a 30p export ever
-    was, and Predbat reorganised the whole strategy around that by itself the day we changed the
-    rate sensors. Only true surplus export (battery full, house satisfied) took the haircut from
-    30p to 12p.
+    Surprisingly, losing Flux's 30p export peak only cost us around 10% of the projected year one
+    return. The reason is that under Agile the battery's job flips from <em>exporting at a peak
+    rate</em> to <em>not importing at a peak rate</em>. Dodging expensive evening import is worth
+    about as much as the old peak export was, and Predbat reorganised the whole strategy by
+    itself the day we changed the rate sensors. The only real loss is on true surplus
+    (battery full, house satisfied), which now earns 12p instead of 30p.
   </p>
   <div class="note">
-    <p><strong>The upgrade path:</strong> Agile Outgoing (half-hourly export pricing, uncapped, no
-    exit fees) can beat a flat 12p for battery owners who export selectively into evening spikes —
-    winter wholesale prices sometimes clear 50p–£1/kWh. The plan is to switch once
-    <a href="/stats/">the data</a> shows our would-be Agile export revenue reliably beating 12p.
-    That comparison is exactly the kind of question this site's dataset exists to answer.</p>
+    <p><strong>A possible upgrade later:</strong> Agile Outgoing offers half-hourly export
+    pricing, uncapped, with no exit fees. For battery owners who can export selectively into
+    evening spikes it can beat a flat 12p, and winter wholesale prices occasionally clear 50p or
+    more. We'll switch if <a href="/stats/">the data</a> shows our would-be Agile export revenue
+    reliably beating 12p. That comparison is exactly the kind of question this site's dataset
+    exists to answer.</p>
   </div>
 
   <h2>Why Octopus at all?</h2>
   <p style="max-width:46rem">
-    Higher flat export rates exist elsewhere (E.ON ~16.5p, British Gas ~15p) — but they require
-    importing with the same supplier on a flat or simple ToU tariff, and for a Predbat home the
-    cheap-import arbitrage on Agile is the bigger prize. Octopus also has the best API in the
-    business, which is what the <a href="/stack/">whole automation stack</a> hangs off.
+    Higher flat export rates do exist elsewhere (E.ON around 16.5p, British Gas around 15p), but
+    they all require importing with the same supplier on a flat or simple time-of-use tariff.
+    For a Predbat home, the cheap-import arbitrage on Agile is the bigger prize. Octopus also has
+    the best API in the business, which the <a href="/stack/">whole automation stack</a> hangs
+    off.
   </p>
 
   <section style="margin-top:3rem">
@@ -64,10 +67,10 @@ const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
       <p class="kicker" style="justify-content:center">Full disclosure: this is how the site pays for its domain</p>
       <h2 style="margin-top:0.4rem">Switching to Octopus?</h2>
       <p style="max-width:34rem; margin:0.6rem auto 1.4rem">
-        Use this referral link and we <strong>both get £50</strong> credit — you don't need solar,
-        any tariff counts. It's the only monetisation on this site.
+        Use this referral link and we <strong>both get £50</strong> credit. You don't need solar,
+        any tariff counts. It's the only money this site makes.
       </p>
-      <a class="btn" href={OCTOPUS_REFERRAL} rel="noopener">⚡ Claim the £50 referral</a>
+      <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><span aria-hidden="true">🐙</span> Claim the £50 referral</a>
       <p class="muted" style="margin-top:1rem">share.octopus.energy/lush-spark-49</p>
     </div>
   </section>

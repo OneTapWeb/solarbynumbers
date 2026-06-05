@@ -22,7 +22,7 @@ const files = [
   },
   {
     name: 'enable_entities.jq', lang: 'text', code: enableJq, dl: '/configs/enable_entities.jq',
-    blurb: 'The Sigenergy integration ships several control entities disabled by default — including the remote EMS mode select that the whole bridge depends on. This jq filter flips them on in the entity registry (run against core.entity_registry with HA stopped, or just enable them by hand in the UI).',
+    blurb: 'The Sigenergy integration ships several control entities disabled by default, including the remote EMS mode select that the whole bridge depends on. This jq filter flips them on in the entity registry (run it against core.entity_registry with HA stopped, or just enable them by hand in the UI).',
   },
   {
     name: 'energy_prefs.json', lang: 'json', code: energyPrefs, dl: '/configs/energy_prefs.json',
@@ -36,15 +36,16 @@ const files = [
     <p class="kicker">Copy-paste ready · sanitized</p>
     <h1>The configs</h1>
     <p style="max-width:46rem">
-      These are the <em>actual</em> files running this system — not examples. Only credentials and
-      meter identifiers have been replaced with placeholders. If you're putting Predbat on a
-      Sigenergy inverter, this page is the shortcut: the mode-bridge automations took the most
-      trial and error and are, as far as we know, not documented anywhere else.
+      These are the actual files running this system, not examples. The only changes are that
+      credentials and meter identifiers have been swapped for placeholders. If you're putting
+      Predbat on a Sigenergy inverter, this page should save you some evenings. The mode-bridge
+      automations took the most trial and error, and as far as we know they aren't documented
+      anywhere else.
     </p>
     <div class="note">
       <p><strong>Before you copy:</strong> entity IDs assume the HACS Sigenergy ESS integration's
-      default naming (<code>sigen_plant_*</code>) and a single plant. Verify yours in
-      Developer Tools → States. Nothing here contains secrets — API keys live in
+      default naming (<code>sigen_plant_*</code>) and a single plant. Check yours in
+      Developer Tools → States. Nothing here contains secrets. API keys live in
       <code>secrets.yaml</code>, which is never published.</p>
     </div>
   </section>
@@ -63,9 +64,9 @@ const files = [
   <section style="margin-top:3rem">
     <h2>The stats-publishing pipeline</h2>
     <p style="max-width:46rem">
-      The utility_meter helpers, cost-snapshot automation and the 00:15 GitHub push that feed the
-      <a href="/stats/">stats page</a> are being finalised on the live system now — they'll be
-      published here once they've survived a few real midnights. The design is described on the
+      The utility_meter helpers and the 00:15 GitHub push that feed the
+      <a href="/stats/">stats page</a> are running on the live system now. They'll be published
+      here once they've survived a few real midnights. The design is described on the
       <a href="/stack/#pipeline">stack page</a>.
     </p>
   </section>

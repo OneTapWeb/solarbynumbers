@@ -277,6 +277,18 @@ p code, li code, td code {
 .btn.ghost { background: transparent; color: var(--accent); }
 .btn.ghost:hover { background: var(--accent-soft); box-shadow: none; }
 
+/* Octopus referral button — Octopus Energy brand colours (deep indigo + pink) */
+.btn.octopus {
+  background: linear-gradient(135deg, #100030, #21125e);
+  border: 1px solid #3a1f96;
+  color: #f050f8;
+}
+.btn.octopus:hover {
+  background: linear-gradient(135deg, #170b45, #2c1a7a);
+  box-shadow: 0 10px 26px -10px rgba(160, 80, 248, 0.6);
+  transform: translateY(-2px);
+}
+
 /* ---------- header / nav ---------- */
 
 header.site {

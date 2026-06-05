@@ -13,14 +13,15 @@ const range = stats.meta.first_date && stats.meta.last_date
   : '';
 ---
 
-<Base title="Live performance stats" description="Real daily solar generation, grid import/export, battery throughput and payback progress — auto-published nightly from Home Assistant.">
+<Base title="Live performance stats" description="Real daily solar generation, grid import and export, battery throughput and payback progress, published automatically every night from Home Assistant.">
   <section class="reveal">
     <p class="kicker">{t.days} days of data · {range} {stats.meta.sample && <span class="badge-sample">demo data</span>}</p>
     <h1>The numbers</h1>
     <p style="max-width:46rem">
-      Every figure below is pushed automatically from Home Assistant at 00:15 each night — kWh from
-      the Sigenergy inverter's meters, costs from the Octopus Energy integration, and the no-solar
-      baseline from Predbat. Nothing is typed in by hand. <a href="/stack/#pipeline">How the pipeline works →</a>
+      Every figure below is pushed automatically from Home Assistant at 00:15 each night. The kWh
+      come from the Sigenergy inverter's own meters and the costs from Predbat's daily tracking,
+      including its estimate of what each day would have cost with no solar or battery. Nothing
+      is typed in by hand. <a href="/stack/#pipeline">How the pipeline works →</a>
     </p>
   </section>
 
@@ -55,12 +56,12 @@ const range = stats.meta.first_date && stats.meta.last_date
   </section>
 
   <section class="chart-panel panel reveal">
-    <p class="chart-title">Grid flows — export ↑ / import ↓</p>
+    <p class="chart-title">Grid flows · export ↑ / import ↓</p>
     <canvas id="chart-grid" height="120"></canvas>
   </section>
 
   <section class="chart-panel panel reveal">
-    <p class="chart-title">Battery throughput — charged ↑ / discharged ↓</p>
+    <p class="chart-title">Battery throughput · charged ↑ / discharged ↓</p>
     <canvas id="chart-battery" height="120"></canvas>
   </section>
 
@@ -111,9 +112,9 @@ const range = stats.meta.first_date && stats.meta.last_date
         </tr>
       </tbody>
     </table>
-    <p class="muted">A day's saving = Predbat's no-solar baseline (what that day's consumption
-    would have cost imported entirely at Agile rates) minus the actual net cost (import cost −
-    export revenue). Standing charges affect both sides equally so are excluded.</p>
+    <p class="muted">A day's saving is Predbat's no-solar baseline (what that day's usage would
+    have cost imported entirely at Agile rates) minus the actual net cost (import cost minus
+    export revenue). Standing charges affect both sides equally, so they cancel out.</p>
   </section>
 
   <script src="../scripts/charts.js"></script>
