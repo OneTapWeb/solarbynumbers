@@ -27,7 +27,8 @@ Chart.defaults.plugins.legend.labels.boxHeight = 12;
 Chart.defaults.animation.duration = 700;
 
 const daily = stats.daily;
-const labels = daily.map((d) => d.date.slice(5)); // MM-DD
+// UK day-first labels: "2026-06-04" -> "04/06"
+const labels = daily.map((d) => `${d.date.slice(8, 10)}/${d.date.slice(5, 7)}`);
 const e = (k) => daily.map((d) => d.energy_kwh?.[k] ?? null);
 const c = (k) => daily.map((d) => d.cost_gbp?.[k] ?? null);
 

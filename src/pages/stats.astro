@@ -8,8 +8,10 @@ const fmt = (v: number | null | undefined, dp = 0) =>
 const months = [...stats.monthly].reverse();
 const monthName = (m: string) =>
   new Date(m + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+const ukDate = (iso: string) =>
+  new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 const range = stats.meta.first_date && stats.meta.last_date
-  ? `${stats.meta.first_date} → ${stats.meta.last_date}`
+  ? `${ukDate(stats.meta.first_date)} → ${ukDate(stats.meta.last_date)}`
   : '';
 ---
 
