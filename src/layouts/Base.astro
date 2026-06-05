@@ -11,8 +11,25 @@ const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
 interface Props {
   title: string;
   description?: string;
+  ogType?: string;
+  jsonLd?: object;
 }
-const { title, description = 'A UK solar and battery install, documented in numbers. 10.45 kWp of Aiko panels, a Sigenergy inverter, Octopus Agile, and Home Assistant with Predbat. Real daily performance data, published automatically.' } = Astro.props;
+const {
+  title,
+  description = 'A UK solar and battery install, documented in numbers. 10.45 kWp of Aiko panels, a Sigenergy inverter, Octopus Agile, and Home Assistant with Predbat. Real daily performance data, published automatically.',
+  ogType = 'website',
+  jsonLd,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const siteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Solar by Numbers',
+  url: Astro.site?.href,
+  description:
+    'Real daily performance data from a UK solar and battery install: Aiko panels, Sigenergy inverter, Octopus Agile, Home Assistant and Predbat.',
+};
 
 const nav = [
   ['/', 'home'],
@@ -35,10 +52,22 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} · Solar by Numbers</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title="Solar by Numbers journey" href="/rss.xml" />
+    <meta property="og:site_name" content="Solar by Numbers" />
     <meta property="og:title" content={`${title} · Solar by Numbers`} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/og-image.png', Astro.site).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_GB" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} · Solar by Numbers`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL('/og-image.png', Astro.site).href} />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd ?? siteJsonLd)} />
   </head>
   <body>
     <header class="site">

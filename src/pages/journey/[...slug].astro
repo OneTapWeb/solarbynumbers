@@ -11,9 +11,20 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.summary,
+  datePublished: post.data.date.toISOString().slice(0, 10),
+  url: new URL(`/journey/${post.id}/`, Astro.site).href,
+  isPartOf: { '@type': 'Blog', name: 'Solar by Numbers journey', url: new URL('/journey/', Astro.site).href },
+  author: { '@type': 'Person', name: 'Solar by Numbers' },
+};
 ---
 
-<Base title={post.data.title} description={post.data.summary}>
+<Base title={post.data.title} description={post.data.summary} ogType="article" jsonLd={jsonLd}>
   <article class="reveal" style="max-width:46rem">
     <p class="kicker">{fmtDate(post.data.date)}</p>
     <h1 style="font-size:clamp(2rem,5vw,3rem)">{post.data.title}</h1>
