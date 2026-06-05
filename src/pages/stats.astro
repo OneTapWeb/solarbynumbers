@@ -114,9 +114,13 @@ const range = stats.meta.first_date && stats.meta.last_date
         </tr>
       </tbody>
     </table>
-    <p class="muted">A day's saving is Predbat's no-solar baseline (what that day's usage would
-    have cost imported entirely at Agile rates) minus the actual net cost (import cost minus
-    export revenue). Standing charges affect both sides equally, so they cancel out.</p>
+    <p class="muted">A day's saving comes from Predbat's no-solar comparison: what the day's
+    usage would have cost imported entirely at the actual half-hourly Agile rates, minus what it
+    actually cost. Predbat also credits energy banked into the battery during the day (priced at
+    the rate it later displaces), and debits energy drawn down, so a day that fills the battery
+    scores higher than a pure avoided-import view. Over a run of days the battery starts and
+    ends at similar charge and this evens out. Standing charges affect both sides equally, so
+    they cancel.</p>
   </section>
 
   <script src="../scripts/charts.js"></script>
