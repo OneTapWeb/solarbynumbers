@@ -16,6 +16,7 @@ const EXPORT = css('--export') || '#1d9e61';
 const IMPORT = css('--import') || '#e0452e';
 const BATTERY = css('--battery') || '#2e8fdf';
 const CREAM_DIM = css('--ink-600') || '#4d5159';
+const INK = css('--ink-900') || '#16181d';
 const LINE = 'rgba(22,24,29,0.07)';
 
 Chart.defaults.font.family = "'IBM Plex Mono', monospace";
@@ -43,7 +44,9 @@ new Chart(document.getElementById('chart-energy'), {
     labels,
     datasets: [
       { type: 'bar', label: 'Generation (kWh)', data: e('pv_generation'), backgroundColor: AMBER, borderRadius: 3 },
-      { type: 'line', label: 'Consumption (kWh)', data: e('house_consumption'), borderColor: CREAM_DIM, borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+      // Visible points matter here: with pointRadius 0 the line vanishes against the
+      // grid when there are only a few days of data (and a single day draws nothing).
+      { type: 'line', label: 'Consumption (kWh)', data: e('house_consumption'), borderColor: INK, backgroundColor: INK, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0.3 },
     ],
   },
   options: { scales: gridOpts, interaction: { mode: 'index', intersect: false } },
