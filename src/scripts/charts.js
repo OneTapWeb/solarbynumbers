@@ -43,13 +43,19 @@ new Chart(document.getElementById('chart-energy'), {
   data: {
     labels,
     datasets: [
-      { type: 'bar', label: 'Generation (kWh)', data: e('pv_generation'), backgroundColor: AMBER, borderRadius: 3 },
+      // order: lower draws on top — keeps the consumption line in front of the bars
+      { type: 'bar', label: 'Generation (kWh)', data: e('pv_generation'), backgroundColor: AMBER, borderRadius: 3, order: 2 },
       // Visible points matter here: with pointRadius 0 the line vanishes against the
       // grid when there are only a few days of data (and a single day draws nothing).
-      { type: 'line', label: 'Consumption (kWh)', data: e('house_consumption'), borderColor: INK, backgroundColor: INK, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0.3 },
+      { type: 'line', label: 'Consumption (kWh)', data: e('house_consumption'), borderColor: INK, backgroundColor: INK, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0.3, order: 1 },
     ],
   },
-  options: { scales: gridOpts, interaction: { mode: 'index', intersect: false } },
+  options: {
+    scales: gridOpts,
+    interaction: { mode: 'index', intersect: false },
+    // order flips legend sequence too — keep Generation listed first
+    plugins: { legend: { labels: { sort: (a, b) => a.datasetIndex - b.datasetIndex } } },
+  },
 });
 
 // 2 — grid flows: export up, import down
