@@ -1,4 +1,4 @@
-- id: predbat_requested_mode_action
+﻿- id: predbat_requested_mode_action
   alias: "Predbat Requested Mode Action"
   description: "Maps input_select.predbat_requested_mode to select.sigen_plant_remote_ems_control_mode (Predbat <-> Sigenergy bridge)"
   mode: restart
@@ -93,7 +93,7 @@
 - id: automation_sigen_ess_max_charging_limit_input_number_action
   alias: "Predbat max charging limit action"
   description: "Maps input_number.charge_rate (W) to number.sigen_plant_ess_max_charging_limit (kW), clamped to rated power"
-  mode: single
+  mode: restart
   triggers:
     - trigger: state
       entity_id: input_number.charge_rate
@@ -107,7 +107,7 @@
 - id: automation_sigen_ess_max_discharging_limit_input_number_action
   alias: "Predbat max discharging limit action"
   description: "Maps input_number.discharge_rate (W) to number.sigen_plant_ess_max_discharging_limit (kW), clamped to rated power"
-  mode: single
+  mode: restart
   triggers:
     - trigger: state
       entity_id: input_number.discharge_rate
