@@ -35,8 +35,10 @@ Conventions:
 - **`null`, never `0`, for unavailable values** — 0 is a real measurement.
 - kWh and £ rounded to 2 dp.
 - `net_cost` = `import_cost − export_revenue`; negative = net credit for the day.
-- `baseline_no_solar_cost` = what the day's consumption would have cost imported
-  entirely from the grid with no PV/battery (Predbat's no-solar baseline).
+- `baseline_no_solar_cost` = `house_consumption × flat import rate` (currently
+  23.4p/kWh) — what the day's consumption would have cost imported entirely from the
+  grid with no PV/battery. (Days before 2026-06-09 used Predbat's
+  `savings_yesterday_pvbat` sensor, which overstated this ~2–3×.)
 - A day's **saving** = `baseline_no_solar_cost − net_cost` (derived, not stored).
 - `source` is `home_assistant` (nightly push), `backfill` (historical script) or
   `sample` (synthesized demo data — never committed).

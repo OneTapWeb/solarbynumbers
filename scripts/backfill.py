@@ -40,6 +40,9 @@ ENERGY_SENSORS = {
 # Export tariff not live yet (final certification pending, ~Jul-Aug 2026).
 # Set to 0.12 once the Outgoing tariff is active. Revenue is computed, not metered.
 EXPORT_RATE_GBP = 0.0
+# Flat import unit rate (GBP/kWh) for the no-solar baseline -- Octopus Flat 23.4p.
+# Update when the import tariff changes (e.g. moving to Agile in autumn 2026).
+FLAT_RATE_GBP = 0.234
 
 
 def api(path: str) -> object:
@@ -88,12 +91,15 @@ def main() -> None:
 
         energy = {field: day_max(eid, day) for eid, field in ENERGY_SENSORS.items()}
         # Costs: Predbat's yesterday sensors aren't queryable historically and the
-        # Octopus integration has no export meter yet, so backfilled days carry
-        # nulls except the computable flat-rate export revenue.
+        # Octopus integration has no export meter yet, so backfilled days carry null
+        # for actual cost. Export revenue and the no-solar baseline are both computable:
+        # baseline = house_consumption * flat import rate (matches the live automation).
         cost = {"import_cost": None, "export_revenue": None, "net_cost": None,
                 "baseline_no_solar_cost": None}
         if energy["grid_export"] is not None:
             cost["export_revenue"] = round(energy["grid_export"] * EXPORT_RATE_GBP, 2)
+        if energy["house_consumption"] is not None:
+            cost["baseline_no_solar_cost"] = round(energy["house_consumption"] * FLAT_RATE_GBP, 2)
 
         if all(v is None for v in energy.values()):
             print(f"{day}: no data, skipping")
