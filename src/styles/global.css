@@ -289,6 +289,18 @@ p code, li code, td code {
   transform: translateY(-2px);
 }
 
+/* Axle referral button — Axle brand (dark navy + teal accent) */
+.btn.axle {
+  background: linear-gradient(135deg, #0a1626, #112e42);
+  border: 1px solid #1f6f7a;
+  color: #2fe3c3;
+}
+.btn.axle:hover {
+  background: linear-gradient(135deg, #0e1d33, #164055);
+  box-shadow: 0 10px 26px -10px rgba(47, 227, 195, 0.55);
+  transform: translateY(-2px);
+}
+
 /* ---------- header / nav ---------- */
 
 header.site {

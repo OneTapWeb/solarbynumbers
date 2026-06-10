@@ -7,6 +7,7 @@ import '@fontsource/ibm-plex-mono/600.css';
 import '../styles/global.css';
 
 const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
+const AXLE_REFERRAL = 'https://vpp.axle.energy/landing?ref=R-QADMOHUO';
 
 interface Props {
   title: string;
@@ -93,13 +94,17 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
       <div class="wrap cols">
         <div>
           <p style="color:var(--cream)"><strong>Solar by Numbers</strong> is the record of one household's solar and battery install: 10.45 kWp on an east/west roof in Hampshire, a 15 kWh battery, and Home Assistant with Predbat running the lot. The numbers update every night, straight from the inverter.</p>
-          <p class="muted">No sponsors. The referral link below is the only money this site makes, and it pays you as much as it pays us.</p>
+          <p class="muted">No sponsors. The referral links below are the only money this site makes, and they pay you as much as they pay us.</p>
         </div>
         <div>
           <p><strong style="color:var(--cream)">Thinking of switching to Octopus?</strong><br />
           We're on Agile import, with fixed 12p export lined up once our export certification
           clears. Sign up through this link and we both get £50:</p>
           <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><span aria-hidden="true">🐙</span> £50 Octopus referral</a>
+          <p style="margin-top:1.5rem"><strong style="color:var(--cream)">Got a home battery?</strong><br />
+          Axle pays you for grid-balancing events — we run it in "events only" mode so Predbat
+          keeps control the rest of the time. Sign up through this link and we both get £25:</p>
+          <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><span aria-hidden="true">⚡</span> £25 Axle referral</a>
           <p class="muted" style="margin-top:1rem">
             <a href="/journey/">Install diary</a> · <a href="/configs/">Predbat configs</a> · <a href="/stats/">Live stats</a>
           </p>
