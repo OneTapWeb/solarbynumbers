@@ -200,6 +200,15 @@ tr.total td {
 }
 td.num, th.num { text-align: right; }
 
+/* wide data tables scroll horizontally on small screens instead of pushing the page off-side */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.2rem 0 1.8rem;
+}
+.table-scroll > table { margin: 0; min-width: 30rem; }
+.table-scroll th, .table-scroll td { white-space: nowrap; }
+
 /* ---------- code ---------- */
 
 pre {
@@ -220,6 +229,7 @@ p code, li code, td code {
   padding: 0.08em 0.4em;
   font-size: 0.85em;
   color: var(--ink-900);
+  overflow-wrap: anywhere;
 }
 
 /* annotated code block w/ filename tab */
