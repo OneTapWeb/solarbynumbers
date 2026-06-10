@@ -13,6 +13,10 @@ const lastDate = last
   : null;
 const pct = Math.round((stats.meta.payback_progress ?? 0) * 1000) / 10;
 const fmt = (v: number | null | undefined, dp = 1) => (v == null ? '—' : v.toFixed(dp));
+
+const AXLE_REFERRAL = 'https://vpp.axle.energy/landing?ref=R-QADMOHUO';
+const axleEarnings = (stats.totals as Record<string, number>).axle_earnings ?? 0;
+const axleEvents = (stats.totals as Record<string, number>).axle_events ?? 0;
 ---
 
 <Base title="Real UK solar & battery data, published daily">
@@ -67,6 +71,24 @@ const fmt = (v: number | null | undefined, dp = 1) => (v == null ? '—' : v.toF
         </div>
       </div>
       <p class="muted">Running total of savings against what the same usage would have cost with no solar or battery, tracked daily since commissioning. <a href="/stats/">Full charts →</a></p>
+    </div>
+  </section>
+
+  <section class="reveal" style="margin-top:2.2rem">
+    <div class="panel axle-tracker">
+      <div class="axle-tracker-fig">
+        <p class="kicker">Axle VPP earnings · grid-balancing events</p>
+        <span class="stat-value">£{axleEarnings.toFixed(2)}</span>
+        <p class="muted" style="margin-top:0.4rem">
+          {axleEvents === 0
+            ? 'Signed up June 2026 — no grid events dispatched yet. The £10/month minimum kicks in once they start.'
+            : `from ${axleEvents} grid event${axleEvents === 1 ? '' : 's'} at £1/kWh · £10/month minimum guaranteed`}
+        </p>
+      </div>
+      <div class="axle-tracker-cta">
+        <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><span aria-hidden="true">⚡</span> £25 Axle referral</a>
+        <p class="muted" style="margin-top:0.6rem; font-size:0.8rem">Got a battery? We both get £25.</p>
+      </div>
     </div>
   </section>
 
