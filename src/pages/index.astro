@@ -77,7 +77,8 @@ const axleEvents = (stats.totals as Record<string, number>).axle_events ?? 0;
   <section class="reveal" style="margin-top:2.2rem">
     <div class="panel axle-tracker">
       <div class="axle-tracker-fig">
-        <p class="kicker">Axle VPP earnings · grid-balancing events</p>
+        <img src="/axle-logo-black.png" alt="Axle" class="axle-logo-inline" style="height:1.5em; margin-bottom:0.5rem; display:block" />
+        <p class="kicker">VPP earnings · grid-balancing events</p>
         <span class="stat-value">£{axleEarnings.toFixed(2)}</span>
         <p class="muted" style="margin-top:0.4rem">
           {axleEvents === 0
@@ -86,7 +87,7 @@ const axleEvents = (stats.totals as Record<string, number>).axle_events ?? 0;
         </p>
       </div>
       <div class="axle-tracker-cta">
-        <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><span aria-hidden="true">⚡</span> £25 Axle referral</a>
+        <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><img src="/axle-logo-black.png" alt="Axle" class="axle-mark" /> £25 referral</a>
         <p class="muted" style="margin-top:0.6rem; font-size:0.8rem">Got a battery? We both get £25.</p>
       </div>
     </div>

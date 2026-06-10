@@ -289,16 +289,31 @@ p code, li code, td code {
   transform: translateY(-2px);
 }
 
-/* Axle referral button — Axle brand (dark navy + teal accent) */
+/* Axle referral button — Axle brand red (matches their Sign Up CTA) */
 .btn.axle {
-  background: linear-gradient(135deg, #0a1626, #112e42);
-  border: 1px solid #1f6f7a;
-  color: #2fe3c3;
+  background: linear-gradient(135deg, #ff5a52, #e8222f);
+  border: 1px solid #d81f2b;
+  color: #fff;
 }
 .btn.axle:hover {
-  background: linear-gradient(135deg, #0e1d33, #164055);
-  box-shadow: 0 10px 26px -10px rgba(47, 227, 195, 0.55);
+  background: linear-gradient(135deg, #ff6b63, #f2333f);
+  box-shadow: 0 10px 26px -10px rgba(232, 34, 47, 0.6);
   transform: translateY(-2px);
+}
+/* white Axle wordmark inside the red button */
+.btn.axle .axle-mark {
+  height: 0.9em;
+  width: auto;
+  filter: brightness(0) invert(1);
+  vertical-align: -0.08em;
+  margin-right: 0.12em;
+}
+/* black Axle wordmark for headings/kickers on light surfaces */
+.axle-logo-inline {
+  height: 1.05em;
+  width: auto;
+  vertical-align: -0.14em;
+  margin-right: 0.12em;
 }
 
 /* Axle earnings tracker (homepage) */
@@ -308,7 +323,7 @@ p code, li code, td code {
   justify-content: space-between;
   gap: 1.5rem;
   flex-wrap: wrap;
-  border-left: 3px solid #2fe3c3;
+  border-left: 3px solid #e8222f;
 }
 .axle-tracker-cta { text-align: center; flex-shrink: 0; }
 @media (max-width: 560px) {
