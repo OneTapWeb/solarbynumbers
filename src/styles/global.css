@@ -277,16 +277,24 @@ p code, li code, td code {
 .btn.ghost { background: transparent; color: var(--accent); }
 .btn.ghost:hover { background: var(--accent-soft); box-shadow: none; }
 
-/* Octopus referral button — Octopus Energy brand colours (deep indigo + pink) */
+/* Octopus referral button — Octopus Energy brand (deep navy + hot pink, like the app mascot) */
 .btn.octopus {
-  background: linear-gradient(135deg, #100030, #21125e);
-  border: 1px solid #3a1f96;
-  color: #f050f8;
+  background: linear-gradient(135deg, #190a2e, #2d1450);
+  border: 1px solid #ff2d9c;
+  color: #ff7bc4;
 }
 .btn.octopus:hover {
-  background: linear-gradient(135deg, #170b45, #2c1a7a);
-  box-shadow: 0 10px 26px -10px rgba(160, 80, 248, 0.6);
+  background: linear-gradient(135deg, #21103c, #3a1a66);
+  box-shadow: 0 10px 26px -10px rgba(255, 45, 156, 0.6);
   transform: translateY(-2px);
+}
+/* Octopus mascot icon inside the button — its own dark bg blends into the button */
+.btn.octopus .octopus-mark {
+  height: 1.3em;
+  width: auto;
+  border-radius: 4px;
+  vertical-align: -0.34em;
+  margin-right: 0.3em;
 }
 
 /* Axle referral button — Axle brand red (matches their Sign Up CTA) */
@@ -307,6 +315,14 @@ p code, li code, td code {
   filter: brightness(0) invert(1);
   vertical-align: -0.08em;
   margin-right: 0.12em;
+}
+/* Octopus mascot for headings on light surfaces */
+.octopus-logo-inline {
+  height: 1.15em;
+  width: auto;
+  border-radius: 4px;
+  vertical-align: -0.24em;
+  margin-right: 0.18em;
 }
 /* black Axle wordmark for headings/kickers on light surfaces */
 .axle-logo-inline {
