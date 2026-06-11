@@ -1,0 +1,106 @@
+---
+import Base from '../layouts/Base.astro';
+
+// One source of truth: rendered on the page AND emitted as FAQPage structured data.
+// Answers are plain text (safe for schema.org acceptedAnswer); `link` adds an on-page "more" pointer.
+const faqs: { q: string; a: string; link?: { href: string; label: string } }[] = [
+  {
+    q: 'What does a 10.45 kWp solar and battery system cost in the UK in 2026?',
+    a: 'This system cost £11,999 fully installed at 0% VAT — that is 22× Aiko 475W panels (10.45 kWp), a Sigenergy EC 8.0 SP hybrid inverter and a 15.06 kWh SigenStor battery. That works out at about £1,148 per kWp including the battery. Pre-install modelling projected roughly £1,900–£2,060 of value in year one and payback around year six and a half, which this site tests in public every day.',
+    link: { href: '/system/', label: 'Full specification & business case' },
+  },
+  {
+    q: 'What is the real-world output of Aiko 475W panels on an east/west UK roof?',
+    a: 'On this 10.45 kWp east/west array in Hampshire, clear June days produce around 40–46 kWh and dull days around 20 kWh. Estimated annual generation is about 7,500 kWh before losses, with roughly 11.5% annual shading loss per the survey. Every day\'s measured figure, good and bad, is published automatically on the stats page.',
+    link: { href: '/stats/', label: 'Live daily numbers' },
+  },
+  {
+    q: 'Is an east/west split roof worth it compared with south-facing solar?',
+    a: 'Yes, for a household with a battery and time-of-use pricing. Peak output is lower than a south-facing array, but generation spreads across the day — morning sun on the east face, evening sun on the west — so it matches household demand better and clips less against the inverter limit. With a battery and Octopus Agile it suits this home well.',
+    link: { href: '/system/', label: 'Why east/west works' },
+  },
+  {
+    q: 'What is a Sigenergy inverter and does it work with Home Assistant and Predbat?',
+    a: 'Sigenergy makes the EC-series hybrid inverters and stackable SigenStor batteries. This install runs a Sigenergy EC 8.0 SP (8 kW). It works fully locally with Home Assistant over Modbus TCP on port 502 via the community Sigenergy ESS integration (HACS), exposing 250+ entities with no cloud dependency. Predbat controls it through three small bridge automations that map Predbat\'s requested mode onto the Sigenergy EMS control registers.',
+    link: { href: '/configs/', label: 'The actual Sigenergy + Predbat configs' },
+  },
+  {
+    q: 'What is Predbat and what does it do?',
+    a: 'Predbat is free, open-source battery-planning software that runs inside Home Assistant. It plans every half hour of battery charging and discharging against live Octopus Agile prices, a Solcast solar forecast and learned household consumption — deciding when to charge from the grid, when to run the house on the battery, and when to export. None of the strategy is hard-coded; it is recomputed from the rates. Here it runs on a £50 refurbished Dell OptiPlex 3050 Micro.',
+    link: { href: '/stack/', label: 'The full software stack' },
+  },
+  {
+    q: 'Is Octopus Agile worth it with a home battery?',
+    a: 'For a battery home running Predbat, yes — the bigger prize is cheap-import arbitrage, not export. The battery charges in the cheapest overnight half-hours (often low-to-mid teens p/kWh) and discharges to cover the house through the evening import peak (mid-20s to high-30s p/kWh in winter). Avoiding peak-rate import is worth about as much per kWh as the old Flux export peak was.',
+    link: { href: '/tariff/', label: 'The full tariff story' },
+  },
+  {
+    q: 'What happened to Octopus Flux, and what should battery owners run instead?',
+    a: 'Octopus Flux and Intelligent Octopus Flux closed to new customers in March 2026. This home now runs Octopus Agile for import with Outgoing Octopus fixed 12p export. Losing Flux\'s 30p evening export peak only cost around 10% of the projected year-one return, because under Agile the battery\'s job flips from exporting at a peak rate to avoiding importing at a peak rate. The lesson: never build a multi-year payback case on a single tariff surviving — model your second-best option too.',
+    link: { href: '/tariff/', label: 'The Flux plot twist' },
+  },
+  {
+    q: 'Can you earn money for exporting solar before installation certification clears?',
+    a: 'Not through your Octopus export tariff — export is unpaid until the final installation certification (often a month or two after install) is processed, even though the inverter still pushes surplus to the grid for free. However, Axle VPP settles directly through the smart meter, so its £1/kWh grid-balancing events pay out before export certification, making it the first real export earner here.',
+    link: { href: '/stats/', label: 'See the unpaid export tracker' },
+  },
+  {
+    q: 'What is Axle VPP and how does "events-only" mode work with Predbat?',
+    a: 'Axle is a virtual power plant that pays you to dispatch your home battery during grid-stress events — £1/kWh with a £10/month minimum, typically four to eight events a month. In events-only mode Predbat stays in full control of the battery the rest of the time; Predbat has built-in Axle support, so it pulls upcoming events into its plan and stands aside cleanly while one runs.',
+    link: { href: '/stack/', label: 'How VPP fits the stack' },
+  },
+  {
+    q: 'How can you publish Home Assistant energy data to a website automatically?',
+    a: 'This site is fed straight from Home Assistant with no spreadsheets or cloud middleman. Six daily utility_meter helpers wrap the Sigenergy cumulative energy sensors; at 00:15 an automation builds one JSON file for the previous day from those helpers plus Predbat\'s cost-tracking sensors, and pushes it to a GitHub repo via a single rest_command against the GitHub Contents API. GitHub Actions then rebuilds the static site (Astro) and rsyncs it to the server. The commit history doubles as an audit log.',
+    link: { href: '/stack/#pipeline', label: 'The publishing pipeline' },
+  },
+];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+
+<Base
+  title="FAQ — UK solar, battery, Sigenergy & Predbat"
+  description="Straight answers about a real UK solar and battery install: cost of a 10.45 kWp system, Aiko 475W east/west output, Sigenergy with Home Assistant and Predbat, Octopus Agile vs Flux, and publishing HA data automatically."
+  jsonLd={faqJsonLd}
+>
+  <section class="reveal" style="padding-top:2.5rem">
+    <p class="kicker">Real answers, backed by the data on this site</p>
+    <h1>Frequently asked questions</h1>
+    <p style="max-width:46rem">
+      The questions we get asked most about this install — cost, output, the Sigenergy and
+      Predbat setup, the Octopus tariff, and how the data gets here. Every answer links to the
+      page with the full story and the numbers behind it.
+    </p>
+  </section>
+
+  <section class="reveal" style="margin-top:2.5rem">
+    {faqs.map((f) => (
+      <div class="panel" style="margin-bottom:1.2rem">
+        <h2 style="margin-top:0; font-size:1.25rem">{f.q}</h2>
+        <p style="margin-bottom:0">{f.a}</p>
+        {f.link && (
+          <p class="muted" style="margin-top:0.8rem; margin-bottom:0">
+            <a href={f.link.href}>{f.link.label} →</a>
+          </p>
+        )}
+      </div>
+    ))}
+  </section>
+
+  <section class="reveal" style="margin-top:2rem">
+    <div class="note">
+      <p>Still curious? The <a href="/journey/">install diary</a> tells the story warts and all,
+      the <a href="/configs/">configs page</a> has the actual files, and the
+      <a href="/stats/">stats page</a> publishes every day's numbers automatically.</p>
+    </div>
+  </section>
+</Base>

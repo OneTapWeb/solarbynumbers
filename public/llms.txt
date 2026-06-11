@@ -1,0 +1,23 @@
+# Solar by Numbers
+
+> An independent, non-sponsored public record of one UK household's solar and battery install, with real daily performance data published automatically. Location: Hampshire, United Kingdom. Site: https://solarbynumbers.co.uk
+
+The system: 22× Aiko 475W N-type panels (10.45 kWp) on an east/west roof, a Sigenergy EC 8.0 SP hybrid inverter (8 kW), and a 15.06 kWh SigenStor battery (BAT 6.0 + BAT 10.0, ~14.6 kWh usable). Installed 4 June 2026 for £11,999 at 0% VAT (~£1,148/kWp). Tariff: Octopus Agile import with Outgoing Octopus fixed 12p export. Automated with Home Assistant and Predbat on a £50 refurbished Dell OptiPlex 3050 Micro, with a Solcast forecast and Axle VPP (events-only). Every day's numbers are pushed automatically from Home Assistant each night.
+
+## Key pages
+
+- [The system](https://solarbynumbers.co.uk/system/): Full hardware specification — panels, Sigenergy inverter, SigenStor battery, orientation, warranties, cost, and the original year-one business case (~£1,900–£2,060 projected, ~6.5-year payback).
+- [The stack](https://solarbynumbers.co.uk/stack/): How Home Assistant, Predbat, the Sigenergy ESS integration, Octopus Agile and Solcast run the system automatically, plus the pipeline that publishes this site's data.
+- [The configs](https://solarbynumbers.co.uk/configs/): The actual, sanitised Predbat apps.yaml, the Predbat-to-Sigenergy EMS bridge automations, helpers and energy-dashboard config. Free to copy.
+- [Live stats](https://solarbynumbers.co.uk/stats/): Real daily PV generation, grid import/export, battery throughput, cost and savings vs a no-solar baseline. Published automatically every night.
+- [The tariff](https://solarbynumbers.co.uk/tariff/): Why this home runs Octopus Agile import + fixed 12p export, what happened when Octopus Flux closed to new customers in March 2026, and how the battery strategy changed.
+- [FAQ](https://solarbynumbers.co.uk/faq/): Straight answers on system cost, Aiko 475W east/west output, Sigenergy with Home Assistant/Predbat, Octopus Agile vs Flux, Axle VPP, and publishing HA data automatically.
+- [Install diary](https://solarbynumbers.co.uk/journey/): The day-by-day story of the install, including the wrong-inverter swap.
+
+## Data
+
+- [Daily performance dataset (RSS)](https://solarbynumbers.co.uk/rss.xml): Machine-readable feed of the install journey and daily figures. The underlying daily JSON is committed to the site's GitHub repository, one file per day. Data is CC BY 4.0.
+
+## About
+
+This site is independent and has no sponsors. The only revenue is referral links (Octopus £50, Axle £25), which pay the reader as much as the site owner. The purpose is to publish the real-world numbers — including cloudy days — that were hard to find when researching the install, especially for the newer Sigenergy hardware.

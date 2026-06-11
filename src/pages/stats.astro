@@ -13,9 +13,38 @@ const ukDate = (iso: string) =>
 const range = stats.meta.first_date && stats.meta.last_date
   ? `${ukDate(stats.meta.first_date)} → ${ukDate(stats.meta.last_date)}`
   : '';
+
+const datasetJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'Solar by Numbers — daily UK solar & battery performance data',
+  description:
+    'Daily measured performance of a 10.45 kWp (22× Aiko 475W) UK solar array with a 15.06 kWh SigenStor battery and Sigenergy EC 8.0 SP inverter on Octopus Agile: PV generation, grid import and export, house consumption, battery charge/discharge, daily cost and savings versus a no-solar baseline. Published automatically every night from Home Assistant and Predbat. Location: Hampshire, UK. East/west roof.',
+  url: 'https://solarbynumbers.co.uk/stats/',
+  license: 'https://creativecommons.org/licenses/by/4.0/',
+  isAccessibleForFree: true,
+  creator: { '@type': 'Organization', name: 'Solar by Numbers', url: 'https://solarbynumbers.co.uk/' },
+  temporalCoverage: stats.meta.first_date && stats.meta.last_date
+    ? `${stats.meta.first_date}/${stats.meta.last_date}`
+    : undefined,
+  spatialCoverage: { '@type': 'Place', name: 'Hampshire, United Kingdom' },
+  variableMeasured: [
+    'PV generation (kWh)', 'Grid import (kWh)', 'Grid export (kWh)',
+    'House consumption (kWh)', 'Battery charge (kWh)', 'Battery discharge (kWh)',
+    'Daily net cost (GBP)', 'Daily saving vs no-solar baseline (GBP)',
+  ],
+  measurementTechnique: 'Sigenergy inverter energy meters and Predbat daily cost tracking, exported via Home Assistant',
+  distribution: [
+    {
+      '@type': 'DataDownload',
+      encodingFormat: 'application/rss+xml',
+      contentUrl: 'https://solarbynumbers.co.uk/rss.xml',
+    },
+  ],
+};
 ---
 
-<Base title="Live performance stats" description="Real daily solar generation, grid import and export, battery throughput and payback progress, published automatically every night from Home Assistant.">
+<Base title="Live performance stats" description="Real daily solar generation, grid import and export, battery throughput and payback progress, published automatically every night from Home Assistant." jsonLd={datasetJsonLd}>
   <section class="reveal">
     <p class="kicker">{t.days} days of data · {range} {stats.meta.sample && <span class="badge-sample">demo data</span>}</p>
     <h1>The numbers</h1>

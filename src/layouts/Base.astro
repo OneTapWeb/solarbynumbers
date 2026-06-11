@@ -23,13 +23,36 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const siteUrl = Astro.site?.href ?? 'https://solarbynumbers.co.uk/';
 const siteJsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Solar by Numbers',
-  url: Astro.site?.href,
-  description:
-    'Real daily performance data from a UK solar and battery install: Aiko panels, Sigenergy inverter, Octopus Agile, Home Assistant and Predbat.',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}#website`,
+      name: 'Solar by Numbers',
+      alternateName: 'solarbynumbers.co.uk',
+      url: siteUrl,
+      inLanguage: 'en-GB',
+      description:
+        'Real daily performance data from a UK solar and battery install: 22× Aiko 475W panels (10.45 kWp), a Sigenergy EC 8.0 SP hybrid inverter, 15.06 kWh SigenStor battery, Octopus Agile, and Home Assistant with Predbat.',
+      publisher: { '@id': `${siteUrl}#publisher` },
+      keywords: [
+        'UK solar', 'home battery', 'Aiko 475W', 'Sigenergy', 'SigenStor', 'Predbat',
+        'Home Assistant', 'Octopus Agile', 'Outgoing Octopus', 'Solcast', 'east west solar',
+        'solar payback UK', 'battery storage', 'Axle VPP',
+      ],
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl}#publisher`,
+      name: 'Solar by Numbers',
+      url: siteUrl,
+      logo: new URL('/og-image.png', siteUrl).href,
+      description:
+        'An independent, non-sponsored record of one UK household\'s 10.45 kWp solar and 15 kWh battery install, with real daily performance data published automatically from Home Assistant.',
+    },
+  ],
 };
 
 const nav = [
@@ -40,6 +63,7 @@ const nav = [
   ['/configs/', 'configs'],
   ['/journey/', 'journey'],
   ['/tariff/', 'tariff'],
+  ['/faq/', 'faq'],
 ];
 const path = Astro.url.pathname;
 const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
