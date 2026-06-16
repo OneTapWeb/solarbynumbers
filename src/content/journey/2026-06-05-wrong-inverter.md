@@ -5,7 +5,7 @@ summary: "We paid for a Sigenergy EC 8.0 SP. The installer has just told us the 
 tags: [install, hardware, sigenergy]
 ---
 
-One day after install, the installer got in touch: the inverter on the wall is a
+One day after install, the installer got in touch. The inverter on the wall is a
 **SigenStor EC 6.0 SP**, not the EC 8.0 SP we ordered and paid for. They're sorting it.
 
 Home Assistant agrees, for what it's worth. The integration exposes the model directly:
@@ -40,10 +40,10 @@ surprisingly little, at least for now.
 
 The cap starts costing real money the day export goes live. Saving Sessions and Axle VPP
 events pay per kWh exported in a short window, and 6.6 kW instead of 8 means roughly 20% less
-energy shifted per event. The same goes for any future move to Agile Outgoing, where the value
+energy shifted per event. Same goes for any future move to Agile Outgoing, where the value
 is in exporting hard into price spikes.
 
-So the race is on: the inverter swap needs to happen before the export certification clears.
+So the race is on. The inverter swap needs to happen before the export certification clears.
 If it does, this whole episode will have cost us approximately nothing.
 
 Lesson for your own install: check the model plate (or the integration's model sensor) against

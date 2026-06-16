@@ -117,16 +117,16 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
     <footer class="site">
       <div class="wrap cols">
         <div>
-          <p style="color:var(--cream)"><strong>Solar by Numbers</strong> is the record of one household's solar and battery install: 10.45 kWp on an east/west roof in Hampshire, a 15 kWh battery, and Home Assistant with Predbat running the lot. The numbers update every night, straight from the inverter.</p>
-          <p class="muted">No sponsors. The referral links below are the only money this site makes, and they pay you as much as they pay us.</p>
+          <p style="color:var(--cream)"><strong>Solar by Numbers</strong> is our personal project tracking how quickly one household's solar and battery pays back, measured against the original proposal's estimate: 10.45 kWp on an east/west roof in Hampshire, a 15 kWh battery, and Home Assistant with Predbat running the lot. The numbers update every night straight off the inverter, and the configs are public in case they're useful to anyone else.</p>
+          <p class="muted">No sponsors. The referral links below are the only money this site makes, and they pay you the same as they pay us.</p>
         </div>
         <div>
           <p><strong style="color:var(--cream)">Thinking of switching to Octopus?</strong><br />
           We're on Agile import, with fixed 12p export lined up once our export certification
-          clears. Sign up through this link and we both get £50:</p>
+          comes through. Sign up through this link and we both get £50:</p>
           <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> £50 referral</a>
           <p style="margin-top:1.5rem"><strong style="color:var(--cream)">Got a home battery?</strong><br />
-          Axle pays you for grid-balancing events — we run it in "events only" mode so Predbat
+          Axle pays you for grid-balancing events. We run it in "events only" mode so Predbat
           keeps control the rest of the time. Sign up through this link and we both get £25:</p>
           <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><img src="/axle-logo-black.png" alt="Axle" class="axle-mark" /> £25 referral</a>
           <p class="muted" style="margin-top:1rem">

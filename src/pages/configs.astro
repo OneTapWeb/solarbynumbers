@@ -10,7 +10,7 @@ import energyPrefs from '../../public/configs/energy_prefs.json?raw';
 const files = [
   {
     name: 'apps.yaml', lang: 'yaml', code: appsYaml, dl: '/configs/apps.yaml',
-    blurb: 'The full Predbat configuration for a Sigenergy EC-series hybrid (inverter_type: SIG) on Octopus Agile + fixed export, with Solcast forecasting and Saving Session support. The regex entity matchers mean it should drop onto most single-inverter Sigenergy installs unchanged, and the rate limits are read from sensors rather than hard-coded, which paid off when our inverter turned out to be a different model than ordered.',
+    blurb: 'The full Predbat configuration for a Sigenergy EC-series hybrid (inverter_type: SIG) on Octopus Agile + fixed export, with Solcast forecasting and Saving Session support. The regex entity matchers mean it should drop onto most single-inverter Sigenergy installs unchanged, and the rate limits are read from sensors rather than hard-coded, which paid off nicely when our inverter turned out to be a different model than the one we ordered.',
   },
   {
     name: 'predbat_sigenergy_bridge.yaml', lang: 'yaml', code: bridgeYaml, dl: '/configs/predbat_sigenergy_bridge.yaml',
@@ -22,7 +22,7 @@ const files = [
   },
   {
     name: 'enable_entities.jq', lang: 'text', code: enableJq, dl: '/configs/enable_entities.jq',
-    blurb: 'The Sigenergy integration ships several control entities disabled by default, including the remote EMS mode select that the whole bridge depends on. This jq filter flips them on in the entity registry (run it against core.entity_registry with HA stopped, or just enable them by hand in the UI).',
+    blurb: 'The Sigenergy integration ships several control entities switched off by default, including the remote EMS mode select that the whole bridge hangs on. This jq filter flips them on in the entity registry (run it against core.entity_registry with HA stopped, or just enable them by hand in the UI).',
   },
   {
     name: 'energy_prefs.json', lang: 'json', code: energyPrefs, dl: '/configs/energy_prefs.json',
@@ -36,11 +36,11 @@ const files = [
     <p class="kicker">Copy-paste ready · sanitized</p>
     <h1>The configs</h1>
     <p style="max-width:46rem">
-      These are the actual files running this system, not examples. The only changes are that
-      credentials and meter identifiers have been swapped for placeholders. If you're putting
-      Predbat on a Sigenergy inverter, this page should save you some evenings. The mode-bridge
-      automations took the most trial and error, and as far as we know they aren't documented
-      anywhere else.
+      These are the actual files running our system, not tidied-up examples, put here in case
+      they're useful to anyone else doing the same. The only changes are that credentials and
+      meter identifiers have been swapped for placeholders. If you're putting Predbat on a
+      Sigenergy inverter, this lot should save you a few evenings. The mode-bridge automations
+      took the most trial and error, and as far as we know they aren't written up anywhere else.
     </p>
     <div class="note">
       <p><strong>Before you copy:</strong> entity IDs assume the HACS Sigenergy ESS integration's
@@ -65,8 +65,8 @@ const files = [
     <h2>The stats-publishing pipeline</h2>
     <p style="max-width:46rem">
       The utility_meter helpers and the 00:15 GitHub push that feed the
-      <a href="/stats/">stats page</a> are running on the live system now. They'll be published
-      here once they've survived a few real midnights. The design is described on the
+      <a href="/stats/">stats page</a> are running on the live system now. They'll go up here once
+      they've survived a few real midnights. The design is written up on the
       <a href="/stack/#pipeline">stack page</a>.
     </p>
   </section>

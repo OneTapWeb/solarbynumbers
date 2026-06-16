@@ -107,6 +107,7 @@ function aggregate(days) {
     import_cost: 0, export_revenue: 0, net_cost: 0,
     baseline_no_solar_cost: 0, savings: 0,
     unpaid_export_kwh: 0, foregone_export_gbp: 0,
+    axle_earnings: 0, axle_events: 0,
   };
   for (const d of days) {
     const m = d.date.slice(0, 7);
@@ -117,12 +118,17 @@ function aggregate(days) {
         house_consumption: 0, battery_charge: 0, battery_discharge: 0,
         import_cost: 0, export_revenue: 0, net_cost: 0,
         baseline_no_solar_cost: 0, savings: 0,
+        axle_earnings: 0, axle_events: 0,
       });
     }
     const mo = monthly.get(m);
     mo.days++;
     const e = d.energy_kwh ?? {};
     const c = d.cost_gbp ?? {};
+    // Axle VPP grid-event earnings (optional block in the daily JSON; absent on pre-Axle days)
+    const ax = d.axle ?? {};
+    if (ax.earnings_gbp != null) { mo.axle_earnings += ax.earnings_gbp; totals.axle_earnings += ax.earnings_gbp; }
+    if (ax.events != null) { mo.axle_events += ax.events; totals.axle_events += ax.events; }
     for (const k of ['pv_generation', 'grid_import', 'grid_export', 'house_consumption', 'battery_charge', 'battery_discharge']) {
       if (e[k] != null) { mo[k] += e[k]; totals[k] += e[k]; }
     }

@@ -4,7 +4,7 @@ import stats from '../data/stats.json';
 
 const t = stats.totals;
 const fmt = (v: number | null | undefined, dp = 0) =>
-  v == null ? '—' : v.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  v == null ? 'n/a' : v.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const months = [...stats.monthly].reverse();
 const monthName = (m: string) =>
   new Date(m + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
@@ -17,7 +17,7 @@ const range = stats.meta.first_date && stats.meta.last_date
 const datasetJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Dataset',
-  name: 'Solar by Numbers — daily UK solar & battery performance data',
+  name: 'Solar by Numbers: daily UK solar & battery performance data',
   description:
     'Daily measured performance of a 10.45 kWp (22× Aiko 475W) UK solar array with a 15.06 kWh SigenStor battery and Sigenergy EC 8.0 SP inverter on Octopus Agile: PV generation, grid import and export, house consumption, battery charge/discharge, daily cost and savings versus a no-solar baseline. Published automatically every night from Home Assistant and Predbat. Location: Hampshire, UK. East/west roof.',
   url: 'https://solarbynumbers.co.uk/stats/',
@@ -51,7 +51,7 @@ const datasetJsonLd = {
     <p style="max-width:46rem">
       Every figure below is pushed automatically from Home Assistant at 00:15 each night. The kWh
       come from the Sigenergy inverter's own meters and the costs from Predbat's daily tracking,
-      including its estimate of what each day would have cost with no solar or battery. Nothing
+      including its estimate of what each day would have cost with no solar or battery. None of it
       is typed in by hand. <a href="/stack/#pipeline">How the pipeline works →</a>
     </p>
   </section>
@@ -91,9 +91,9 @@ const datasetJsonLd = {
             <span class="stat-sub">{fmt(t.unpaid_export_kwh, 1)} kWh exported for free</span>
           </div>
           <p class="muted" style="max-width:36rem; margin:0">
-            Until the final installation certification clears we earn nothing for export, but
-            the inverter still pushes surplus to the grid once the battery is full. This is what
-            that donated energy would have earned at the 12p rate.
+            Until the final installation certification comes through we earn nothing for export,
+            but the inverter still pushes surplus to the grid once the battery is full. This is
+            what that donated energy would have earned at the 12p rate.
             <a href="/tariff/">The certification story →</a>
           </p>
         </div>
@@ -166,11 +166,11 @@ const datasetJsonLd = {
     </table>
     </div>
     <p class="muted">A day's saving comes from Predbat's no-solar comparison: what the day's
-    usage would have cost imported entirely at the actual half-hourly Agile rates, minus what it
-    actually cost. Predbat also credits energy banked into the battery during the day (priced at
-    the rate it later displaces), and debits energy drawn down, so a day that fills the battery
-    scores higher than a pure avoided-import view. Over a run of days the battery starts and
-    ends at similar charge and this evens out. Standing charges affect both sides equally, so
+    usage would have cost if it were all imported at the actual half-hourly Agile rates, minus
+    what it actually cost. Predbat also credits energy banked into the battery during the day
+    (priced at the rate it later displaces), and debits energy drawn down, so a day that fills the
+    battery scores higher than a pure avoided-import view. Over a run of days the battery starts
+    and ends at a similar charge and it evens out. Standing charges hit both sides equally, so
     they cancel.</p>
   </section>
 
