@@ -1,7 +1,7 @@
 ---
 title: "Our first Axle event, and teaching the system to see the next one coming"
 date: 2026-06-16
-summary: "Tonight the battery ran its first paid grid event: a steady 5.5 kW out for an hour, around £4 of help to the grid at £1/kWh. It also taught us that once a VPP event starts there's no touching the battery, so we rewired Predbat to prepare for events in advance instead of scrambling during them."
+summary: "Tonight the battery ran its first paid grid event: a steady 5.5 kW out for an hour, £4.27 of help to the grid at £1/kWh. It also taught us that once a VPP event starts there's no touching the battery, so we rewired Predbat to prepare for events in advance instead of scrambling during them."
 tags: [axle, vpp, revenue, home-assistant, predbat]
 ---
 
@@ -12,10 +12,16 @@ battery started pushing power to the grid. Our **first paid grid event**.
 ## What actually happened
 
 The dispatch ran the full hour, 7–8pm. The battery discharged at a rock-steady **5.5 kW**,
-exporting around **4 kWh** to the grid and dropping from a near-full 99% down to about 66%. At
-Axle's £1/kWh that's roughly **£4** for an hour of doing nothing but letting the grid borrow what
-the sun put in earlier. (We'll confirm the exact figure once Axle settles it, and log it here when
-we do.)
+exporting **4.27 kWh** to the grid and dropping from a near-full 99% down to about 66%. At
+Axle's £1/kWh that's **£4.27** for an hour of doing nothing but letting the grid borrow what
+the sun put in earlier.
+
+**Update — Axle has now settled it: £4.27.** Their figure landed in our account a couple of days
+later, and it's an exact match for what our own inverter logged exporting during the hour (we
+integrated the grid-export trace ourselves and got 4.27 kWh too). That's reassuring: the VPP pays
+on metered export, and our meter and theirs agree to the penny. It's now showing on our
+[stats page](/stats/) and homepage — and from here on, every event auto-publishes from our own
+meter the same night, no waiting on the email.
 
 No drama, and the dispatch itself needed no help from us. The battery was already full because
 Predbat routinely charges it for the evening peak, so there was plenty to give.
