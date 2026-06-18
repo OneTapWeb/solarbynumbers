@@ -138,6 +138,7 @@ const datasetJsonLd = {
           <th class="num">Export kWh</th>
           <th class="num">Import kWh</th>
           <th class="num">Net cost £</th>
+          <th class="num">Axle £</th>
           <th class="num">Saved £</th>
         </tr>
       </thead>
@@ -150,6 +151,7 @@ const datasetJsonLd = {
             <td class="num">{fmt(m.grid_export, 1)}</td>
             <td class="num">{fmt(m.grid_import, 1)}</td>
             <td class="num">{fmt(m.net_cost, 2)}</td>
+            <td class="num axle-cell">{m.axle_earnings ? `£${fmt(m.axle_earnings, 2)}` : '—'}</td>
             <td class="num" style="color:var(--export)">{fmt(m.savings, 2)}</td>
           </tr>
         ))}
@@ -160,6 +162,7 @@ const datasetJsonLd = {
           <td class="num">{fmt(t.grid_export, 1)}</td>
           <td class="num">{fmt(t.grid_import, 1)}</td>
           <td class="num">{fmt(t.net_cost, 2)}</td>
+          <td class="num axle-cell">{t.axle_earnings ? `£${fmt(t.axle_earnings, 2)}` : '—'}</td>
           <td class="num">{fmt(t.savings, 2)}</td>
         </tr>
       </tbody>
@@ -172,7 +175,16 @@ const datasetJsonLd = {
     battery scores higher than a pure avoided-import view. Over a run of days the battery starts
     and ends at a similar charge and it evens out. Standing charges hit both sides equally, so
     they cancel.</p>
+    <p class="muted"><strong>Axle £</strong> is the VPP grid-event income (battery exported at £1/kWh
+    during demand events), measured from our own meter. It is <em>already part of</em> the Saved
+    figure — Predbat prices the event export into the day's net cost — so it counts toward payback
+    too; the column just breaks out how much of the saving came from VPP events. Don't add it to
+    Saved.</p>
   </section>
+
+  <style>
+    .axle-cell { color: #e8472b; font-weight: 600; }
+  </style>
 
   <script src="../scripts/charts.js"></script>
 </Base>
