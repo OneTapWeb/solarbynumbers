@@ -32,7 +32,15 @@ async function loadDaily() {
   for (const f of files.sort()) {
     try {
       const rec = JSON.parse(await readFile(join(DAILY_DIR, f), 'utf8'));
-      if (rec && rec.date) days.push(rec);
+      // A double-encoded file (JSON string instead of an object) parses fine but
+      // has no .date, so guard explicitly — otherwise the day vanishes silently.
+      if (typeof rec !== 'object' || rec === null || Array.isArray(rec)) {
+        console.warn(`aggregate: skipping ${f}: not a JSON object (got ${Array.isArray(rec) ? 'array' : typeof rec} — likely double-encoded)`);
+      } else if (!rec.date) {
+        console.warn(`aggregate: skipping ${f}: object has no "date" field`);
+      } else {
+        days.push(rec);
+      }
     } catch (e) {
       console.warn(`aggregate: skipping unparseable ${f}: ${e.message}`);
     }
