@@ -173,7 +173,7 @@ const out = {
   meta: {
     sample,
     system_cost_gbp: SYSTEM_COST_GBP,
-    payback_progress: round2(Math.min(1, Math.max(0, totals.savings / SYSTEM_COST_GBP))),
+    payback_progress: Math.round(Math.min(1, Math.max(0, totals.savings / SYSTEM_COST_GBP)) * 1e5) / 1e5,
     first_date: days[0]?.date ?? null,
     last_date: days[days.length - 1]?.date ?? null,
   },
