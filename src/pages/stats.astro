@@ -2,17 +2,49 @@
 import Base from '../layouts/Base.astro';
 import stats from '../data/stats.json';
 
-const t = stats.totals;
+const t = stats.totals as Record<string, number>;
+const m = stats.meta as any;
+const prop = m.proposal;
+
 const fmt = (v: number | null | undefined, dp = 0) =>
   v == null ? 'n/a' : v.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const months = [...stats.monthly].reverse();
-const monthName = (m: string) =>
-  new Date(m + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+const monthName = (mo: string) =>
+  new Date(mo + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 const ukDate = (iso: string) =>
   new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-const range = stats.meta.first_date && stats.meta.last_date
-  ? `${ukDate(stats.meta.first_date)} → ${ukDate(stats.meta.last_date)}`
-  : '';
+const range = m.first_date && m.last_date ? `${ukDate(m.first_date)} → ${ukDate(m.last_date)}` : '';
+
+// --- generation heatmap: one row per month, one cell per day of that month ---
+const byDate = new Map(stats.daily.map((d: any) => [d.date, d.energy_kwh?.pv_generation ?? null]));
+const heatMax = Math.max(...stats.daily.map((d: any) => d.energy_kwh?.pv_generation ?? 0), 1);
+const heatMonths = stats.monthly.map((mo: any) => {
+  const [y, mm] = mo.month.split('-').map(Number);
+  const dayCount = new Date(Date.UTC(y, mm, 0)).getUTCDate();
+  const cells = Array.from({ length: dayCount }, (_, i) => {
+    const iso = `${mo.month}-${String(i + 1).padStart(2, '0')}`;
+    return { iso, kwh: byDate.has(iso) ? (byDate.get(iso) as number | null) : undefined };
+  });
+  return {
+    month: mo.month,
+    short: new Date(mo.month + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'short' }),
+    total: mo.pv_generation,
+    cells,
+  };
+});
+// 5 steps of the accent hue, palest to full — plus a distinct "no data" tone
+const STEPS = ['#e8eefc', '#c9d8f8', '#9ab4f2', '#5b83e6', '#1d4ed8'];
+const cellStyle = (kwh: number | null | undefined) => {
+  if (kwh === undefined) return 'background:transparent';        // day not in the dataset
+  if (kwh == null) return 'background:var(--track)';             // logged, but no figure
+  const step = Math.min(STEPS.length - 1, Math.floor((kwh / heatMax) * STEPS.length));
+  return `background:${STEPS[step]}`;
+};
+
+const axleMonths = stats.monthly.filter((mo: any) => (mo.axle_earnings ?? 0) > 0 || (mo.axle_events ?? 0) > 0);
+const axleMax = Math.max(...axleMonths.map((mo: any) => mo.axle_earnings ?? 0), 1);
+
+const selfConsumed = (t.pv_generation ?? 0) - (t.grid_export ?? 0);
 
 const datasetJsonLd = {
   '@context': 'https://schema.org',
@@ -24,9 +56,7 @@ const datasetJsonLd = {
   license: 'https://creativecommons.org/licenses/by/4.0/',
   isAccessibleForFree: true,
   creator: { '@type': 'Organization', name: 'Solar by Numbers', url: 'https://solarbynumbers.co.uk/' },
-  temporalCoverage: stats.meta.first_date && stats.meta.last_date
-    ? `${stats.meta.first_date}/${stats.meta.last_date}`
-    : undefined,
+  temporalCoverage: m.first_date && m.last_date ? `${m.first_date}/${m.last_date}` : undefined,
   spatialCoverage: { '@type': 'Place', name: 'Hampshire, United Kingdom' },
   variableMeasured: [
     'PV generation (kWh)', 'Grid import (kWh)', 'Grid export (kWh)',
@@ -35,100 +65,130 @@ const datasetJsonLd = {
   ],
   measurementTechnique: 'Sigenergy inverter energy meters and Predbat daily cost tracking, exported via Home Assistant',
   distribution: [
-    {
-      '@type': 'DataDownload',
-      encodingFormat: 'application/rss+xml',
-      contentUrl: 'https://solarbynumbers.co.uk/rss.xml',
-    },
+    { '@type': 'DataDownload', encodingFormat: 'application/rss+xml', contentUrl: 'https://solarbynumbers.co.uk/rss.xml' },
   ],
 };
 ---
 
 <Base title="Live performance stats" description="Real daily solar generation, grid import and export, battery throughput and payback progress, published automatically every night from Home Assistant." jsonLd={datasetJsonLd}>
-  <section class="reveal">
-    <p class="kicker">{t.days} days of data · {range} {stats.meta.sample && <span class="badge-sample">demo data</span>}</p>
+  <div class="page-head">
     <h1>The numbers</h1>
-    <p style="max-width:46rem">
-      Every figure below is pushed automatically from Home Assistant at 00:15 each night. The kWh
-      come from the Sigenergy inverter's own meters and the costs from Predbat's daily tracking,
-      including its estimate of what each day would have cost with no solar or battery. None of it
-      is typed in by hand. <a href="/stack/#pipeline">How the pipeline works →</a>
+    <p class="lede">
+      Updated every night from the inverter. Nothing smoothed, nothing left out.
+      {m.sample && <span class="badge-sample">demo data</span>}
+    </p>
+    <p class="muted mono">{t.days} days · {range}</p>
+  </div>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Cumulative savings vs the proposal</h2>
+      <div class="chart-key">
+        <span class="actual"><i></i>actual</span>
+        <span class="projected"><i></i>proposal estimate</span>
+      </div>
+    </div>
+    <div class="chart"><canvas id="chart-payback" height="118"></canvas></div>
+    <p class="caption">
+      {t.days} days in we're running at <strong>{Math.round((prop.pace ?? 0) * 100)}%</strong> of
+      the pace the proposal assumed — but £{prop.unearnable_gbp} of its year-one total is made up
+      of streams we physically cannot earn yet: export is unpaid until certification clears, and
+      Octopus Saving Sessions only run November to March. Against the streams that <em>are</em>
+      available today the figure is <strong>{Math.round(((t.savings ?? 0) / prop.to_date_earnable_gbp) * 100)}%</strong>.
+      Extrapolating a summer to a whole year flatters us in the other direction, so treat both as
+      early signals rather than verdicts.
     </p>
   </section>
 
-  <section class="reveal" style="margin-top:2.2rem">
-    <div class="panel ticks">
-      <p class="kicker" style="margin-bottom:1.2rem">Running totals</p>
-      <div class="grid-4">
-        <div class="stat gen">
-          <span class="stat-label">Generated</span>
-          <span class="stat-value">{fmt(t.pv_generation)}<span class="unit">kWh</span></span>
+  {(t.unpaid_export_kwh ?? 0) > 0.05 && (
+    <div class="note warn">
+      <p><strong>£{fmt(t.foregone_export_gbp, 2)} given away unpaid</strong> — {fmt(t.unpaid_export_kwh, 1)} kWh
+      exported for free. Until the final installation certification comes through we earn nothing
+      for export, but the inverter still pushes surplus to the grid once the battery is full. This
+      is what that donated energy would have earned at the 12p rate.
+      <a href="/tariff/">The certification story →</a></p>
+    </div>
+  )}
+
+  <section class="card" style="margin-top:1rem">
+    <div class="card-head">
+      <h2>Generation, day by day</h2>
+      <span class="meta">kWh generated each day since {ukDate(m.first_date)}</span>
+    </div>
+    <div class="heat">
+      {heatMonths.map((mo: any) => (
+        <div class="hrow">
+          <span class="hlabel">{mo.short}</span>
+          <span class="hcells">
+            {mo.cells.map((c: any) => (
+              <i style={cellStyle(c.kwh)} title={c.kwh == null ? c.iso : `${c.iso}: ${c.kwh} kWh`}></i>
+            ))}
+          </span>
+          <span class="htotal">{fmt(mo.total)} kWh</span>
         </div>
-        <div class="stat exp">
-          <span class="stat-label">Exported</span>
-          <span class="stat-value">{fmt(t.grid_export)}<span class="unit">kWh</span></span>
-        </div>
-        <div class="stat imp">
-          <span class="stat-label">Imported</span>
-          <span class="stat-value">{fmt(t.grid_import)}<span class="unit">kWh</span></span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Saved</span>
-          <span class="stat-value">£{fmt(t.savings)}</span>
-          <span class="stat-sub">{((stats.meta.payback_progress ?? 0) * 100).toFixed(1)}% of £{fmt(stats.meta.system_cost_gbp)}</span>
-        </div>
+      ))}
+      <div class="hscale">
+        <span>0 kWh</span>
+        {STEPS.map((s) => <i style={`background:${s}`}></i>)}
+        <span>{fmt(heatMax)} kWh</span>
       </div>
     </div>
   </section>
 
-  {(t.unpaid_export_kwh ?? 0) > 0.05 && (
-    <section class="reveal" style="margin-top:1.2rem">
-      <div class="panel" style="border-left:4px solid var(--import)">
-        <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:0.6rem 2rem">
-          <div class="stat imp">
-            <span class="stat-label">Given away unpaid</span>
-            <span class="stat-value">£{fmt(t.foregone_export_gbp, 2)}</span>
-            <span class="stat-sub">{fmt(t.unpaid_export_kwh, 1)} kWh exported for free</span>
+  <div class="cols-2" style="margin-top:1rem">
+    <section class="card dark">
+      <div class="card-head">
+        <h2>VPP earnings</h2>
+        <span class="meta">Axle grid events, £1/kWh</span>
+      </div>
+      <div class="vpp-bars">
+        {axleMonths.map((mo: any) => (
+          <div class="vbar">
+            <span class="v">£{(mo.axle_earnings ?? 0).toFixed(2)}</span>
+            <span class="b" style={`height:${Math.max(6, ((mo.axle_earnings ?? 0) / axleMax) * 100)}%`}></span>
+            <span class="l">{new Date(mo.month + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'short' })}</span>
+            <span class="s">{mo.axle_events ?? 0} ev</span>
           </div>
-          <p class="muted" style="max-width:36rem; margin:0">
-            Until the final installation certification comes through we earn nothing for export,
-            but the inverter still pushes surplus to the grid once the battery is full. This is
-            what that donated energy would have earned at the 12p rate.
-            <a href="/tariff/">The certification story →</a>
-          </p>
-        </div>
+        ))}
+      </div>
+      <p style="margin-top:1rem; font-size:0.88rem">
+        £{((t.axle_earnings ?? 0) - (t.axle_topups ?? 0)).toFixed(2)} from {t.axle_events} events,
+        £{(t.axle_topups ?? 0).toFixed(2)} in monthly top-ups. <a href="#axle">How it's counted</a>.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Since commissioning</h2></div>
+      <div class="ledger">
+        <div class="row"><span class="k">Generated</span><span class="v">{fmt(t.pv_generation)}<span class="u">kWh</span></span></div>
+        <div class="row"><span class="k">Self-consumed</span><span class="v">{fmt(selfConsumed)}<span class="u">kWh</span></span></div>
+        <div class="row"><span class="k">Exported</span><span class="v">{fmt(t.grid_export)}<span class="u">kWh</span></span></div>
+        <div class="row"><span class="k">Imported from grid</span><span class="v">{fmt(t.grid_import)}<span class="u">kWh</span></span></div>
+        <div class="row"><span class="k">Battery throughput</span><span class="v">{fmt(t.battery_discharge)}<span class="u">kWh</span></span></div>
+        <div class="row"><span class="k">Grid savings</span><span class="v">£{fmt(t.savings, 2)}</span></div>
+        <div class="row"><span class="k">VPP earnings</span><span class="v">£{fmt(t.axle_earnings, 2)}</span></div>
       </div>
     </section>
-  )}
+  </div>
 
-  <section class="chart-panel panel reveal">
-    <p class="chart-title">Daily generation vs consumption</p>
-    <canvas id="chart-energy" height="120"></canvas>
+  <section class="card" style="margin-top:1rem">
+    <div class="card-head">
+      <h2>Grid flows</h2>
+      <div class="chart-key">
+        <span style="color:#1d4ed8"><i></i>export</span>
+        <span style="color:#b4422c"><i></i>import</span>
+      </div>
+    </div>
+    <div class="chart"><canvas id="chart-grid" height="110"></canvas></div>
+    <p class="caption">
+      Export above the line, import below. The battery covers almost everything the house needs,
+      so import only shows up on the dullest days — and every blue bar above the line is, for now,
+      energy handed to the grid for nothing.
+    </p>
   </section>
 
-  <section class="chart-panel panel reveal">
-    <p class="chart-title">Grid flows · export ↑ / import ↓</p>
-    <canvas id="chart-grid" height="120"></canvas>
-  </section>
-
-  <section class="chart-panel panel reveal">
-    <p class="chart-title">Battery throughput · charged ↑ / discharged ↓</p>
-    <canvas id="chart-battery" height="120"></canvas>
-  </section>
-
-  <section class="chart-panel panel reveal">
-    <p class="chart-title">Daily net cost vs no-solar baseline</p>
-    <canvas id="chart-cost" height="120"></canvas>
-  </section>
-
-  <section class="chart-panel panel reveal">
-    <p class="chart-title">Cumulative savings → £{fmt(stats.meta.system_cost_gbp)} payback</p>
-    <canvas id="chart-payback" height="120"></canvas>
-  </section>
-
-  <section style="margin-top:3rem">
-    <h2>Monthly ledger</h2>
-    <div class="table-scroll">
+  <div class="section-head"><h2>Monthly ledger</h2></div>
+  <div class="table-scroll">
     <table>
       <thead>
         <tr>
@@ -143,16 +203,16 @@ const datasetJsonLd = {
         </tr>
       </thead>
       <tbody>
-        {months.map((m) => (
+        {months.map((mo: any) => (
           <tr>
-            <td>{monthName(m.month)}</td>
-            <td class="num">{m.days}</td>
-            <td class="num">{fmt(m.pv_generation, 1)}</td>
-            <td class="num">{fmt(m.grid_export, 1)}</td>
-            <td class="num">{fmt(m.grid_import, 1)}</td>
-            <td class="num">{fmt(m.net_cost, 2)}</td>
-            <td class="num axle-cell">{m.axle_earnings ? `£${fmt(m.axle_earnings, 2)}` : '—'}</td>
-            <td class="num" style="color:var(--export)">{fmt(m.savings, 2)}</td>
+            <td>{monthName(mo.month)}</td>
+            <td class="num">{mo.days}</td>
+            <td class="num">{fmt(mo.pv_generation, 1)}</td>
+            <td class="num">{fmt(mo.grid_export, 1)}</td>
+            <td class="num">{fmt(mo.grid_import, 1)}</td>
+            <td class="num">{fmt(mo.net_cost, 2)}</td>
+            <td class="num">{mo.axle_earnings ? `£${fmt(mo.axle_earnings, 2)}` : '—'}</td>
+            <td class="num">{fmt(mo.savings, 2)}</td>
           </tr>
         ))}
         <tr class="total">
@@ -162,37 +222,58 @@ const datasetJsonLd = {
           <td class="num">{fmt(t.grid_export, 1)}</td>
           <td class="num">{fmt(t.grid_import, 1)}</td>
           <td class="num">{fmt(t.net_cost, 2)}</td>
-          <td class="num axle-cell">{t.axle_earnings ? `£${fmt(t.axle_earnings, 2)}` : '—'}</td>
+          <td class="num">{t.axle_earnings ? `£${fmt(t.axle_earnings, 2)}` : '—'}</td>
           <td class="num">{fmt(t.savings, 2)}</td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="section-head"><h2>How these are worked out</h2></div>
+  <div class="cols-2">
+    <div class="card">
+      <h3 style="margin-top:0">The saving</h3>
+      <p>A day's saving comes from Predbat's no-solar comparison: what the day's usage would have
+      cost if it were all imported at the actual half-hourly Agile rates, minus what it actually
+      cost. Predbat also credits energy banked into the battery during the day (priced at the rate
+      it later displaces) and debits energy drawn down, so a day that fills the battery scores
+      higher than a pure avoided-import view. Over a run of days the battery starts and ends at a
+      similar charge and it evens out. Standing charges hit both sides equally, so they cancel.</p>
     </div>
-    <p class="muted">A day's saving comes from Predbat's no-solar comparison: what the day's
-    usage would have cost if it were all imported at the actual half-hourly Agile rates, minus
-    what it actually cost. Predbat also credits energy banked into the battery during the day
-    (priced at the rate it later displaces), and debits energy drawn down, so a day that fills the
-    battery scores higher than a pure avoided-import view. Over a run of days the battery starts
-    and ends at a similar charge and it evens out. Standing charges hit both sides equally, so
-    they cancel.</p>
-    <p class="muted" id="axle"><strong>Axle £</strong> is what Axle has actually paid, taken from the
-    transaction list in their app: £{fmt(t.axle_earnings - (t.axle_topups ?? 0), 2)} for
-    {t.axle_events} grid events at £1/kWh, plus £{fmt(t.axle_topups ?? 0, 2)} of monthly top-ups
-    bringing quiet months up to the £10 minimum.</p>
-    <p class="muted">Our own meters made those events look like
-    £{fmt(t.axle_metered_estimate ?? 0, 2)} — we log the battery's export during each dispatch
-    window and price it at £1/kWh. Axle settles on their own metering, a day or so later, and the
-    two disagree by a few percent in both directions. On 6 September they disagreed completely: the
-    Axle API key had silently expired, Predbat never saw the event coming, and the battery went into
-    it at 2.9%. Our meter caught 0.43 kWh trickling out; Axle paid £0.00. Their number is the one
-    that turns into money, so it is the one published here.</p>
-    <p class="muted">The event earnings are <em>already part of</em> the Saved figure — Predbat prices
-    the event export into the day's net cost — so don't add them to Saved. The top-ups are not:
-    they arrive as a separate payment and sit outside the daily numbers entirely.</p>
-  </section>
+    <div class="card" id="axle">
+      <h3 style="margin-top:0">The Axle column</h3>
+      <p><strong>Axle £</strong> is what Axle has actually paid, taken from the transaction list in
+      their app: £{fmt((t.axle_earnings ?? 0) - (t.axle_topups ?? 0), 2)} for {t.axle_events} grid
+      events at £1/kWh, plus £{fmt(t.axle_topups, 2)} of monthly top-ups bringing quiet months up
+      to the £10 minimum.</p>
+      <p>Our own meters made those events look like £{fmt(t.axle_metered_estimate, 2)} — we log the
+      battery's export during each dispatch window and price it at £1/kWh. Axle settles on their
+      own metering a day or so later, and the two disagree by a few percent in both directions. On
+      6 September they disagreed completely: the Axle API key had silently expired, Predbat never
+      saw the event coming, and the battery went into it at 2.9%. Our meter caught 0.43 kWh
+      trickling out; Axle paid £0.00. Their number is the one that turns into money, so it is the
+      one published here.</p>
+      <p>The event earnings are <em>already part of</em> the Saved column — Predbat prices the
+      event export into the day's net cost — so don't add them to Saved. The top-ups are not: they
+      arrive as a separate payment and sit outside the daily numbers entirely.</p>
+    </div>
+  </div>
 
   <style>
-    .axle-cell { color: #e8472b; font-weight: 600; }
+    .vpp-bars { display: flex; align-items: flex-end; gap: 0.8rem; height: 190px; }
+    .vpp-bars .vbar {
+      flex: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      align-items: end;
+      height: 100%;
+      text-align: center;
+      font-family: var(--mono);
+    }
+    .vpp-bars .vbar .v { font-size: 0.7rem; color: var(--accent-pale); padding-bottom: 0.3rem; }
+    .vpp-bars .vbar .b { background: var(--accent-pale); border-radius: 3px 3px 0 0; align-self: end; }
+    .vpp-bars .vbar .l { font-size: 0.72rem; color: var(--dark-ink); padding-top: 0.4rem; }
+    .vpp-bars .vbar .s { font-size: 0.66rem; color: var(--dark-ink-dim); }
   </style>
 
   <script src="../scripts/charts.js"></script>

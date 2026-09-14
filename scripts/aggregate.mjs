@@ -22,6 +22,21 @@ const SYSTEM_COST_GBP = 11999;
 const EXPORT_PAID_FROM = null;
 const EXPORT_RATE_GBP = 0.12;
 
+// The proposal's own Year-1 model (solar_proposal.html, Section 13, June 2026 revision).
+// The site's whole point is testing this in public, so the homepage compares actual
+// savings against this projection pro-rated by days elapsed. Two of its streams cannot
+// be earned yet — export is unpaid until certification clears, and Octopus Saving
+// Sessions only run Nov-Mar — so they're broken out to explain the gap honestly rather
+// than leaving it looking like underperformance.
+const PROPOSAL = {
+  year1_gbp: 2029,
+  payback_years: 5.4,
+  unearnable: [
+    { label: 'solar export at 12p', gbp: 465, why: 'unpaid until export certification clears' },
+    { label: 'Octopus Saving Sessions', gbp: 120, why: 'only run November to March' },
+  ],
+};
+
 async function loadDaily() {
   let files = [];
   try {
@@ -216,6 +231,13 @@ const days = sample ? sampleDays() : real;
 const ledger = await loadAxleLedger();
 const { monthly, totals } = aggregate(days, ledger);
 
+// Pace against the proposal, and what the current run rate implies for payback.
+// Both are honestly summer-weighted this early on — the pages say so.
+const elapsed = totals.days || 1;
+const proposalToDate = round2((PROPOSAL.year1_gbp * elapsed) / 365);
+const runRate = round2((totals.savings / elapsed) * 365);
+const unearnable = PROPOSAL.unearnable.reduce((s, u) => s + u.gbp, 0);
+
 const out = {
   meta: {
     sample,
@@ -223,6 +245,17 @@ const out = {
     payback_progress: Math.round(Math.min(1, Math.max(0, totals.savings / SYSTEM_COST_GBP)) * 1e5) / 1e5,
     axle_source: ledger ? 'ledger' : 'metered',
     axle_ledger_as_of: ledger?.as_of ?? null,
+    proposal: {
+      ...PROPOSAL,
+      unearnable_gbp: unearnable,
+      // what the proposal said we'd have banked by now
+      to_date_gbp: proposalToDate,
+      // ...and against the streams that are actually available to us today
+      to_date_earnable_gbp: round2(((PROPOSAL.year1_gbp - unearnable) * elapsed) / 365),
+      pace: proposalToDate > 0 ? Math.round((totals.savings / proposalToDate) * 1000) / 1000 : null,
+      run_rate_gbp: runRate,
+      payback_years_at_rate: runRate > 0 ? Math.round((SYSTEM_COST_GBP / runRate) * 10) / 10 : null,
+    },
     first_date: days[0]?.date ?? null,
     last_date: days[days.length - 1]?.date ?? null,
   },

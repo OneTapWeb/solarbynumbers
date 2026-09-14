@@ -72,35 +72,30 @@ const faqJsonLd = {
   description="Straight answers about a real UK solar and battery install: cost of a 10.45 kWp system, Aiko 475W east/west output, Sigenergy with Home Assistant and Predbat, Octopus Agile vs Flux, and publishing HA data automatically."
   jsonLd={faqJsonLd}
 >
-  <section class="reveal" style="padding-top:2.5rem">
-    <p class="kicker">Real answers, backed by the data on this site</p>
-    <h1>Frequently asked questions</h1>
-    <p style="max-width:46rem">
-      The questions we get asked most about this install. Cost, output, the Sigenergy and
-      Predbat setup, the Octopus tariff, and how the data ends up here. Every answer links to the
-      page with the full story and the numbers behind it.
+  <div class="page-head">
+    <h1>Questions we get asked</h1>
+    <p class="lede">
+      Mostly by neighbours, over a fence. Cost, output, the Sigenergy and Predbat setup, the
+      Octopus tariff, and how the data ends up here. Every answer links to the page with the full
+      story and the numbers behind it.
     </p>
-  </section>
+  </div>
 
-  <section class="reveal" style="margin-top:2.5rem">
+  <div class="qa">
     {faqs.map((f) => (
-      <div class="panel" style="margin-bottom:1.2rem">
-        <h2 style="margin-top:0; font-size:1.25rem">{f.q}</h2>
-        <p style="margin-bottom:0">{f.a}</p>
+      <div class="item">
+        <h2>{f.q}</h2>
+        <p>{f.a}</p>
         {f.link && (
-          <p class="muted" style="margin-top:0.8rem; margin-bottom:0">
-            <a href={f.link.href}>{f.link.label} →</a>
-          </p>
+          <p class="more"><a href={f.link.href}>{f.link.label} <span class="arrow">→</span></a></p>
         )}
       </div>
     ))}
-  </section>
+  </div>
 
-  <section class="reveal" style="margin-top:2rem">
-    <div class="note">
-      <p>Still curious? The <a href="/journey/">install diary</a> tells the story warts and all,
-      the <a href="/configs/">configs page</a> has the actual files, and the
-      <a href="/stats/">stats page</a> puts up every day's numbers automatically.</p>
-    </div>
-  </section>
+  <div class="note">
+    <p>Still curious? The <a href="/journey/">install diary</a> tells the story warts and all, the
+    <a href="/configs/">configs page</a> has the actual files, and the <a href="/stats/">stats
+    page</a> puts up every day's numbers automatically.</p>
+  </div>
 </Base>

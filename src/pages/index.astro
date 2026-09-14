@@ -1,133 +1,201 @@
 ---
 import Base from '../layouts/Base.astro';
 import stats from '../data/stats.json';
+import agile from '../../data/agile-profile.json';
+
+const lowSlot = Math.min(...(agile.slots as number[])).toFixed(0);
+const highSlot = Math.max(...(agile.slots as number[])).toFixed(0);
+
+const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
+const AXLE_REFERRAL = 'https://vpp.axle.energy/landing?ref=R-QADMOHUO';
+
+const t = stats.totals as Record<string, number>;
+const m = stats.meta as any;
+const prop = m.proposal;
 
 const last = stats.daily[stats.daily.length - 1];
 const e = last?.energy_kwh ?? {};
 const c = last?.cost_gbp ?? {};
-const saving = c.baseline_no_solar_cost != null && c.net_cost != null
-  ? (c.baseline_no_solar_cost - c.net_cost).toFixed(2)
+const daySaving = c.baseline_no_solar_cost != null && c.net_cost != null
+  ? c.baseline_no_solar_cost - c.net_cost
   : null;
 const lastDate = last
   ? new Date(last.date + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   : null;
-const pct = Math.round((stats.meta.payback_progress ?? 0) * 1000) / 10;
-const fmt = (v: number | null | undefined, dp = 1) => (v == null ? 'n/a' : v.toFixed(dp));
 
-const AXLE_REFERRAL = 'https://vpp.axle.energy/landing?ref=R-QADMOHUO';
-const axleTotals = stats.totals as Record<string, number>;
-const axleEarnings = axleTotals.axle_earnings ?? 0;
-const axleEvents = axleTotals.axle_events ?? 0;
-const axleTopups = axleTotals.axle_topups ?? 0;
+const fmt = (v: number | null | undefined, dp = 1) => (v == null ? 'n/a' : v.toFixed(dp));
+// Split a money figure so the pence can be set small, the way a printed table would.
+const money = (v: number) => {
+  const [pounds, pence] = v.toFixed(2).split('.');
+  return { pounds: Number(pounds).toLocaleString('en-GB'), pence };
+};
+
+const saved = money(t.savings ?? 0);
+const pctRecovered = ((m.payback_progress ?? 0) * 100).toFixed(1);
+const pacePct = Math.round((prop.pace ?? 0) * 100);
+// the honest comparison: against the streams we can actually earn today
+const earnablePace = prop.to_date_earnable_gbp > 0
+  ? Math.round(((t.savings ?? 0) / prop.to_date_earnable_gbp) * 100)
+  : null;
+// marker position for where the proposal said we'd be, on the same £0–£11,999 scale
+const markerPct = (prop.to_date_gbp / m.system_cost_gbp) * 100;
+const dayNo = t.days;
+
+const axleEarnings = t.axle_earnings ?? 0;
+const axleEvents = t.axle_events ?? 0;
+const axleTopups = t.axle_topups ?? 0;
 const axleFromEvents = axleEarnings - axleTopups;
 ---
 
 <Base title="Real UK solar & battery data, published daily">
-  <section class="reveal" style="padding-top:2.5rem">
-    <p class="kicker">22 panels · 15 kWh battery · Hampshire, UK</p>
-    <h1>One roof.<br />Every number published.</h1>
-    <p style="max-width:46rem; font-size:1.1rem">
-      This is our own solar and battery setup on a fairly ordinary UK house, and really it's just a
-      place to track one thing: how quickly it pays back, and whether real life keeps pace with the
-      proposal's estimate. So
-      every day's numbers go up here automatically, straight off the inverter, cloudy days and all.
-      It's all run with <a href="/stack/">Home Assistant and Predbat</a>, and the
+  <section>
+    <p class="kicker">22 panels · 15 kWh battery · Hampshire</p>
+
+    <div class="card" style="margin-top:0.8rem">
+      <div class="card-head">
+        <h2>Payback so far</h2>
+        <span class="meta">day {dayNo} · £{m.system_cost_gbp.toLocaleString('en-GB')} system</span>
+      </div>
+
+      <div class="split">
+        <div>
+          <span class="figure hero accent">£{saved.pounds}<span class="minor">.{saved.pence}</span></span>
+          <p style="margin-top:1rem; max-width:24rem">
+            Saved against what the same usage would have cost with no solar and no battery.
+            Measured every night, straight off the inverter.
+          </p>
+        </div>
+
+        <div>
+          <div class="pay-bar">
+            <div class="ends"><span>£0</span><span>£{m.system_cost_gbp.toLocaleString('en-GB')}</span></div>
+            <div class="track">
+              <div class="fill" style={`width:${Math.max(Number(pctRecovered), 0.4)}%`}></div>
+              <div class="marker" style={`left:${markerPct}%`} title="where the proposal said we'd be by now"></div>
+            </div>
+            <div class="legend">
+              <span><b>{pctRecovered}%</b> recovered</span>
+              <span class="pace">proposal pace: <b>{(markerPct).toFixed(1)}%</b></span>
+            </div>
+          </div>
+
+          <div class="tiles three" style="margin-top:1.4rem; border-radius:8px">
+            <div>
+              <p class="kicker">Vs proposal</p>
+              <span class="figure md">{pacePct}%</span>
+              <p class="note-line">of its projected pace</p>
+            </div>
+            <div>
+              <p class="kicker">Like for like</p>
+              <span class="figure md">{earnablePace}%</span>
+              <p class="note-line">minus what we can't earn yet</p>
+            </div>
+            <div>
+              <p class="kicker">At this rate</p>
+              <span class="figure md">{prop.payback_years_at_rate}<span class="unit">yr</span></span>
+              <p class="note-line">vs {prop.payback_years} quoted</p>
+            </div>
+          </div>
+
+          <p style="margin-top:1rem; font-size:0.88rem">
+            <a href="/stats/">Full charts <span class="arrow">→</span></a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>Yesterday</h2>
+    <span class="meta">{lastDate} {m.sample && <span class="badge-sample">demo data</span>}</span>
+  </div>
+
+  <div class="tiles">
+    <div>
+      <p class="kicker">Generated</p>
+      <span class="figure lg">{fmt(e.pv_generation)}<span class="unit">kWh</span></span>
+    </div>
+    <div>
+      <p class="kicker">Exported</p>
+      <span class="figure lg">{fmt(e.grid_export)}<span class="unit">kWh</span></span>
+      <p class="note-line">awaiting export certification</p>
+    </div>
+    <div>
+      <p class="kicker">Imported</p>
+      <span class="figure lg">{fmt(e.grid_import)}<span class="unit">kWh</span></span>
+    </div>
+    <div>
+      <p class="kicker">Day's saving</p>
+      <span class="figure lg accent">{daySaving == null ? 'n/a' : `£${daySaving.toFixed(2)}`}</span>
+      <p class="note-line">vs a no-solar baseline</p>
+    </div>
+  </div>
+
+  <div class="cols-2" style="margin-top:1rem">
+    <div class="card dark referral">
+      <p class="kicker"><img src="/axle-logo-black.png" alt="Axle" class="axle-logo-inline" style="filter:brightness(0) invert(1); opacity:0.75" /> VPP earnings · grid events</p>
+      <span class="figure lg">£{axleEarnings.toFixed(2)}</span>
+      <p style="margin-top:0.6rem">
+        £{axleFromEvents.toFixed(2)} paid for {axleEvents} grid-balancing {axleEvents === 1 ? 'event' : 'events'} at
+        £1/kWh{axleTopups > 0 ? `, plus £${axleTopups.toFixed(2)} topping quiet months up to the £10 minimum` : ''}.
+        Straight from Axle's ledger, not our meter's guess —
+        <a href="/stats/#axle">they differ</a>.
+      </p>
+      <div class="cta">
+        <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><img src="/axle-logo-black.png" alt="Axle" class="axle-mark" /> £25 referral</a>
+        <p class="fine">Got a battery? We both get £25.</p>
+      </div>
+    </div>
+
+    <div class="card referral">
+      <p class="kicker">Tariff · Octopus Agile</p>
+      <span class="figure lg">{agile.mean_p_per_kwh}<span class="unit">p avg</span></span>
+      <p style="margin-top:0.6rem">
+        Half-hourly import on Agile — <a href="/tariff/">{lowSlot}p in the small hours, {highSlot}p
+        at the evening peak</a> — with fixed 12p export lined up for the day certification lands.
+        Until then the surplus goes to the grid for nothing,
+        <a href="/stats/">£{(t.foregone_export_gbp ?? 0).toFixed(0)} of it so far</a>.
+      </p>
+      <div class="cta">
+        <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> £50 referral</a>
+        <p class="fine">Switching? We both get £50.</p>
+      </div>
+    </div>
+  </div>
+
+  <section style="margin-top:3rem">
+    <h2>One roof, every number published</h2>
+    <p class="lede">
+      An ordinary UK house with a £12k punt on its roof. A punt that size deserves an honest
+      scoreboard, so rather than take the proposal's payback estimate on trust we publish the real
+      figures every night — cloudy days and all. It's all run with
+      <a href="/stack/">Home Assistant and Predbat</a>, and the
       <a href="/configs/">config files</a> that make it work are public too, in case they save
       someone else the faff.
     </p>
-  </section>
 
-  <section class="reveal" style="margin-top:3rem">
-    <div class="panel ticks">
-      <p class="kicker" style="margin-bottom:1.2rem">
-        Yesterday · {lastDate}
-        {stats.meta.sample && <span class="badge-sample">demo data</span>}
-      </p>
-      <div class="grid-4">
-        <div class="stat gen">
-          <span class="stat-label">Generated</span>
-          <span class="stat-value">{fmt(e.pv_generation)}<span class="unit">kWh</span></span>
-        </div>
-        <div class="stat exp">
-          <span class="stat-label">Exported</span>
-          <span class="stat-value">{fmt(e.grid_export)}<span class="unit">kWh</span></span>
-        </div>
-        <div class="stat imp">
-          <span class="stat-label">Imported</span>
-          <span class="stat-value">{fmt(e.grid_import)}<span class="unit">kWh</span></span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Day's saving</span>
-          <span class="stat-value">{saving == null ? 'n/a' : `£${saving}`}</span>
-          <span class="stat-sub">vs no-solar baseline</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="reveal" style="margin-top:2.2rem">
-    <div class="panel">
-      <p class="kicker">Payback progress · £{stats.meta.system_cost_gbp.toLocaleString('en-GB')} system</p>
-      <div class="payback">
-        <div class="track"><div class="fill" style={`width:${Math.max(pct, 0.5)}%`}></div></div>
-        <div class="scale">
-          <span>£0</span>
-          <span class="num" style="color:var(--amber)">£{(stats.totals.savings ?? 0).toLocaleString('en-GB')} saved · {pct}%</span>
-          <span>£{stats.meta.system_cost_gbp.toLocaleString('en-GB')}</span>
-        </div>
-      </div>
-      <p class="muted">A running total of savings against what the same usage would have cost with no solar or battery, tracked every day since commissioning. <a href="/stats/">Full charts →</a></p>
-    </div>
-  </section>
-
-  <section class="reveal" style="margin-top:2.2rem">
-    <div class="panel axle-tracker">
-      <div class="axle-tracker-fig">
-        <img src="/axle-logo-black.png" alt="Axle" class="axle-logo-inline" style="height:1.5em; margin-bottom:0.5rem; display:block" />
-        <p class="kicker">VPP earnings · grid-balancing events</p>
-        <span class="stat-value">£{axleEarnings.toFixed(2)}</span>
-        <p class="muted" style="margin-top:0.4rem">
-          {axleEvents === 0
-            ? 'Signed up June 2026, no grid events dispatched yet. The £10/month minimum kicks in once they start.'
-            : `£${axleFromEvents.toFixed(2)} paid for ${axleEvents} grid event${axleEvents === 1 ? '' : 's'} at £1/kWh${axleTopups > 0 ? `, plus £${axleTopups.toFixed(2)} of top-ups to the £10/month minimum` : ''}`}
-        </p>
-        <p class="muted" style="margin-top:0.2rem; font-size:0.8rem">
-          Taken from Axle's own settled ledger, not our meter's guess. <a href="/stats/#axle">Why they differ →</a>
-        </p>
-      </div>
-      <div class="axle-tracker-cta">
-        <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><img src="/axle-logo-black.png" alt="Axle" class="axle-mark" /> £25 referral</a>
-        <p class="muted" style="margin-top:0.6rem; font-size:0.8rem">Got a battery? We both get £25.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="reveal" style="margin-top:3.5rem">
-    <h2>What's here</h2>
-    <div class="grid-3" style="margin-top:1.2rem">
-      <div class="panel">
+    <div class="cols-3" style="margin-top:1.4rem">
+      <div class="card">
+        <p class="kicker accent">Hardware</p>
         <h3 style="margin-top:0">The system</h3>
-        <p>22 Aiko 475W panels on an east/west roof, a Sigenergy hybrid inverter and 15.06 kWh of battery. £11,999 fully installed. <a href="/system/">Specs & warranties →</a></p>
+        <p>22 Aiko 475W panels on an east/west roof, a Sigenergy hybrid inverter and 15.06 kWh of
+        battery. £11,999 fully installed.</p>
+        <p style="font-size:0.88rem"><a href="/system/">Specs &amp; warranties <span class="arrow">→</span></a></p>
       </div>
-      <div class="panel">
+      <div class="card">
+        <p class="kicker accent">Software</p>
         <h3 style="margin-top:0">The brain</h3>
-        <p>Home Assistant on a £50 second-hand Dell, with Predbat planning every half hour against Octopus Agile prices and a Solcast forecast. <a href="/stack/">How it works →</a></p>
+        <p>Home Assistant on a £50 second-hand Dell, with Predbat planning every half hour against
+        Agile prices and a Solcast forecast.</p>
+        <p style="font-size:0.88rem"><a href="/stack/">How it works <span class="arrow">→</span></a></p>
       </div>
-      <div class="panel">
+      <div class="card">
+        <p class="kicker accent">Copy them</p>
         <h3 style="margin-top:0">The configs</h3>
-        <p>The <code>apps.yaml</code>, automations and helpers that run this Sigenergy and Predbat setup. Sanitised, annotated and free to copy. <a href="/configs/">Help yourself →</a></p>
+        <p>The <code>apps.yaml</code>, automations and helpers that run this Sigenergy and Predbat
+        setup. Sanitised, annotated, free to take.</p>
+        <p style="font-size:0.88rem"><a href="/configs/">Help yourself <span class="arrow">→</span></a></p>
       </div>
-    </div>
-  </section>
-
-  <section class="reveal" style="margin-top:3rem">
-    <div class="note">
-      <p><strong>Why bother with all this?</strong> Honestly, it's mostly for us. A £12k punt
-      deserves an honest scoreboard, so rather than take the proposal's payback estimate on trust we
-      wanted to track how quickly it really pays back, day by day, against that projection. The
-      Predbat-and-Sigenergy setup took enough trial and error that we've put the configs up too, in
-      case they save someone else some of it. Start with the
-      <a href="/journey/">install diary</a>.</p>
     </div>
   </section>
 </Base>

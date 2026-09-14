@@ -25,10 +25,10 @@ const jsonLd = {
 ---
 
 <Base title={post.data.title} description={post.data.summary} ogType="article" jsonLd={jsonLd}>
-  <article class="reveal" style="max-width:46rem">
+  <article style="max-width:40rem">
     <p class="kicker">{fmtDate(post.data.date)}</p>
-    <h1 style="font-size:clamp(2rem,5vw,3rem)">{post.data.title}</h1>
-    <div style="margin-top:1.5rem">
+    <h1>{post.data.title}</h1>
+    <div style="margin-top:1.4rem">
       <Content />
     </div>
     <hr />
