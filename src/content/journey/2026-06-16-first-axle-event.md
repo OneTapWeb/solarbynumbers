@@ -23,6 +23,21 @@ on metered export, and our meter and theirs agree to the penny. It's now showing
 [stats page](/stats/) and homepage — and from here on, every event auto-publishes from our own
 meter the same night, no waiting on the email.
 
+> **Later note, 14 September 2026.** That last paragraph was too confident, and we're leaving it
+> up rather than quietly editing it. One event agreeing to the penny is not a rule. Across the
+> first twelve events our meter totalled **£76.63** while Axle actually paid **£82.51** — they
+> settle on their own metering a day or so later, and per event the two disagree by a few percent
+> in both directions (11 August: our £14.33 against their £13.19). Our figure also can't see the
+> monthly top-ups that bring a quiet month up to the £10 minimum, which are £13.12 of that gap.
+>
+> The worst case was **6 September**. The Axle API key had silently expired, so Predbat never saw
+> the event coming and the battery went into it at 2.9%. Our meter dutifully logged 0.43 kWh
+> trickling out and called it 43p. Axle paid **£0.00**.
+>
+> So the site no longer publishes our estimate. The headline VPP figure now comes from Axle's own
+> settled ledger, and the [stats page](/stats/#axle) shows both numbers side by side, because the
+> gap between what you measure and what you get paid is worth seeing.
+
 No drama, and the dispatch itself needed no help from us. The battery was already full because
 Predbat routinely charges it for the evening peak, so there was plenty to give.
 

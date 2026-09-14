@@ -81,6 +81,19 @@ ul, ol { margin: 0.7rem 0 0.7rem 1.3rem; color: var(--ink-600); }
 li { margin: 0.28rem 0; }
 hr { border: none; border-top: 1px solid var(--rule); margin: 2.4rem 0; }
 
+/* diary addenda: a later correction set apart from the entry it amends,
+   so the original record stays legible as what we thought at the time */
+blockquote {
+  border-left: 2px solid var(--ink-400);
+  background: var(--tile);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.9rem 1.2rem;
+  margin: 1.4rem 0;
+  font-size: 0.93rem;
+}
+blockquote > :first-child { margin-top: 0; }
+blockquote > :last-child { margin-bottom: 0; }
+
 .lede { max-width: 34rem; }
 
 /* small mono label — no rules, no colour, just set small and wide */
