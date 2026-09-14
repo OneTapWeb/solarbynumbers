@@ -1,0 +1,57 @@
+{
+  "_comment": "MODELLED projection, not measured data. The car is not metered separately from the house, so annual mileage, efficiency and charging losses are estimates. The baseline is the two cars actually replaced, at real-world economy rather than manufacturer figures, and at UK average pump prices as of September 2026. Replace with measured figures once a full year of charging is logged and mark measured:true.",
+  "measured": false,
+  "as_of": "2026-09-14",
+  "pump_prices_as_of": "2026-09",
+  "car": {
+    "model": "Skoda Enyaq",
+    "bought": "2026-07-16",
+    "battery_kwh_usable": 77
+  },
+  "replaced": {
+    "note": "Two cars, roughly half the mileage each. The Enyaq is now the only car.",
+    "cars": [
+      { "model": "2017 Nissan Qashqai 1.6 DIG-T", "fuel": "petrol", "mpg_real": 36, "price_per_litre": 1.67, "share": 0.5, "pence_per_mile": 21.1, "annual_if_all_miles": 2109 },
+      { "model": "2015 Citroen C4", "fuel": "diesel", "mpg_real": 56, "price_per_litre": 1.89, "share": 0.5, "pence_per_mile": 15.3, "annual_if_all_miles": 1534 }
+    ],
+    "blended_pence_per_mile": 18.2,
+    "blended_annual_gbp": 1822
+  },
+  "use": {
+    "miles_per_year": 10000,
+    "miles_per_kwh": 3.4,
+    "charging_efficiency": 0.9,
+    "kwh_to_battery": 2941,
+    "kwh_from_meter": 3268
+  },
+  "cost_per_mile_p": {
+    "iog_night": 2.49,
+    "solar_surplus_opportunity": 3.92,
+    "standard_flat": 7.64,
+    "day_rate": 10.81,
+    "diesel_c4": 15.3,
+    "blended_baseline": 18.2,
+    "petrol_qashqai": 21.1
+  },
+  "annual_gbp": {
+    "ev_on_iog_night": 249,
+    "ev_on_standard_flat": 764,
+    "fuel_baseline": 1822,
+    "saving_from_going_electric": 1058,
+    "saving_from_the_tariff": 515,
+    "saving_total": 1573
+  },
+  "fuel_sensitivity": {
+    "_note": "annual cost GBP for 10,000 miles if pump prices rise from the Sept 2026 baseline of 167p petrol / 189p diesel",
+    "scenarios": [
+      { "label": "today", "multiplier": 1.0 },
+      { "label": "+10%", "multiplier": 1.1 },
+      { "label": "+20%", "multiplier": 1.2 }
+    ],
+    "rows": [
+      { "what": "All miles in the Qashqai", "cost": [2109, 2320, 2531] },
+      { "what": "All miles in the C4", "cost": [1534, 1688, 1841] },
+      { "what": "Our actual 50/50 split", "cost": [1822, 2004, 2186] }
+    ]
+  }
+}

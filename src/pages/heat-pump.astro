@@ -1,0 +1,247 @@
+---
+import Base from '../layouts/Base.astro';
+import hp from '../../data/heat-pump.json';
+
+const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
+
+const { hardware, cost, demand, annual_gbp: a, payback_years: p, sensitivity: s } = hp;
+const gbp = (n: number) => `£${Math.round(n).toLocaleString('en-GB')}`;
+const netCapital = cost.paid_gbp - cost.avoided_boiler_gbp;
+const gasBill = a.with_gas_gas + a.with_gas_standing;
+
+// shade the sensitivity grid: pale where the sum barely works, ink where it clearly does
+const allSavings = s.rows.flatMap((r: any) => r.saving);
+const lo = Math.min(...allSavings);
+const hi = Math.max(...allSavings);
+const shade = (v: number) => {
+  const k = (v - lo) / (hi - lo);
+  if (k > 0.72) return '#5b83e6';
+  if (k > 0.45) return '#9ab4f2';
+  if (k > 0.22) return '#c9d8f8';
+  return '#e8eefc';
+};
+const ink = (v: number) => ((v - lo) / (hi - lo) > 0.72 ? '#fff' : 'inherit');
+---
+
+<Base
+  title="The heat pump"
+  description="A 19-year-old gas boiler replaced by an Octopus Cosy 9 air source heat pump in December 2026. What it actually saves once you count the extra electricity, modelled honestly against a rising gas price."
+>
+  <div class="page-head">
+    <h1>The heat pump</h1>
+    <p class="lede">
+      The gas boiler is 19 years old, heat-only, and living in a garage we're converting into an
+      office. It owes us nothing. In <strong>December 2026</strong> an
+      <strong>Octopus Cosy 9</strong> replaces it, the gas meter comes out, and the house goes
+      fully electric. This page is the sum we did first, including the part most heat pump
+      arithmetic quietly skips.
+    </p>
+  </div>
+
+  <div class="note warn">
+    <p><strong>Everything on this page is modelled, not measured.</strong> The install hasn't
+    happened yet. Heat demand comes from our own historic gas meter readings, and the efficiency
+    figure is the manufacturer's at the quoted flow temperature. Unlike the
+    <a href="/stats/">stats</a>, none of it is real yet. We'll replace it with measured numbers
+    after the first winter, and you'll be able to see how wrong we were.</p>
+  </div>
+
+  <div class="tiles" style="margin-top:1.4rem">
+    <div>
+      <p class="kicker">What we pay</p>
+      <span class="figure md">{gbp(cost.paid_gbp)}</span>
+      <p class="note-line">after the {gbp(cost.bus_grant_gbp)} grant</p>
+    </div>
+    <div>
+      <p class="kicker">Heat needed</p>
+      <span class="figure md">{(demand.heat_kwh / 1000).toFixed(0)}<span class="unit">MWh/yr</span></span>
+      <p class="note-line">space + hot water</p>
+    </div>
+    <div>
+      <p class="kicker">Gas bill removed</p>
+      <span class="figure md">{gbp(gasBill)}</span>
+      <p class="note-line">unit cost + standing charge</p>
+    </div>
+    <div>
+      <p class="kicker">Actual saving</p>
+      <span class="figure md accent">{gbp(a.saving)}<span class="unit">/yr</span></span>
+      <p class="note-line">after the new electricity</p>
+    </div>
+  </div>
+
+  <div class="section-head"><h2>The trap in the middle</h2></div>
+  <p class="lede">
+    Losing a {gbp(gasBill)} gas bill is not the same as saving {gbp(gasBill)}. The heat pump has to
+    make that heat out of electricity, and that's
+    {' '}<strong>{demand.hp_electricity_kwh.toLocaleString('en-GB')} kWh</strong> of new demand
+    landing mostly in the four coldest months. Once you price it, roughly two thirds of the gas
+    saving gets spent again.
+  </p>
+
+  <div class="cols-2">
+    <div class="card">
+      <p class="kicker">Keep the gas boiler</p>
+      <div class="ledger" style="margin-top:0.6rem">
+        <div class="row"><span class="k">Electricity</span><span class="v">{gbp(a.with_gas_electricity)}</span></div>
+        <div class="row"><span class="k">Gas · {demand.gas_now_kwh.toLocaleString('en-GB')} kWh</span><span class="v">{gbp(a.with_gas_gas)}</span></div>
+        <div class="row"><span class="k">Gas standing charge</span><span class="v">{gbp(a.with_gas_standing)}</span></div>
+        <div class="row"><span class="k"><strong>Total</strong></span><span class="v"><strong>{gbp(a.with_gas_total)}</strong></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="kicker">Heat pump, no gas at all</p>
+      <div class="ledger" style="margin-top:0.6rem">
+        <div class="row"><span class="k">Electricity</span><span class="v">{gbp(a.with_hp_total)}</span></div>
+        <div class="row"><span class="k">Gas</span><span class="v">£0</span></div>
+        <div class="row"><span class="k">Gas standing charge</span><span class="v">£0</span></div>
+        <div class="row"><span class="k"><strong>Total</strong></span><span class="v"><strong>{gbp(a.with_hp_total)}</strong></span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="lede" style="margin-top:1.2rem">
+    <strong>{gbp(a.saving)} a year.</strong> A real saving, and a much smaller one than the
+    brochure number. Anyone quoting you a heat pump saving that looks suspiciously like your whole
+    gas bill has forgotten to add the electricity back on.
+  </p>
+
+  <div class="section-head"><h2>So what's the payback?</h2></div>
+  <p class="lede">
+    It depends entirely on what you think the alternative was, and this is where most published
+    paybacks quietly pick the flattering one.
+  </p>
+
+  <table class="spec">
+    <tbody>
+      <tr>
+        <td>{p.raw} years</td>
+        <td><strong>If the old boiler would have run forever, free.</strong> {gbp(cost.paid_gbp)}
+        divided by {gbp(a.saving)}. This is the honest headline number, and it isn't thrilling.</td>
+      </tr>
+      <tr>
+        <td>{p.net_of_boiler} years</td>
+        <td><strong>If you net off the boiler you'd have bought anyway.</strong> Ours is 19 years
+        old and heat-only. A like-for-like replacement is around {gbp(cost.avoided_boiler_gbp)} and
+        was coming within a few years regardless, so only {gbp(netCapital)} of this spend is truly
+        extra.</td>
+      </tr>
+      <tr>
+        <td>~{p.realistic} years</td>
+        <td><strong>What we actually believe.</strong> The boiler replacement wasn't due today, it
+        was due at some uncertain point over the next few years. Money spent now to dodge a cost in
+        year four isn't a pound-for-pound offset. Discount it sensibly and you land here.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <p><strong>We're quoting the middle number, not the best one.</strong> It would be easy to
+    publish {p.net_of_boiler} years and let it stand. But the avoided boiler is a cost we hadn't
+    paid yet, and treating a future maybe as cash in hand is exactly how payback figures get
+    inflated. Roughly five years is the number we'd defend.</p>
+  </div>
+
+  <div class="section-head"><h2>The gas price does the heavy lifting</h2></div>
+  <p class="lede">
+    Our gas is fixed at <strong>{s.rows[0].gas_p}p/kWh</strong> until March 2027, which is a low
+    rate by recent standards, and wholesale gas has been climbing again. That fix is the main
+    reason the saving looks modest today. Here's the same sum across plausible gas prices and
+    real-world efficiencies. Our assumed case is the top-left corner, and almost every other
+    square is better.
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Gas price</th>
+          {s.scop.map((sc: number) => <th>SCOP {sc.toFixed(1)}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {s.rows.map((r: any) => (
+          <tr>
+            <td>
+              <strong>{r.gas_p.toFixed(2)}p</strong>
+              {r.label ? <span class="muted"> · {r.label}</span> : null}
+            </td>
+            {r.saving.map((v: number) => (
+              <td style={`background:${shade(v)}; color:${ink(v)}; font-family:var(--mono); font-size:0.82rem`}>
+                {gbp(v)}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="lede">
+    At 8p gas, not a wild guess for a twenty-year asset, the saving is
+    {' '}{gbp(s.rows[2].saving[1])} a year and the raw payback drops under six years. A heat pump
+    is, among other things, a hedge against the gas price. Keeping the boiler is a bet that gas
+    stays cheap.
+  </p>
+
+  <div class="section-head"><h2>Flow temperature is the free money</h2></div>
+  <p class="lede">
+    Octopus's standard install commissions at <strong>{hardware.flow_temp_c}°C</strong>, which is
+    quick to fit and kind to the radiator schedule, but costs efficiency forever. The Cosy 9 does
+    SCOP 3.6 at 50°C and drifts toward 3.0 as you push it to 65°C. Reading across the grid above,
+    moving from SCOP 3.0 to 3.6 is worth about
+    {' '}{gbp(s.rows[0].saving[2] - s.rows[0].saving[0])} a year at our gas price, and more as gas
+    rises. It costs nothing but an afternoon of tuning and a willingness to live with longer run
+    times. We're doing it in spring, not during a December commissioning, because that's the wrong
+    month to discover you've gone too far.
+  </p>
+
+  <div class="section-head"><h2>It only works because of everything else</h2></div>
+  <p class="lede">
+    This part is worth being blunt about. That {gbp(a.saving)} is not what a heat pump saves a
+    typical house. It's what one saves <em>here</em>, because
+    {' '}{demand.hp_electricity_kwh.toLocaleString('en-GB')} kWh of new winter demand lands on a
+    house with 10.45 kWp of panels, a 15 kWh battery and an overnight rate under 8p. Drop the same
+    machine into a home on a flat tariff with no battery and it roughly breaks even against gas.
+  </p>
+
+  <div class="note quiet">
+    <p><strong>The same house with no solar and no battery</strong>, running this heat pump and the
+    car on the same tariff, would pay about <strong>{gbp(a.no_solar_no_battery)}</strong> a year
+    for electricity, because nothing could be shifted into the cheap window. The panels, the
+    battery and the tariff are what turn a break-even heat pump into a paying one. See
+    {' '}<a href="/tariff/">the tariff</a> for why that window matters so much, and
+    {' '}<a href="/ev/">the car</a> for the other half of the electrification bill.</p>
+  </div>
+
+  <div class="section-head"><h2>The kit</h2></div>
+  <table class="spec">
+    <tbody>
+      <tr><td>Unit</td><td>{hardware.model} monobloc, {hardware.refrigerant} (propane) refrigerant, with a global warming potential of 3 against 675 for the R32 alternative we were also quoted.</td></tr>
+      <tr><td>Sized for</td><td>{hardware.heat_loss_kw} kW surveyed heat loss. The Cosy 9 covers up to 8.7 kW at 50°C flow.</td></tr>
+      <tr><td>Cylinder</td><td>{hardware.cylinder_litres} L slimline unvented, replacing the old vented tank. The loft header tank comes out with it.</td></tr>
+      <tr><td>Radiators</td><td>{hardware.radiators_upgraded} upgraded to type 22 K2, included in the fixed price. The rest of the house keeps what it has.</td></tr>
+      <tr><td>Underfloor</td><td>Already there, already decommissioned from gas, reconnected as part of the install. It runs happily at low flow temperatures, and it's the one part of the house the heat pump will suit perfectly.</td></tr>
+      <tr><td>Price</td><td>{gbp(cost.list_gbp)} list, less the {gbp(cost.bus_grant_gbp)} Boiler Upgrade Scheme grant that Octopus claim on our behalf, leaving {gbp(cost.paid_gbp)}.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card referral" style="margin-top:1.4rem">
+    <p class="kicker">Thinking of switching?</p>
+    <h2 style="margin:0.2rem 0 0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
+    <p>No sponsors on this site. The referral links are the only money it makes, and they pay you
+    exactly what they pay us. You don't need solar or a heat pump, any tariff counts.</p>
+    <div class="cta">
+      <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> Claim £50</a>
+      <p class="fine mono">share.octopus.energy/lush-spark-49</p>
+    </div>
+  </div>
+
+  <div class="section-head"><h2>What we'll know in March</h2></div>
+  <p class="lede">
+    Three numbers on this page are guesses, and they're the three that matter. Heat demand is
+    inferred from gas readings rather than measured at the emitter. SCOP is a manufacturer figure,
+    not our house in a cold snap. And the gas price we're comparing against is frozen until March
+    2027 at a rate we won't see again. One real January fixes all three, and we'll publish the
+    corrected sum whichever way it falls.
+  </p>
+</Base>
