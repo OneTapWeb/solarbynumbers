@@ -27,27 +27,27 @@
     "boiler_efficiency": 0.9
   },
   "annual_gbp": {
-    "with_gas_electricity": 278,
+    "with_gas_electricity": 2,
     "with_gas_gas_fixed": 1102,
-    "with_gas_gas_market": 1305,
+    "with_gas_gas_market": 1306,
     "with_gas_standing": 121,
-    "with_gas_total_fixed": 1501,
-    "with_gas_total_market": 1704,
-    "with_hp_total": 1078,
-    "saving_at_fixed_gas": 423,
-    "saving_at_market_gas": 626,
-    "no_solar_no_battery": 3399
+    "with_gas_total_fixed": 1225,
+    "with_gas_total_market": 1429,
+    "with_hp_total": 591,
+    "saving_at_fixed_gas": 634,
+    "saving_at_market_gas": 838,
+    "no_solar_no_battery": 3458
   },
   "payback_years": {
     "at_market": {
-      "raw": 7,
-      "net_of_boiler": 2.2,
-      "realistic": 3.6
+      "raw": 5.2,
+      "net_of_boiler": 1.6,
+      "realistic": 2.7
     },
     "at_fixed": {
-      "raw": 10.4,
-      "net_of_boiler": 3.3,
-      "realistic": 5.3
+      "raw": 6.9,
+      "net_of_boiler": 2.2,
+      "realistic": 3.5
     }
   },
   "sensitivity": {
@@ -63,50 +63,50 @@
         "gas_p": 6.24,
         "label": "our fix, until Mar 2027",
         "saving": [
-          341,
-          423,
-          496,
-          539
+          566,
+          634,
+          688,
+          718
         ]
       },
       {
         "gas_p": 7.39,
         "label": "market today",
         "saving": [
-          545,
-          626,
-          699,
-          743
+          769,
+          838,
+          892,
+          921
         ]
       },
       {
         "gas_p": 8,
         "label": "",
         "saving": [
-          653,
-          734,
-          807,
-          851
+          877,
+          945,
+          999,
+          1029
         ]
       },
       {
         "gas_p": 9,
         "label": "",
         "saving": [
-          829,
-          910,
-          984,
-          1027
+          1054,
+          1122,
+          1176,
+          1205
         ]
       },
       {
         "gas_p": 10,
         "label": "",
         "saving": [
-          1006,
-          1087,
-          1160,
-          1204
+          1230,
+          1299,
+          1353,
+          1382
         ]
       }
     ]

@@ -46,11 +46,45 @@
   "comparison": {
     "_note": "modelled annual net cost GBP with heat pump and EV both running, export at 12p, electricity VAT at 0%",
     "rows": [
-      { "name": "Agile import", "net": 980, "blended_p": 12.6, "verdict": "cheapest on paper, on last year's prices" },
-      { "name": "Intelligent Octopus Go", "net": 1078, "blended_p": 14.8, "verdict": "our pick", "chosen": true },
-      { "name": "Octopus Go (5h)", "net": 1203, "blended_p": 16.4, "verdict": "shorter window, dearer rate" },
-      { "name": "Cosy Octopus", "net": 1506, "blended_p": 20.7, "verdict": "the heat pump tariff, and it loses" },
-      { "name": "Our 12M Fixed today", "net": 1692, "blended_p": 23.4, "verdict": "doing nothing", "current": true }
+      {
+        "name": "Intelligent Octopus Go",
+        "net": 591,
+        "blended_p": 9.4,
+        "verdict": "our pick",
+        "chosen": true
+      },
+      {
+        "name": "Octopus Go (5h)",
+        "net": 775,
+        "blended_p": 11.2,
+        "verdict": "shorter window, dearer rate"
+      },
+      {
+        "name": "Agile import",
+        "net": 946,
+        "blended_p": 12.6,
+        "verdict": "loses once the battery can fill overnight"
+      },
+      {
+        "name": "Cosy Octopus",
+        "net": 1123,
+        "blended_p": 14.8,
+        "verdict": "the heat pump tariff, and it loses"
+      },
+      {
+        "name": "Our 12M Fixed today",
+        "net": 1692,
+        "blended_p": 23.4,
+        "verdict": "doing nothing",
+        "current": true
+      }
     ]
+  },
+  "export_comparison": {
+    "outgoing_fixed_12p": 488,
+    "agile_outgoing": 314,
+    "agile_achieved_p": 7.7,
+    "export_kwh": 4067,
+    "import_kwh": 9687
   }
 }

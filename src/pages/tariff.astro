@@ -150,13 +150,13 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
   </table>
 
   <div class="note">
-    <p><strong>Agile came out cheaper, and we're not taking it.</strong> On a full year of real
-    published prices Agile models {gbp(chosen.net - cmp.rows[0].net)} a year better than
-    Intelligent Octopus Go. That margin is inside the error bars: it rests on last year's price
-    shape, Agile's standing charge is higher, and Octopus is currently only offering fixed products
-    while citing volatility. A guaranteed {plan.night_p}p for six hours is worth more to us than a
-    modelled {gbp(chosen.net - cmp.rows[0].net)} — especially with a heat pump arriving that has to
-    get through January whatever the wholesale market does.</p>
+    <p><strong>Agile used to look cheaper, and doesn't any more.</strong> An earlier version of
+    this page said Agile modelled about £100/yr better than Intelligent Octopus Go. That was a bug
+    in our own model: the battery's charging logic stopped looking ahead as soon as it hit another
+    equally-cheap half hour, so inside a flat six-hour window it never actually filled up. Fixing it
+    changed the answer. With the battery properly charged overnight, a guaranteed six hours at
+    {plan.night_p}p beats Agile's average by {gbp(cmp.rows[2].net - chosen.net)} a year, and the
+    expensive day rate stops mattering nearly as much.</p>
   </div>
 
   <div class="note quiet">
@@ -249,7 +249,7 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
   <div class="section-head"><h2>Why we keep the boring 12p export</h2></div>
   <p class="lede">
     Agile Outgoing does half-hourly export pricing, uncapped, with no exit fees. We modelled a full
-    year of real rates against our own generation: flat 12p wins by around £110 a year. Only the
+    year of real rates against our own generation: flat 12p returns {gbp(t.export_comparison.outgoing_fixed_12p)} against {gbp(t.export_comparison.agile_outgoing)} for Agile Outgoing, which achieves only {t.export_comparison.agile_achieved_p}p. Flat 12p wins by {gbp(t.export_comparison.outgoing_fixed_12p - t.export_comparison.agile_outgoing)} a year. Only the
     16:00–19:00 window beats 12p, while this high-generation, low-consumption house floods the grid
     at midday when Agile export pays 5–7p. The heat pump makes that verdict stronger, not weaker —
     it eats the shoulder-season surplus that Agile Outgoing pays best for, leaving the midday
