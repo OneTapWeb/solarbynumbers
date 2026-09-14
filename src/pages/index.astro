@@ -15,8 +15,11 @@ const pct = Math.round((stats.meta.payback_progress ?? 0) * 1000) / 10;
 const fmt = (v: number | null | undefined, dp = 1) => (v == null ? 'n/a' : v.toFixed(dp));
 
 const AXLE_REFERRAL = 'https://vpp.axle.energy/landing?ref=R-QADMOHUO';
-const axleEarnings = (stats.totals as Record<string, number>).axle_earnings ?? 0;
-const axleEvents = (stats.totals as Record<string, number>).axle_events ?? 0;
+const axleTotals = stats.totals as Record<string, number>;
+const axleEarnings = axleTotals.axle_earnings ?? 0;
+const axleEvents = axleTotals.axle_events ?? 0;
+const axleTopups = axleTotals.axle_topups ?? 0;
+const axleFromEvents = axleEarnings - axleTopups;
 ---
 
 <Base title="Real UK solar & battery data, published daily">
@@ -86,7 +89,10 @@ const axleEvents = (stats.totals as Record<string, number>).axle_events ?? 0;
         <p class="muted" style="margin-top:0.4rem">
           {axleEvents === 0
             ? 'Signed up June 2026, no grid events dispatched yet. The £10/month minimum kicks in once they start.'
-            : `from ${axleEvents} grid event${axleEvents === 1 ? '' : 's'} at £1/kWh · £10/month minimum guaranteed`}
+            : `£${axleFromEvents.toFixed(2)} paid for ${axleEvents} grid event${axleEvents === 1 ? '' : 's'} at £1/kWh${axleTopups > 0 ? `, plus £${axleTopups.toFixed(2)} of top-ups to the £10/month minimum` : ''}`}
+        </p>
+        <p class="muted" style="margin-top:0.2rem; font-size:0.8rem">
+          Taken from Axle's own settled ledger, not our meter's guess. <a href="/stats/#axle">Why they differ →</a>
         </p>
       </div>
       <div class="axle-tracker-cta">

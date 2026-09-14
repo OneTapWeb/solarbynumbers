@@ -175,11 +175,20 @@ const datasetJsonLd = {
     battery scores higher than a pure avoided-import view. Over a run of days the battery starts
     and ends at a similar charge and it evens out. Standing charges hit both sides equally, so
     they cancel.</p>
-    <p class="muted"><strong>Axle £</strong> is the VPP grid-event income (battery exported at £1/kWh
-    during demand events), measured from our own meter. It is <em>already part of</em> the Saved
-    figure — Predbat prices the event export into the day's net cost — so it counts toward payback
-    too; the column just breaks out how much of the saving came from VPP events. Don't add it to
-    Saved.</p>
+    <p class="muted" id="axle"><strong>Axle £</strong> is what Axle has actually paid, taken from the
+    transaction list in their app: £{fmt(t.axle_earnings - (t.axle_topups ?? 0), 2)} for
+    {t.axle_events} grid events at £1/kWh, plus £{fmt(t.axle_topups ?? 0, 2)} of monthly top-ups
+    bringing quiet months up to the £10 minimum.</p>
+    <p class="muted">Our own meters made those events look like
+    £{fmt(t.axle_metered_estimate ?? 0, 2)} — we log the battery's export during each dispatch
+    window and price it at £1/kWh. Axle settles on their own metering, a day or so later, and the
+    two disagree by a few percent in both directions. On 6 September they disagreed completely: the
+    Axle API key had silently expired, Predbat never saw the event coming, and the battery went into
+    it at 2.9%. Our meter caught 0.43 kWh trickling out; Axle paid £0.00. Their number is the one
+    that turns into money, so it is the one published here.</p>
+    <p class="muted">The event earnings are <em>already part of</em> the Saved figure — Predbat prices
+    the event export into the day's net cost — so don't add them to Saved. The top-ups are not:
+    they arrive as a separate payment and sit outside the daily numbers entirely.</p>
   </section>
 
   <style>

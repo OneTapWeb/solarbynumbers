@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DAILY_DIR = join(root, 'data', 'daily');
+const AXLE_LEDGER = join(root, 'data', 'axle.json');
 const OUT = join(root, 'src', 'data', 'stats.json');
 
 const SYSTEM_COST_GBP = 11999;
@@ -46,6 +47,26 @@ async function loadDaily() {
     }
   }
   return days;
+}
+
+// Axle's own settled ledger (data/axle.json), transcribed from the app.
+// It is the authority on money: the per-day `axle` blocks that Home Assistant
+// pushes are our metered-export estimate of each dispatch, which runs a few
+// percent out and knows nothing about the monthly top-ups to the £10 minimum.
+async function loadAxleLedger() {
+  let raw;
+  try {
+    raw = JSON.parse(await readFile(AXLE_LEDGER, 'utf8'));
+  } catch (e) {
+    if (e.code !== 'ENOENT') console.warn(`aggregate: ignoring unreadable data/axle.json: ${e.message}`);
+    return null;
+  }
+  const tx = Array.isArray(raw?.transactions) ? raw.transactions.filter((t) => t?.date && t?.type) : [];
+  if (tx.length === 0) {
+    console.warn('aggregate: data/axle.json has no usable transactions — falling back to metered estimates');
+    return null;
+  }
+  return { as_of: raw.as_of ?? null, source: raw.source ?? null, transactions: tx };
 }
 
 // Deterministic pseudo-random (no Math.random — reproducible builds)
@@ -106,19 +127,9 @@ function round2(x) {
   return x == null ? null : Math.round(x * 100) / 100;
 }
 
-function aggregate(days) {
+function aggregate(days, ledger) {
   const monthly = new Map();
-  const totals = {
-    days: days.length,
-    pv_generation: 0, grid_import: 0, grid_export: 0,
-    house_consumption: 0, battery_charge: 0, battery_discharge: 0,
-    import_cost: 0, export_revenue: 0, net_cost: 0,
-    baseline_no_solar_cost: 0, savings: 0,
-    unpaid_export_kwh: 0, foregone_export_gbp: 0,
-    axle_earnings: 0, axle_events: 0,
-  };
-  for (const d of days) {
-    const m = d.date.slice(0, 7);
+  const month = (m) => {
     if (!monthly.has(m)) {
       monthly.set(m, {
         month: m, days: 0,
@@ -126,17 +137,37 @@ function aggregate(days) {
         house_consumption: 0, battery_charge: 0, battery_discharge: 0,
         import_cost: 0, export_revenue: 0, net_cost: 0,
         baseline_no_solar_cost: 0, savings: 0,
-        axle_earnings: 0, axle_events: 0,
+        axle_earnings: 0, axle_events: 0, axle_topups: 0, axle_export_kwh: 0,
       });
     }
-    const mo = monthly.get(m);
+    return monthly.get(m);
+  };
+  const totals = {
+    days: days.length,
+    pv_generation: 0, grid_import: 0, grid_export: 0,
+    house_consumption: 0, battery_charge: 0, battery_discharge: 0,
+    import_cost: 0, export_revenue: 0, net_cost: 0,
+    baseline_no_solar_cost: 0, savings: 0,
+    unpaid_export_kwh: 0, foregone_export_gbp: 0,
+    axle_earnings: 0, axle_events: 0, axle_topups: 0, axle_export_kwh: 0,
+    axle_metered_estimate: 0,
+  };
+  for (const d of days) {
+    const m = d.date.slice(0, 7);
+    const mo = month(m);
     mo.days++;
     const e = d.energy_kwh ?? {};
     const c = d.cost_gbp ?? {};
-    // Axle VPP grid-event earnings (optional block in the daily JSON; absent on pre-Axle days)
+    // Axle VPP dispatches as our own meters saw them (optional block in the daily
+    // JSON; absent on pre-Axle days). The kWh are ours to measure; the money is
+    // only an estimate, and is replaced below by Axle's settled ledger if we have it.
     const ax = d.axle ?? {};
-    if (ax.earnings_gbp != null) { mo.axle_earnings += ax.earnings_gbp; totals.axle_earnings += ax.earnings_gbp; }
-    if (ax.events != null) { mo.axle_events += ax.events; totals.axle_events += ax.events; }
+    if (ax.export_kwh != null) { mo.axle_export_kwh += ax.export_kwh; totals.axle_export_kwh += ax.export_kwh; }
+    if (ax.earnings_gbp != null) {
+      totals.axle_metered_estimate += ax.earnings_gbp;
+      if (!ledger) { mo.axle_earnings += ax.earnings_gbp; totals.axle_earnings += ax.earnings_gbp; }
+    }
+    if (ax.events != null && !ledger) { mo.axle_events += ax.events; totals.axle_events += ax.events; }
     for (const k of ['pv_generation', 'grid_import', 'grid_export', 'house_consumption', 'battery_charge', 'battery_discharge']) {
       if (e[k] != null) { mo[k] += e[k]; totals[k] += e[k]; }
     }
@@ -155,7 +186,22 @@ function aggregate(days) {
       totals.foregone_export_gbp += e.grid_export * EXPORT_RATE_GBP;
     }
   }
-  const monthlyArr = [...monthly.values()].map((m) => {
+  // Axle's settled ledger overrides the estimates: paid events plus the monthly
+  // top-ups that bring a quiet month up to the £10 guaranteed minimum. Withdrawals
+  // are Dave moving the balance to his bank, not income, so they don't count.
+  if (ledger) {
+    for (const t of ledger.transactions) {
+      if (t.type === 'withdrawal') continue;
+      const mo = month(t.date.slice(0, 7));
+      const amt = Number(t.amount_gbp) || 0;
+      mo.axle_earnings += amt;
+      totals.axle_earnings += amt;
+      if (t.type === 'event') { mo.axle_events++; totals.axle_events++; }
+      if (t.type === 'topup') { mo.axle_topups += amt; totals.axle_topups += amt; }
+    }
+  }
+
+  const monthlyArr = [...monthly.values()].sort((a, b) => a.month.localeCompare(b.month)).map((m) => {
     const out = { ...m };
     for (const k of Object.keys(out)) if (typeof out[k] === 'number' && k !== 'days') out[k] = round2(out[k]);
     return out;
@@ -167,13 +213,16 @@ function aggregate(days) {
 const real = await loadDaily();
 const sample = real.length === 0;
 const days = sample ? sampleDays() : real;
-const { monthly, totals } = aggregate(days);
+const ledger = await loadAxleLedger();
+const { monthly, totals } = aggregate(days, ledger);
 
 const out = {
   meta: {
     sample,
     system_cost_gbp: SYSTEM_COST_GBP,
     payback_progress: Math.round(Math.min(1, Math.max(0, totals.savings / SYSTEM_COST_GBP)) * 1e5) / 1e5,
+    axle_source: ledger ? 'ledger' : 'metered',
+    axle_ledger_as_of: ledger?.as_of ?? null,
     first_date: days[0]?.date ?? null,
     last_date: days[days.length - 1]?.date ?? null,
   },

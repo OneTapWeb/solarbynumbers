@@ -1,0 +1,26 @@
+{
+  "_comment": "Axle's own settled ledger, transcribed from the transactions list in the Axle app. This is the money Axle has actually paid, and it is what the site publishes. The per-day 'axle' blocks in data/daily/*.json are our own metered-export estimate captured by Home Assistant during each dispatch - useful for the kWh story, but not the payment. They disagree by a few percent (different metering and settlement), and where they disagree the ledger wins. Types: event = grid-balancing dispatch, topup = monthly payment bringing the month up to the GBP 10 minimum, withdrawal = cash taken out of the Axle balance (not earnings, ignored in the totals).",
+  "source": "Axle app - account transactions",
+  "as_of": "2026-09-14",
+  "transactions": [
+    { "date": "2026-06-16", "type": "event",      "amount_gbp": 4.27 },
+    { "date": "2026-07-01", "type": "topup",      "amount_gbp": 5.73 },
+    { "date": "2026-07-15", "type": "event",      "amount_gbp": 2.61 },
+    { "date": "2026-07-15", "type": "withdrawal", "amount_gbp": -10.00 },
+    { "date": "2026-08-01", "type": "topup",      "amount_gbp": 7.39 },
+    { "date": "2026-08-05", "type": "event",      "amount_gbp": 5.65 },
+    { "date": "2026-08-06", "type": "event",      "amount_gbp": 5.76 },
+    { "date": "2026-08-06", "type": "withdrawal", "amount_gbp": -10.00 },
+    { "date": "2026-08-09", "type": "event",      "amount_gbp": 6.04 },
+    { "date": "2026-08-09", "type": "withdrawal", "amount_gbp": -11.41 },
+    { "date": "2026-08-11", "type": "event",      "amount_gbp": 6.02 },
+    { "date": "2026-08-12", "type": "event",      "amount_gbp": 13.19 },
+    { "date": "2026-08-14", "type": "withdrawal", "amount_gbp": -12.06 },
+    { "date": "2026-08-17", "type": "withdrawal", "amount_gbp": -13.19 },
+    { "date": "2026-08-31", "type": "event",      "amount_gbp": 6.15 },
+    { "date": "2026-09-05", "type": "event",      "amount_gbp": 5.94 },
+    { "date": "2026-09-06", "type": "event",      "amount_gbp": 0.00 },
+    { "date": "2026-09-07", "type": "event",      "amount_gbp": 6.10 },
+    { "date": "2026-09-11", "type": "event",      "amount_gbp": 7.66 }
+  ]
+}
