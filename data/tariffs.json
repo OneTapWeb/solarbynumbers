@@ -1,0 +1,56 @@
+{
+  "_comment": "What this house actually runs, read from the Octopus API via Home Assistant, plus the modelled comparison behind the planned switch. Rates are inclusive of VAT at the rate applying on as_of. Electricity VAT drops from 5% to 0% on 2026-10-01; the comparison table below is already stated at 0%.",
+  "as_of": "2026-09-14",
+  "current": {
+    "electricity": {
+      "product": "Octopus 12M Fixed",
+      "tariff_code": "E-1R-OE-FIX-12M-26-03-03-V2-H",
+      "unit_p": 24.5446,
+      "standing_p": 44.3496,
+      "started": "2026-03-03",
+      "ends": "2027-03-03",
+      "exit_fee_gbp_per_fuel": 50
+    },
+    "gas": {
+      "product": "Octopus 12M Fixed",
+      "tariff_code": "G-1R-OE-FIX-12M-26-03-03-V2-H",
+      "unit_p": 6.2382,
+      "standing_p": 33.1889,
+      "note": "Goes away entirely with the heat pump in December 2026."
+    },
+    "export": {
+      "product": "Outgoing Octopus Fixed",
+      "unit_p": 12,
+      "status": "agreed but not yet paying — export MPAN not registered",
+      "kwh_given_away": 2371,
+      "value_forgone_gbp": 284.51,
+      "since": "2026-06-04"
+    },
+    "vpp": {
+      "product": "Axle, events only",
+      "rate_gbp_per_kwh": 1,
+      "monthly_minimum_gbp": 10,
+      "status": "live and settling"
+    }
+  },
+  "planned": {
+    "product": "Intelligent Octopus Go",
+    "night_p": 8,
+    "night_window": "23:30–05:30",
+    "day_p": 34.72,
+    "standing_p": 49.41,
+    "quoted": "2026-09-14",
+    "why": "Six guaranteed hours under 8p, whole home, plus smart dispatch slots. The heat pump and the car both want the same cheap window.",
+    "deadline": "before the heat pump lands in December 2026"
+  },
+  "comparison": {
+    "_note": "modelled annual net cost GBP with heat pump and EV both running, export at 12p, electricity VAT at 0%",
+    "rows": [
+      { "name": "Agile import", "net": 980, "blended_p": 12.6, "verdict": "cheapest on paper, on last year's prices" },
+      { "name": "Intelligent Octopus Go", "net": 1078, "blended_p": 14.8, "verdict": "our pick", "chosen": true },
+      { "name": "Octopus Go (5h)", "net": 1203, "blended_p": 16.4, "verdict": "shorter window, dearer rate" },
+      { "name": "Cosy Octopus", "net": 1506, "blended_p": 20.7, "verdict": "the heat pump tariff, and it loses" },
+      { "name": "Our 12M Fixed today", "net": 1692, "blended_p": 23.4, "verdict": "doing nothing", "current": true }
+    ]
+  }
+}

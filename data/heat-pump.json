@@ -28,17 +28,27 @@
   },
   "annual_gbp": {
     "with_gas_electricity": 278,
-    "with_gas_gas": 1102,
+    "with_gas_gas_fixed": 1102,
+    "with_gas_gas_market": 1305,
     "with_gas_standing": 121,
-    "with_gas_total": 1501,
+    "with_gas_total_fixed": 1501,
+    "with_gas_total_market": 1704,
     "with_hp_total": 1078,
-    "saving": 423,
+    "saving_at_fixed_gas": 423,
+    "saving_at_market_gas": 626,
     "no_solar_no_battery": 3399
   },
   "payback_years": {
-    "raw": 10.4,
-    "net_of_boiler": 3.3,
-    "realistic": 5.3
+    "at_market": {
+      "raw": 7,
+      "net_of_boiler": 2.2,
+      "realistic": 3.6
+    },
+    "at_fixed": {
+      "raw": 10.4,
+      "net_of_boiler": 3.3,
+      "realistic": 5.3
+    }
   },
   "sensitivity": {
     "_note": "annual saving GBP vs gas unit price (p/kWh) and real-world SCOP",
@@ -51,7 +61,7 @@
     "rows": [
       {
         "gas_p": 6.24,
-        "label": "our fixed rate",
+        "label": "our fix, until Mar 2027",
         "saving": [
           341,
           423,
@@ -60,13 +70,13 @@
         ]
       },
       {
-        "gas_p": 7,
-        "label": "",
+        "gas_p": 7.39,
+        "label": "market today",
         "saving": [
-          476,
-          557,
-          630,
-          674
+          545,
+          626,
+          699,
+          743
         ]
       },
       {
@@ -88,7 +98,23 @@
           984,
           1027
         ]
+      },
+      {
+        "gas_p": 10,
+        "label": "",
+        "saving": [
+          1006,
+          1087,
+          1160,
+          1204
+        ]
       }
     ]
+  },
+  "gas_price": {
+    "fixed_p": 6.2382,
+    "fixed_until": "2027-03-03",
+    "market_p": 7.39,
+    "_note": "We are fixed below market until March 2027. The market figure is the one to plan on."
   }
 }

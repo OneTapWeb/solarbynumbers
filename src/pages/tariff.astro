@@ -1,9 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
 import profile from '../../data/agile-profile.json';
+import t from '../../data/tariffs.json';
 
 const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
 const AXLE_REFERRAL = 'https://vpp.axle.energy/landing?ref=R-QADMOHUO';
+
+const { current: cur, planned: plan, comparison: cmp } = t;
+const gbp = (n: number) => `£${Math.round(n).toLocaleString('en-GB')}`;
+const chosen = cmp.rows.find((r: any) => r.chosen);
+const today = cmp.rows.find((r: any) => r.current);
+const switchSaving = today.net - chosen.net;
 
 const slots = profile.slots as number[];
 const lo = Math.min(...slots);
@@ -20,42 +27,145 @@ const shade = (v: number) => {
 };
 const cheapest = slots.indexOf(lo);
 const dearest = slots.indexOf(hi);
+
+const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
 ---
 
-<Base title="The tariff" description="Why this UK solar, battery and Predbat home runs Octopus Agile import with fixed 12p export, and what happened when Octopus Flux closed a month before our install.">
+<Base
+  title="The tariff"
+  description="What this UK solar, battery and Predbat home actually pays for electricity today, why a plain 12-month fix is the wrong tariff once a heat pump and an EV arrive, and the modelling behind the switch to Intelligent Octopus Go."
+>
   <div class="page-head">
     <h1>The tariff</h1>
     <p class="lede">
-      Agile import, half-hourly, re-priced every afternoon for the following day. Fixed 12p export
-      is lined up for the moment certification lands. The tariff matters every bit as much as the
-      hardware, because it decides what every stored kWh is actually worth.
+      The tariff matters every bit as much as the hardware, because it decides what every stored
+      kWh is actually worth. Here's the unglamorous truth: right now we're on a
+      {' '}<strong>plain 12-month fix at {cur.electricity.unit_p}p</strong>, which is the wrong
+      tariff for this house and about to become badly wrong. This page is what we run, what we're
+      moving to, and the modelling that settled it.
     </p>
   </div>
 
-  <section class="card">
+  <div class="section-head"><h2>What we actually run today</h2></div>
+  <table class="spec">
+    <tbody>
+      <tr>
+        <td>Import</td>
+        <td>
+          <strong>{cur.electricity.product}</strong> — {cur.electricity.unit_p}p/kWh flat, standing
+          charge {cur.electricity.standing_p}p/day. Started {cur.electricity.started}, runs to
+          {' '}{cur.electricity.ends}, £{cur.electricity.exit_fee_gbp_per_fuel} exit fee per fuel.
+          <span class="mono fine"> {cur.electricity.tariff_code}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>Gas</td>
+        <td>
+          <strong>{cur.gas.product}</strong> — {cur.gas.unit_p}p/kWh, standing charge
+          {' '}{cur.gas.standing_p}p/day. {cur.gas.note}
+          <span class="mono fine"> {cur.gas.tariff_code}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>Export</td>
+        <td>
+          <strong>{cur.export.product}</strong> — flat {cur.export.unit_p}p/kWh, no export peaks to
+          chase. Boring on purpose, because it's a guaranteed floor.
+          <strong> Not paying yet</strong> — see below.
+        </td>
+      </tr>
+      <tr>
+        <td>VPP</td>
+        <td>
+          <strong>{cur.vpp.product}</strong> — £{cur.vpp.rate_gbp_per_kwh}/kWh with a
+          £{cur.vpp.monthly_minimum_gbp}/month minimum. Settles through the smart meter, so it pays
+          out even without export certification. <a href="/stats/#axle">What it's actually paid us →</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note warn">
+    <p><strong>We're still giving our export away.</strong> The panels have exported
+    {' '}<strong>{cur.export.kwh_given_away.toLocaleString('en-GB')} kWh</strong> since
+    {' '}{cur.export.since} and earned <strong>£0</strong> for it, because the export MPAN still
+    isn't registered. At {cur.export.unit_p}p that's <strong>{gbp(cur.export.value_forgone_gbp)}</strong>
+    handed to the grid for nothing. The <a href="/stats/">stats</a> honestly report £0 export
+    revenue throughout. If you take one thing from this site: chase the paperwork before you chase
+    the optimisation.</p>
+  </div>
+
+  <div class="note quiet">
+    <p><strong>VAT on electricity drops from 5% to 0% on 1 October 2026.</strong> Every rate on this
+    page falls about 4.8% automatically. It applies to all tariffs equally, so it changes no
+    comparison — but it does mean the figures above are the last of the VAT-inclusive ones.</p>
+  </div>
+
+  <div class="section-head"><h2>Why a fix stops working</h2></div>
+  <p class="lede">
+    A flat {cur.electricity.unit_p}p is perfectly reasonable for a house that just uses
+    electricity. It's a poor fit for one with a battery, and a bad one for a house about to add
+    {' '}<a href="/ev/">an EV</a> and <a href="/heat-pump/">a heat pump</a>. A flat rate pays the
+    same whenever you use power, which means a battery has nothing to arbitrage and a heat pump has
+    no cheap hours to hide in. Every unit of new demand arrives at full price.
+  </p>
+
+  <div class="card" style="margin-top:1rem">
     <div class="card-head">
-      <h2>A typical day's import price</h2>
-      <span class="meta">mean of a full year of published rates · Jun 2025 → Jun 2026</span>
+      <h2>Modelled annual cost, heat pump and car both running</h2>
+      <span class="meta">export at 12p · electricity VAT at 0%</span>
     </div>
-    <div class="price-curve">
-      {slots.map((v, i) => (
-        <span
-          class="bar"
-          style={`height:${((v - lo * 0.72) / (hi - lo * 0.72)) * 100}%; background:${isPeak(i) ? 'var(--dark)' : shade(v)}`}
-          title={`${slotTime(i)} — ${v.toFixed(2)}p`}
-        ></span>
+    <div class="tar-bars">
+      {cmp.rows.map((r: any) => (
+        <div class="trow">
+          <span class="tlabel">
+            {r.chosen || r.current ? <strong>{r.name}</strong> : r.name}
+            <span class="tverdict">{r.verdict}</span>
+          </span>
+          <span class="ttrack">
+            <span
+              class={`tfill ${r.chosen ? 'accent' : r.current ? 'dark' : 'mid'}`}
+              style={`width:${(r.net / barMax) * 100}%`}
+            ></span>
+          </span>
+          <span class="tval">{gbp(r.net)}</span>
+        </div>
       ))}
     </div>
-    <div class="price-axis"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:30</span></div>
     <p class="caption">
-      The battery charges in the pale hours and carries the house through the near-black
-      16:00–19:00 peak. That gap is where most of the saving comes from — more than the panels, on
-      a bad week. Averaged over a full year of published rates the cheapest half hour is
-      <strong>{lo.toFixed(2)}p at {slotTime(cheapest)}</strong> and the dearest
-      <strong>{hi.toFixed(2)}p at {slotTime(dearest)}</strong>, with a mean of
-      {' '}<strong>{profile.mean_p_per_kwh}p</strong>.
+      Doing nothing costs <strong>{gbp(switchSaving)} a year</strong> more than switching. The
+      blended import price falls from {today.blended_p}p to {chosen.blended_p}p, because a battery
+      and a six-hour cheap window between them move most of the year's demand off the day rate.
     </p>
-  </section>
+  </div>
+
+  <div class="section-head"><h2>Where we're going: {plan.product}</h2></div>
+  <table class="spec">
+    <tbody>
+      <tr><td>Night</td><td><strong>{plan.night_p}p/kWh</strong>, {plan.night_window}, whole home — not just the car. Plus smart dispatch slots outside the window when the grid is generous.</td></tr>
+      <tr><td>Day</td><td>{plan.day_p}p/kWh. Punishing, and the whole game is never using it. The battery and the heat pump's thermal store exist to make that possible.</td></tr>
+      <tr><td>Standing</td><td>{plan.standing_p}p/day.</td></tr>
+      <tr><td>Deadline</td><td>Switched <strong>{plan.deadline}</strong>. Waiting for the fix to expire in March 2027 would put an entire heating season on the wrong tariff.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <p><strong>Agile came out cheaper, and we're not taking it.</strong> On a full year of real
+    published prices Agile models {gbp(chosen.net - cmp.rows[0].net)} a year better than
+    Intelligent Octopus Go. That margin is inside the error bars: it rests on last year's price
+    shape, Agile's standing charge is higher, and Octopus is currently only offering fixed products
+    while citing volatility. A guaranteed {plan.night_p}p for six hours is worth more to us than a
+    modelled {gbp(chosen.net - cmp.rows[0].net)} — especially with a heat pump arriving that has to
+    get through January whatever the wholesale market does.</p>
+  </div>
+
+  <div class="note quiet">
+    <p><strong>Cosy Octopus is the designated heat pump tariff, and it finishes fourth.</strong> Its
+    off-peak is around 14.5p against IOG's 8p, and its 16:00–19:00 peak runs above 50p — which is
+    exactly when a heat pump wants to run on a cold evening. Cosy sells flexibility that a 15 kWh
+    battery already provides. If you have a battery, check the sum before assuming the heat pump
+    tariff is for you.</p>
+  </div>
 
   <div class="cols-2" style="margin-top:1rem">
     <div class="card referral">
@@ -79,13 +189,46 @@ const dearest = slots.indexOf(hi);
     </div>
   </div>
 
+  <div class="section-head"><h2>The half-hourly price we modelled against</h2></div>
+  <p class="lede">
+    We don't run Agile, but a full year of its published half-hourly rates is the best free dataset
+    there is for understanding when electricity is actually expensive — and it's what every
+    comparison above was built on.
+  </p>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>A typical day's Agile import price</h2>
+      <span class="meta">mean of a full year of published rates · Jun 2025 → Jun 2026</span>
+    </div>
+    <div class="price-curve">
+      {slots.map((v, i) => (
+        <span
+          class="bar"
+          style={`height:${((v - lo * 0.72) / (hi - lo * 0.72)) * 100}%; background:${isPeak(i) ? 'var(--dark)' : shade(v)}`}
+          title={`${slotTime(i)} — ${v.toFixed(2)}p`}
+        ></span>
+      ))}
+    </div>
+    <div class="price-axis"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:30</span></div>
+    <p class="caption">
+      The shape is the point: a battery charges in the pale hours and carries the house through the
+      near-black 16:00–19:00 peak. Averaged over a full year the cheapest half hour is
+      <strong>{lo.toFixed(2)}p at {slotTime(cheapest)}</strong> and the dearest
+      <strong>{hi.toFixed(2)}p at {slotTime(dearest)}</strong>, with a mean of
+      {' '}<strong>{profile.mean_p_per_kwh}p</strong>. Intelligent Octopus Go buys that same cheap
+      window at a guaranteed price instead of a forecast one.
+    </p>
+  </section>
+
   <div class="section-head"><h2>The Flux plot twist</h2></div>
   <p class="lede">
     The original business case was built on <strong>Octopus Flux</strong>, the classic battery
     tariff with a cheap overnight window and a 30p evening export peak. The plan was dead simple:
     charge cheap overnight, force-export the battery into the 4pm to 7pm peak, profit. Then in
-    <strong>March 2026</strong> Flux and Intelligent Octopus Flux closed to new customers, months
-    before our panels went on the roof.
+    <strong>March 2026</strong> Flux and Intelligent Flux closed to new customers, months before
+    our panels went on the roof. Standard Flux has since reopened; Intelligent Flux was still shut
+    as of August 2026.
   </p>
 
   <div class="note warn">
@@ -95,48 +238,32 @@ const dearest = slots.indexOf(hi);
   </div>
 
   <p class="lede">
-    Here's the surprise: losing Flux's 30p export peak only cost around 10% of the projected
-    year-one return. Under Agile the battery's job flips from <em>exporting at a peak rate</em> to
-    <em>not importing at a peak rate</em>, and dodging expensive evening import is worth roughly as
-    much as the old peak export was. Predbat reorganised the whole strategy on its own the day we
-    swapped the rate sensors over. The only real loss is on true surplus — battery full, house
-    satisfied — which now earns 12p instead of 30p.
+    Here's the surprise: losing Flux's 30p export peak cost far less than expected, because the
+    battery's job simply flips from <em>exporting at a peak rate</em> to <em>not importing at a
+    peak rate</em>, and dodging expensive evening import is worth roughly as much. With a heat pump
+    and a car arriving, that's now emphatically the better job for it — which is why Flux stays
+    ruled out even though it has reopened. Its cheap import window is about three hours, and three
+    hours cannot feed a 45 kWh winter day plus a car.
   </p>
 
-  <div class="section-head"><h2>What we run now</h2></div>
-  <table class="spec">
-    <tbody>
-      <tr><td>Import</td><td>Octopus Agile. Half-hourly dynamic pricing, published around 4pm for the next day, capped at £1/kWh. Cheap slots sit in the low teens; evening peaks run from the mid-20s in summer to the high 30s in winter.</td></tr>
-      <tr><td>Export</td><td>Outgoing Octopus, flat 12p/kWh all day, every day. No export peaks to chase. Boring on purpose, because it's a guaranteed floor.</td></tr>
-      <tr><td>VPP</td><td>Axle, events-only, £1/kWh with a £10/month minimum. Settles through the smart meter, so it pays out even without export certification.</td></tr>
-    </tbody>
-  </table>
-
-  <div class="note">
-    <p><strong>Export isn't paid yet.</strong> We can't earn anything for export until the final
-    installation certification goes in, which can take a month or two from install day. The
-    inverter still exports the surplus once the battery's full — we just hand it to the grid for
-    free, and the <a href="/stats/">stats</a> honestly report £0 export revenue. On a sunny June
-    day that's £2 or more sailing out of the meter for nothing, which is a decent reason to chase
-    the paperwork.</p>
-  </div>
+  <div class="section-head"><h2>Why we keep the boring 12p export</h2></div>
+  <p class="lede">
+    Agile Outgoing does half-hourly export pricing, uncapped, with no exit fees. We modelled a full
+    year of real rates against our own generation: flat 12p wins by around £110 a year. Only the
+    16:00–19:00 window beats 12p, while this high-generation, low-consumption house floods the grid
+    at midday when Agile export pays 5–7p. The heat pump makes that verdict stronger, not weaker —
+    it eats the shoulder-season surplus that Agile Outgoing pays best for, leaving the midday
+    summer spill it pays worst for.
+  </p>
 
   <div class="note quiet">
-    <p><strong>A possible upgrade later.</strong> Agile Outgoing does half-hourly export pricing,
-    uncapped, with no exit fees. We modelled a full year of real rates against our own generation:
-    it nets about £449/yr versus £466 on flat 12p — effectively a wash, because only the
-    16:00–19:00 window beats 12p while this high-generation, low-consumption house floods the grid
-    at midday when Agile export pays 5–7p. Flat 12p stays. That comparison is exactly the kind of
-    question this site's dataset exists to answer.</p>
+    <p><strong>The discharge hierarchy that falls out of all this:</strong> Axle VPP at £1/kWh
+    beats self-consumption at the avoided import rate, which beats exporting at 12p. Predbat is
+    told as much, and it reorganises the day accordingly. The one counter-intuitive consequence:
+    once we're on {plan.product} at {plan.night_p}p, cheap imported power is cheaper than our own
+    solar's 12p opportunity cost — so the right move is to <em>sell</em> the sunshine and charge
+    the car overnight. See <a href="/ev/">the car</a>.</p>
   </div>
-
-  <div class="section-head"><h2>Why Octopus at all?</h2></div>
-  <p class="lede">
-    Higher flat export rates do exist elsewhere (E.ON around 16.5p, British Gas around 15p), but
-    they all want you importing with the same supplier on a flat or simple time-of-use tariff. For
-    a Predbat home the cheap-import arbitrage on Agile is the bigger prize anyway. Octopus also has
-    the best API in the business, and the <a href="/stack/">whole automation stack</a> hangs off it.
-  </p>
 
   <style>
     .price-curve {
@@ -154,6 +281,20 @@ const dearest = slots.indexOf(hi);
       font-size: 0.7rem;
       color: var(--ink-400);
       margin-top: 0.4rem;
+    }
+    .tar-bars { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.4rem; }
+    .trow { display: grid; grid-template-columns: 15rem 1fr 4rem; align-items: center; gap: 0.8rem; }
+    .tlabel { font-size: 0.86rem; display: flex; flex-direction: column; }
+    .tverdict { font-size: 0.74rem; color: var(--ink-400); }
+    .ttrack { background: var(--track); border-radius: 999px; height: 12px; overflow: hidden; }
+    .tfill { display: block; height: 100%; border-radius: 999px; min-width: 6px; background: #9ab4f2; }
+    .tfill.accent { background: var(--accent); }
+    .tfill.dark { background: var(--dark); }
+    .tfill.mid { background: #9ab4f2; }
+    .tval { font-family: var(--mono); font-size: 0.78rem; text-align: right; color: var(--ink-400); }
+    @media (max-width: 620px) {
+      .trow { grid-template-columns: 1fr 4rem; }
+      .tlabel { grid-column: 1 / -1; margin-bottom: -0.3rem; }
     }
   </style>
 </Base>
