@@ -1,5 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
+import savings from '../../data/savings.json';
+import tariffs from '../../data/tariffs.json';
 import stats from '../data/stats.json';
 import agile from '../../data/agile-profile.json';
 
@@ -148,12 +150,13 @@ const axleFromEvents = axleEarnings - axleTopups;
     </div>
 
     <div class="card referral">
-      <p class="kicker">Tariff · Octopus Agile</p>
-      <span class="figure lg">{agile.mean_p_per_kwh}<span class="unit">p avg</span></span>
+      <p class="kicker">Tariff · {tariffs.current.electricity.product}</p>
+      <span class="figure lg">{tariffs.current.electricity.unit_p}<span class="unit">p flat</span></span>
       <p style="margin-top:0.6rem">
-        Half-hourly import on Agile — <a href="/tariff/">{lowSlot}p in the small hours, {highSlot}p
-        at the evening peak</a> — with fixed 12p export lined up for the day certification lands.
-        Until then the surplus goes to the grid for nothing,
+        A plain fix at {tariffs.current.electricity.unit_p}p, which is
+        <a href="/tariff/">the wrong tariff for this house</a> — we're moving to
+        {tariffs.planned.product} at {tariffs.planned.night_p}p overnight before the heat pump lands.
+        Export is agreed at 12p but still isn't paying, so the surplus goes to the grid for nothing,
         <a href="/stats/">£{(t.foregone_export_gbp ?? 0).toFixed(0)} of it so far</a>.
       </p>
       <div class="cta">
@@ -161,6 +164,58 @@ const axleFromEvents = axleEarnings - axleTopups;
         <p class="fine">Switching? We both get £50.</p>
       </div>
     </div>
+  </div>
+
+  <div class="section-head">
+    <h2>What each decision is worth</h2>
+    <span class="meta">modelled · once the heat pump is in and the tariff switch is done</span>
+  </div>
+
+  <div class="note warn">
+    <p><strong>This block is a projection, not a reading.</strong> Everything else on this page is
+    measured off the inverter. These figures describe the finished house — heat pump installed, gas
+    gone, on an 8p overnight tariff, export actually paying — and none of those three is true yet.
+    We'll replace them with measured numbers once they are.</p>
+  </div>
+
+  <div class="sv-rows">
+    {savings.marginal_gbp.map((row: any) => (
+      <a class="svrow" href={row.href}>
+        <span class="svlabel">
+          <strong>{row.what}</strong>
+          <span class="svnote">{row.note}</span>
+        </span>
+        <span class="svtrack">
+          <span class="svfill" style={`width:${(row.saving / savings.marginal_gbp[0].saving) * 100}%`}></span>
+        </span>
+        <span class="svval">£{row.saving.toLocaleString('en-GB')}</span>
+      </a>
+    ))}
+  </div>
+
+  <div class="cols-2" style="margin-top:1rem">
+    <div class="card">
+      <p class="kicker">Without any of it</p>
+      <span class="figure md">£{savings.baseline_gbp.total.toLocaleString('en-GB')}<span class="unit">/yr</span></span>
+      <p class="note-line" style="margin-top:0.5rem">
+        £{savings.baseline_gbp.electricity.toLocaleString('en-GB')} electricity,
+        £{savings.baseline_gbp.gas.toLocaleString('en-GB')} gas,
+        £{savings.baseline_gbp.fuel.toLocaleString('en-GB')} petrol and diesel.
+      </p>
+    </div>
+    <div class="card">
+      <p class="kicker">With all of it</p>
+      <span class="figure md accent">£{savings.end_state_gbp.total.toLocaleString('en-GB')}<span class="unit">/yr</span></span>
+      <p class="note-line" style="margin-top:0.5rem">
+        £{savings.end_state_gbp.electricity.toLocaleString('en-GB')} of electricity, less
+        £{Math.abs(savings.end_state_gbp.axle_vpp)} of VPP earnings. No gas bill, no fuel bill.
+      </p>
+    </div>
+  </div>
+
+  <div class="note">
+    <p><strong>They don't add up, and that's the point.</strong> {savings.overlap_note} The real
+    total is <strong>£{savings.total_saving_gbp.toLocaleString('en-GB')} a year</strong>.</p>
   </div>
 
   <section style="margin-top:3rem">
@@ -198,4 +253,19 @@ const axleFromEvents = axleEarnings - axleTopups;
       </div>
     </div>
   </section>
+  <style>
+    .sv-rows { display:flex; flex-direction:column; gap:0.6rem; margin-top:1.2rem; }
+    .svrow { display:grid; grid-template-columns:16rem 1fr 5rem; align-items:center; gap:0.9rem;
+             text-decoration:none; color:inherit; padding:0.55rem 0.7rem; border-radius:8px; }
+    .svrow:hover { background:var(--tile); }
+    .svlabel { display:flex; flex-direction:column; font-size:0.9rem; }
+    .svnote { font-size:0.74rem; color:var(--ink-400); margin-top:0.15rem; }
+    .svtrack { background:var(--track); border-radius:999px; height:14px; overflow:hidden; }
+    .svfill { display:block; height:100%; border-radius:999px; background:var(--accent); min-width:8px; }
+    .svval { font-family:var(--mono); font-size:0.92rem; text-align:right; }
+    @media (max-width:640px){
+      .svrow { grid-template-columns:1fr 5rem; }
+      .svlabel { grid-column:1 / -1; margin-bottom:-0.2rem; }
+    }
+  </style>
 </Base>

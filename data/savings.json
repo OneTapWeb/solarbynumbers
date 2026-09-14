@@ -1,0 +1,34 @@
+{
+  "_comment": "MODELLED steady-state projection, not measured data. Describes the house once the heat pump is installed (December 2026), the switch to Intelligent Octopus Go is done, and export is actually being paid. None of those three are true yet. The measured, real-money figures are in data/daily/*.json and on /stats/. Replace with measured figures after a full year in the finished configuration.",
+  "measured": false,
+  "as_of": "2026-09-14",
+  "assumes": [
+    "heat pump installed and gas supply removed",
+    "on Intelligent Octopus Go at 8p overnight",
+    "export MPAN registered and paying 12p",
+    "electricity VAT at 0%",
+    "gas priced at the 7.39p market average, not our expiring 6.24p fix"
+  ],
+  "baseline_gbp": {
+    "_note": "same house, no solar, no battery, gas boiler, petrol Qashqai and diesel C4, on our current fixed tariff",
+    "electricity": 1754,
+    "gas": 1427,
+    "fuel": 1822,
+    "total": 5003
+  },
+  "end_state_gbp": {
+    "electricity": 591,
+    "axle_vpp": -250,
+    "gas": 0,
+    "fuel": 0,
+    "total": 341
+  },
+  "total_saving_gbp": 4662,
+  "marginal_gbp": [
+    { "what": "Solar, battery and the VPP", "saving": 3117, "href": "/stats/", "note": "what you'd lose by taking the panels and battery off a house that still had the car and the heat pump" },
+    { "what": "The electric car", "saving": 1573, "href": "/ev/", "note": "against the petrol Qashqai and diesel C4 it replaced, at September 2026 pump prices" },
+    { "what": "The heat pump", "saving": 838, "href": "/heat-pump/", "note": "against the 19-year-old gas boiler, at the 7.39p market gas price" }
+  ],
+  "overlap_gbp": 865,
+  "overlap_note": "The three figures sum to £5,528 against a real total of £4,662. That is not an error: each change is worth more when the others are present, because every new load is another thing the battery and the cheap overnight window can feed. Quote any one of them, but never add them together."
+}
