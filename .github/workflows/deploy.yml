@@ -47,12 +47,21 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H 185.249.75.81 >> ~/.ssh/known_hosts
+          # Pinned host key, deliberately not ssh-keyscan. Two reasons:
+          #  1. keyscan opens one connection per key type and drops each one
+          #     pre-auth. fail2ban (sshd jail, mode=aggressive, maxretry=5)
+          #     counted those five drops as five failures and banned the runner
+          #     a fraction of a second before rsync connected, so rsync hung
+          #     and died with exit 255. That killed the 2026-09-15 nightly.
+          #  2. keyscan trusts whatever answers on the night. Pinning is the
+          #     only version of this step that authenticates the server at all.
+          # If the VPS is ever rebuilt, replace this line with its new host key.
+          echo '185.249.75.81 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPe3vd7f60sUbj5VrajahCoK5CuSEPgzgGtCWWZqRhdY' > ~/.ssh/known_hosts
 
       - name: Deploy to VPS
         run: |
           rsync -az --delete \
-            -e "ssh -i ~/.ssh/id_ed25519" \
+            -e "ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o ConnectTimeout=20" \
             dist/ root@185.249.75.81:/var/www/solarbynumbers.co.uk/
 
       - name: Verify
