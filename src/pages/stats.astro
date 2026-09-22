@@ -92,8 +92,8 @@ const datasetJsonLd = {
     <p class="caption">
       {t.days} days in we're running at <strong>{Math.round((prop.pace ?? 0) * 100)}%</strong> of
       the pace the proposal assumed — but £{prop.unearnable_gbp} of its year-one total is made up
-      of streams we physically cannot earn yet: export is unpaid until certification clears, and
-      Octopus Saving Sessions only run November to March. Against the streams that <em>are</em>
+      of streams that were not available to us for most of that window: export earned nothing until
+      22 September, and Octopus Saving Sessions only run November to March. Against the streams that <em>are</em>
       available today the figure is <strong>{Math.round(((t.savings ?? 0) / prop.to_date_earnable_gbp) * 100)}%</strong>.
       Extrapolating a summer to a whole year flatters us in the other direction, so treat both as
       early signals rather than verdicts.
@@ -103,9 +103,10 @@ const datasetJsonLd = {
   {(t.unpaid_export_kwh ?? 0) > 0.05 && (
     <div class="note warn">
       <p><strong>£{fmt(t.foregone_export_gbp, 2)} given away unpaid</strong> — {fmt(t.unpaid_export_kwh, 1)} kWh
-      exported for free. Until the final installation certification comes through we earn nothing
-      for export, but the inverter still pushes surplus to the grid once the battery is full. This
-      is what that donated energy would have earned at the 12p rate.
+      exported for free between June and 21 September, while the export MPAN was still being
+      registered. The inverter pushed surplus to the grid once the battery was full and we earned
+      nothing for it; this is what it would have earned at 12p. Paid export went live on
+      22 September, so this figure is now fixed and every day after it earns.
       <a href="/tariff/">The certification story →</a></p>
     </div>
   )}

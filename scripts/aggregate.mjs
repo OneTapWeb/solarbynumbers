@@ -15,24 +15,25 @@ const OUT = join(root, 'src', 'data', 'stats.json');
 
 const SYSTEM_COST_GBP = 11999;
 
-// Export tariff status: until final certification clears, surplus is exported
-// to the grid unpaid. Days before EXPORT_PAID_FROM count toward the "foregone
-// export earnings" stat at the would-be flat rate. Set the date (YYYY-MM-DD)
-// when paid export goes live.
-const EXPORT_PAID_FROM = null;
+// Export tariff status: paid export went live on 2026-09-22 (Outgoing Octopus,
+// flat 12p). Days before EXPORT_PAID_FROM were exported to the grid unpaid while
+// certification was pending, and count toward the "foregone export earnings" stat
+// at the would-be flat rate. That stat is now historical and stops growing.
+const EXPORT_PAID_FROM = '2026-09-22';
 const EXPORT_RATE_GBP = 0.12;
 
 // The proposal's own Year-1 model (solar_proposal.html, Section 13, June 2026 revision).
 // The site's whole point is testing this in public, so the homepage compares actual
-// savings against this projection pro-rated by days elapsed. Two of its streams cannot
-// be earned yet — export is unpaid until certification clears, and Octopus Saving
+// savings against this projection pro-rated by days elapsed. Some of its streams could not
+// be earned for part of that window — export was unpaid until 2026-09-22, and Octopus Saving
 // Sessions only run Nov-Mar — so they're broken out to explain the gap honestly rather
-// than leaving it looking like underperformance.
+// than leaving it looking like underperformance. An entry with 'until' only counts as
+// unearnable for the days before that date.
 const PROPOSAL = {
   year1_gbp: 2029,
   payback_years: 5.4,
   unearnable: [
-    { label: 'solar export at 12p', gbp: 465, why: 'unpaid until export certification clears' },
+    { label: 'solar export at 12p', gbp: 465, why: 'unpaid until export went live on 22 Sep 2026', until: EXPORT_PAID_FROM },
     { label: 'Octopus Saving Sessions', gbp: 120, why: 'only run November to March' },
   ],
 };
@@ -237,6 +238,12 @@ const elapsed = totals.days || 1;
 const proposalToDate = round2((PROPOSAL.year1_gbp * elapsed) / 365);
 const runRate = round2((totals.savings / elapsed) * 365);
 const unearnable = PROPOSAL.unearnable.reduce((s, u) => s + u.gbp, 0);
+// ...and the slice of it that actually applied over the days we have measured: a stream
+// with an 'until' date (export) only counts as unearnable for the days before it went live.
+const unearnableToDate = PROPOSAL.unearnable.reduce((s, u) => {
+  const d = u.until ? days.filter((x) => x.date < u.until).length : elapsed;
+  return s + (u.gbp * d) / 365;
+}, 0);
 
 const out = {
   meta: {
@@ -251,7 +258,7 @@ const out = {
       // what the proposal said we'd have banked by now
       to_date_gbp: proposalToDate,
       // ...and against the streams that are actually available to us today
-      to_date_earnable_gbp: round2(((PROPOSAL.year1_gbp - unearnable) * elapsed) / 365),
+      to_date_earnable_gbp: round2(proposalToDate - unearnableToDate),
       pace: proposalToDate > 0 ? Math.round((totals.savings / proposalToDate) * 1000) / 1000 : null,
       run_rate_gbp: runRate,
       payback_years_at_rate: runRate > 0 ? Math.round((SYSTEM_COST_GBP / runRate) * 10) / 10 : null,

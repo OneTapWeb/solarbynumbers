@@ -6,11 +6,15 @@ import t from '../../data/tariffs.json';
 const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
 const AXLE_REFERRAL = 'https://vpp.axle.energy/landing?ref=R-QADMOHUO';
 
-const { current: cur, planned: plan, comparison: cmp } = t;
+const { current: cur, comparison: cmp } = t;
+const elec = cur.electricity;
+const prev = cur.previous_electricity;
 const gbp = (n: number) => `£${Math.round(n).toLocaleString('en-GB')}`;
+const ukDate = (iso: string) =>
+  new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 const chosen = cmp.rows.find((r: any) => r.chosen);
-const today = cmp.rows.find((r: any) => r.current);
-const switchSaving = today.net - chosen.net;
+const left = cmp.rows.find((r: any) => r.previous);
+const switchSaving = left.net - chosen.net;
 
 const slots = profile.slots as number[];
 const lo = Math.min(...slots);
@@ -33,16 +37,17 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
 
 <Base
   title="The tariff"
-  description="What this UK solar, battery and Predbat home actually pays for electricity today, why a plain 12-month fix is the wrong tariff once a heat pump and an EV arrive, and the modelling behind the switch to Intelligent Octopus Go."
+  description="What this UK solar, battery and Predbat home actually pays for electricity, why a plain 12-month fix is the wrong tariff once a heat pump and an EV arrive, and the modelling behind the switch to Intelligent Octopus Go."
 >
   <div class="page-head">
     <h1>The tariff</h1>
     <p class="lede">
       The tariff matters every bit as much as the hardware, because it decides what every stored
-      kWh is actually worth. Here's the unglamorous truth: right now we're on a
-      {' '}<strong>plain 12-month fix at {cur.electricity.unit_p}p</strong>, which is the wrong
-      tariff for this house and about to become badly wrong. This page is what we run, what we're
-      moving to, and the modelling that settled it.
+      kWh is actually worth. For the first six months we ran a
+      {' '}<strong>plain 12-month fix at {prev.unit_p}p</strong>, which was the wrong tariff for
+      this house and about to become badly wrong. On 14 September we left it for
+      {' '}<strong>{elec.product}</strong>. This page is what we run, what we left, and the
+      modelling that settled it.
     </p>
   </div>
 
@@ -52,10 +57,12 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
       <tr>
         <td>Import</td>
         <td>
-          <strong>{cur.electricity.product}</strong> — {cur.electricity.unit_p}p/kWh flat, standing
-          charge {cur.electricity.standing_p}p/day. Started {cur.electricity.started}, runs to
-          {' '}{cur.electricity.ends}, £{cur.electricity.exit_fee_gbp_per_fuel} exit fee per fuel.
-          <span class="mono fine"> {cur.electricity.tariff_code}</span>
+          <strong>{elec.product}</strong> — <strong>{elec.night_p}p/kWh</strong> for
+          {' '}{elec.night_hours} hours ({elec.night_window}), {elec.day_p}p the rest of the day,
+          standing charge {elec.standing_p}p/day. Started {ukDate(elec.started)}, runs to
+          {' '}{ukDate(elec.ends)}. Replaced a {prev.unit_p}p flat fix we left on
+          {' '}{ukDate(prev.left)}, five months early.
+          <span class="mono fine"> {elec.tariff_code}</span>
         </td>
       </tr>
       <tr>
@@ -71,28 +78,31 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
         <td>
           <strong>{cur.export.product}</strong> — flat {cur.export.unit_p}p/kWh, no export peaks to
           chase. Boring on purpose, because it's a guaranteed floor.
-          <strong> Not paying yet</strong> — see below.
+          <strong> Paying since 22 September 2026</strong> — after three and a half months of
+          exporting for nothing. <span class="mono fine">{cur.export.tariff_code}</span>
         </td>
       </tr>
       <tr>
         <td>VPP</td>
         <td>
           <strong>{cur.vpp.product}</strong> — £{cur.vpp.rate_gbp_per_kwh}/kWh with a
-          £{cur.vpp.monthly_minimum_gbp}/month minimum. Settles through the smart meter, so it pays
-          out even without export certification. <a href="/stats/#axle">What it's actually paid us →</a>
+          £{cur.vpp.monthly_minimum_gbp}/month minimum. Settles through the smart meter, so it paid
+          out for months before export certification cleared. <a href="/stats/#axle">What it's actually paid us →</a>
         </td>
       </tr>
     </tbody>
   </table>
 
   <div class="note warn">
-    <p><strong>We're still giving our export away.</strong> The panels have exported
-    {' '}<strong>{cur.export.kwh_given_away.toLocaleString('en-GB')} kWh</strong> since
-    {' '}{cur.export.since} and earned <strong>£0</strong> for it, because the export MPAN still
-    isn't registered. At {cur.export.unit_p}p that's <strong>{gbp(cur.export.value_forgone_gbp)}</strong>
-    handed to the grid for nothing. The <a href="/stats/">stats</a> honestly report £0 export
-    revenue throughout. If you take one thing from this site: chase the paperwork before you chase
-    the optimisation.</p>
+    <p><strong>We gave our export away for 110 days.</strong> The panels exported
+    {' '}<strong>{cur.export.kwh_given_away.toLocaleString('en-GB')} kWh</strong> between
+    {' '}{ukDate(cur.export.since)} and {ukDate(cur.export.given_away_until)} and earned <strong>£0</strong> for it,
+    because the export MPAN was not registered. At {cur.export.unit_p}p that was
+    {' '}<strong>{gbp(cur.export.value_forgone_gbp)}</strong> handed to the grid for nothing. The MPAN
+    came through on 14 September and the tariff started paying on 22 September; the
+    {' '}<a href="/stats/">stats</a> report £0 export revenue for every day before that, because that
+    is what it was. If you take one thing from this site: chase the paperwork before you chase the
+    optimisation.</p>
   </div>
 
   <div class="note quiet">
@@ -101,13 +111,14 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     comparison — but it does mean the figures above are the last of the VAT-inclusive ones.</p>
   </div>
 
-  <div class="section-head"><h2>Why a fix stops working</h2></div>
+  <div class="section-head"><h2>Why the fix stopped working</h2></div>
   <p class="lede">
-    A flat {cur.electricity.unit_p}p is perfectly reasonable for a house that just uses
-    electricity. It's a poor fit for one with a battery, and a bad one for a house about to add
+    A flat {prev.unit_p}p is perfectly reasonable for a house that just uses electricity. It's a
+    poor fit for one with a battery, and a bad one for a house adding
     {' '}<a href="/ev/">an EV</a> and <a href="/heat-pump/">a heat pump</a>. A flat rate pays the
     same whenever you use power, which means a battery has nothing to arbitrage and a heat pump has
-    no cheap hours to hide in. Every unit of new demand arrives at full price.
+    no cheap hours to hide in. Every unit of new demand arrives at full price. That is the whole
+    argument for leaving early and paying the exit fee.
   </p>
 
   <div class="card" style="margin-top:1rem">
@@ -133,19 +144,20 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
       ))}
     </div>
     <p class="caption">
-      Doing nothing costs <strong>{gbp(switchSaving)} a year</strong> more than switching. The
-      blended import price falls from {today.blended_p}p to {chosen.blended_p}p, because a battery
-      and a six-hour cheap window between them move most of the year's demand off the day rate.
+      Staying put would have cost <strong>{gbp(switchSaving)} a year</strong> more. The blended
+      import price falls from {left.blended_p}p to {chosen.blended_p}p, because a battery and a
+      {' '}{elec.night_hours}-hour cheap window between them move most of the year's demand off the
+      day rate.
     </p>
   </div>
 
-  <div class="section-head"><h2>Where we're going: {plan.product}</h2></div>
+  <div class="section-head"><h2>What we moved to: {elec.product}</h2></div>
   <table class="spec">
     <tbody>
-      <tr><td>Night</td><td><strong>{plan.night_p}p/kWh</strong>, {plan.night_window}, whole home — not just the car. Plus smart dispatch slots outside the window when the grid is generous.</td></tr>
-      <tr><td>Day</td><td>{plan.day_p}p/kWh. Punishing, and the whole game is never using it. The battery and the heat pump's thermal store exist to make that possible.</td></tr>
-      <tr><td>Standing</td><td>{plan.standing_p}p/day.</td></tr>
-      <tr><td>Deadline</td><td>Switched <strong>{plan.deadline}</strong>. Waiting for the fix to expire in March 2027 would put an entire heating season on the wrong tariff.</td></tr>
+      <tr><td>Night</td><td><strong>{elec.night_p}p/kWh</strong>, {elec.night_window} — {elec.night_hours} hours, whole home, not just the car. Plus smart dispatch slots outside the window when the grid is generous.</td></tr>
+      <tr><td>Day</td><td>{elec.day_p}p/kWh. Punishing, and the whole game is never using it. The battery and the heat pump's thermal store exist to make that possible.</td></tr>
+      <tr><td>Standing</td><td>{elec.standing_p}p/day.</td></tr>
+      <tr><td>Timing</td><td>Live from <strong>{ukDate(elec.started)}</strong>, well before the heat pump lands in December. Waiting for the fix to expire in March 2027 would have put an entire heating season on the wrong tariff.</td></tr>
     </tbody>
   </table>
 
@@ -154,8 +166,8 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     this page said Agile modelled about £100/yr better than Intelligent Octopus Go. That was a bug
     in our own model: the battery's charging logic stopped looking ahead as soon as it hit another
     equally-cheap half hour, so inside a flat six-hour window it never actually filled up. Fixing it
-    changed the answer. With the battery properly charged overnight, a guaranteed six hours at
-    {plan.night_p}p beats Agile's average by {gbp(cmp.rows[2].net - chosen.net)} a year, and the
+    changed the answer. With the battery properly charged overnight, a guaranteed {elec.night_hours} hours at
+    {elec.night_p}p beats Agile's average by {gbp(cmp.rows[2].net - chosen.net)} a year, and the
     expensive day rate stops mattering nearly as much.</p>
   </div>
 
@@ -260,7 +272,7 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     <p><strong>The discharge hierarchy that falls out of all this:</strong> Axle VPP at £1/kWh
     beats self-consumption at the avoided import rate, which beats exporting at 12p. Predbat is
     told as much, and it reorganises the day accordingly. The one counter-intuitive consequence:
-    once we're on {plan.product} at {plan.night_p}p, cheap imported power is cheaper than our own
+    now we're on {elec.product} at {elec.night_p}p, cheap imported power is cheaper than our own
     solar's 12p opportunity cost — so the right move is to <em>sell</em> the sunshine and charge
     the car overnight. See <a href="/ev/">the car</a>.</p>
   </div>

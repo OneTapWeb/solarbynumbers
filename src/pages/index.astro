@@ -120,7 +120,7 @@ const axleFromEvents = axleEarnings - axleTopups;
     <div>
       <p class="kicker">Exported</p>
       <span class="figure lg">{fmt(e.grid_export)}<span class="unit">kWh</span></span>
-      <p class="note-line">awaiting export certification</p>
+      <p class="note-line">{c.export_revenue ? `earned £${c.export_revenue.toFixed(2)} at 12p` : 'exported unpaid — before the tariff went live'}</p>
     </div>
     <div>
       <p class="kicker">Imported</p>
@@ -151,13 +151,15 @@ const axleFromEvents = axleEarnings - axleTopups;
 
     <div class="card referral">
       <p class="kicker">Tariff · {tariffs.current.electricity.product}</p>
-      <span class="figure lg">{tariffs.current.electricity.unit_p}<span class="unit">p flat</span></span>
+      <span class="figure lg">{tariffs.current.electricity.night_p}<span class="unit">p overnight</span></span>
       <p style="margin-top:0.6rem">
-        A plain fix at {tariffs.current.electricity.unit_p}p, which is
-        <a href="/tariff/">the wrong tariff for this house</a> — we're moving to
-        {tariffs.planned.product} at {tariffs.planned.night_p}p overnight before the heat pump lands.
-        Export is agreed at 12p but still isn't paying, so the surplus goes to the grid for nothing,
-        <a href="/stats/">£{(t.foregone_export_gbp ?? 0).toFixed(0)} of it so far</a>.
+        We left the {tariffs.current.previous_electricity.unit_p.toFixed(1)}p flat fix on 14 September, five
+        months early and <a href="/tariff/">for good reasons</a>:
+        {tariffs.current.electricity.product} gives us {tariffs.current.electricity.night_hours} hours
+        at {tariffs.current.electricity.night_p}p every night, in time for the heat pump.
+        Export started paying at 12p on 22 September, after
+        <a href="/stats/">£{(t.foregone_export_gbp ?? 0).toFixed(0)} of surplus</a> had already gone
+        to the grid for nothing.
       </p>
       <div class="cta">
         <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> £50 referral</a>

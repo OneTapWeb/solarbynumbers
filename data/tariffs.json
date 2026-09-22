@@ -1,14 +1,27 @@
 {
-  "_comment": "What this house actually runs, read from the Octopus API via Home Assistant, plus the modelled comparison behind the planned switch. Rates are inclusive of VAT at the rate applying on as_of. Electricity VAT drops from 5% to 0% on 2026-10-01; the comparison table below is already stated at 0%.",
-  "as_of": "2026-09-14",
+  "_comment": "What this house actually runs, read from the Octopus API via Home Assistant, plus the modelled comparison behind the tariff switch. Rates are inclusive of VAT at the rate applying on as_of. Electricity VAT drops from 5% to 0% on 2026-10-01; the comparison table below is already stated at 0%.",
+  "as_of": "2026-09-22",
   "current": {
     "electricity": {
+      "product": "Intelligent Octopus Go",
+      "tariff_code": "E-1R-IOG-SMB-FIX-12M-26-09-02-H",
+      "day_p": 34.7205,
+      "night_p": 8,
+      "night_window": "01:30–08:30",
+      "night_hours": 7,
+      "standing_p": 49.4071,
+      "started": "2026-09-14",
+      "ends": "2027-09-14",
+      "note": "Seven hours at 8p as the meter reads it, plus smart dispatch slots outside the window. Octopus quote the window as 23:30–05:30; ours lands later, which suits the car and the heat pump equally well."
+    },
+    "previous_electricity": {
       "product": "Octopus 12M Fixed",
       "tariff_code": "E-1R-OE-FIX-12M-26-03-03-V2-H",
       "unit_p": 24.5446,
       "standing_p": 44.3496,
       "started": "2026-03-03",
-      "ends": "2027-03-03",
+      "left": "2026-09-14",
+      "would_have_ended": "2027-03-03",
       "exit_fee_gbp_per_fuel": 50
     },
     "gas": {
@@ -19,12 +32,15 @@
       "note": "Goes away entirely with the heat pump in December 2026."
     },
     "export": {
-      "product": "Outgoing Octopus Fixed",
+      "product": "Outgoing Octopus",
+      "tariff_code": "E-1R-OUTGOING-VAR-24-10-26-H",
       "unit_p": 12,
-      "status": "agreed but not yet paying — export MPAN not registered",
-      "kwh_given_away": 2371,
-      "value_forgone_gbp": 284.51,
-      "since": "2026-06-04"
+      "status": "live and paying",
+      "live_from": "2026-09-22",
+      "kwh_given_away": 2487,
+      "value_forgone_gbp": 298.50,
+      "since": "2026-06-04",
+      "given_away_until": "2026-09-21"
     },
     "vpp": {
       "product": "Axle, events only",
@@ -33,16 +49,6 @@
       "status": "live and settling"
     }
   },
-  "planned": {
-    "product": "Intelligent Octopus Go",
-    "night_p": 8,
-    "night_window": "23:30–05:30",
-    "day_p": 34.72,
-    "standing_p": 49.41,
-    "quoted": "2026-09-14",
-    "why": "Six guaranteed hours under 8p, whole home, plus smart dispatch slots. The heat pump and the car both want the same cheap window.",
-    "deadline": "before the heat pump lands in December 2026"
-  },
   "comparison": {
     "_note": "modelled annual net cost GBP with heat pump and EV both running, export at 12p, electricity VAT at 0%",
     "rows": [
@@ -50,8 +56,9 @@
         "name": "Intelligent Octopus Go",
         "net": 591,
         "blended_p": 9.4,
-        "verdict": "our pick",
-        "chosen": true
+        "verdict": "what we now run",
+        "chosen": true,
+        "current": true
       },
       {
         "name": "Octopus Go (5h)",
@@ -72,11 +79,11 @@
         "verdict": "the heat pump tariff, and it loses"
       },
       {
-        "name": "Our 12M Fixed today",
+        "name": "The 12M Fixed we left",
         "net": 1692,
         "blended_p": 23.4,
         "verdict": "doing nothing",
-        "current": true
+        "previous": true
       }
     ]
   },
