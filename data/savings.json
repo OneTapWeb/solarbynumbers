@@ -1,11 +1,11 @@
 {
-  "_comment": "MODELLED steady-state projection, not measured data. Describes the house once the heat pump is installed (December 2026), the switch to Intelligent Octopus Go is done, and export is actually being paid. None of those three are true yet. The measured, real-money figures are in data/daily/*.json and on /stats/. Replace with measured figures after a full year in the finished configuration.",
+  "_comment": "MODELLED steady-state projection, not measured data. Describes the house once the heat pump is installed (December 2026), the switch to Intelligent Octopus Go is done, and export is actually being paid. IOG went live 2026-09-15 and paid export 2026-09-22; the heat pump is still to come. The measured, real-money figures are in data/daily/*.json and on /stats/. Replace with measured figures after a full year in the finished configuration.",
   "measured": false,
   "as_of": "2026-09-14",
   "assumes": [
     "heat pump installed and gas supply removed",
     "on Intelligent Octopus Go at 8p overnight",
-    "export MPAN registered and paying 12p",
+    "export paying 12p (live since 2026-09-22)",
     "electricity VAT at 0%",
     "gas priced at the 7.39p market average, not our expiring 6.24p fix"
   ],
@@ -25,10 +25,10 @@
   },
   "total_saving_gbp": 4662,
   "marginal_gbp": [
-    { "what": "Solar, battery and the VPP", "saving": 3117, "href": "/stats/", "note": "what you'd lose by taking the panels and battery off a house that still had the car and the heat pump" },
+    { "what": "Solar, battery and the VPP", "saving": 3117, "href": "/stats/", "note": "what we'd lose if the panels and battery came off but the car and heat pump stayed" },
     { "what": "The electric car", "saving": 1573, "href": "/ev/", "note": "against the petrol Qashqai and diesel C4 it replaced, at September 2026 pump prices" },
     { "what": "The heat pump", "saving": 838, "href": "/heat-pump/", "note": "against the 19-year-old gas boiler, at the 7.39p market gas price" }
   ],
   "overlap_gbp": 865,
-  "overlap_note": "The three figures sum to £5,528 against a real total of £4,662. That is not an error: each change is worth more when the others are present, because every new load is another thing the battery and the cheap overnight window can feed. Quote any one of them, but never add them together."
+  "overlap_note": "The three figures add up to £5,528, but the real total is £4,662. Each change is worth more when the others are in place, because every new load gives the battery and the cheap overnight window more to do. Each figure is fine on its own, but they can't be added together."
 }

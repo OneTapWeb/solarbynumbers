@@ -75,7 +75,7 @@ const datasetJsonLd = {
   <div class="page-head">
     <h1>The numbers</h1>
     <p class="lede">
-      Updated every night from the inverter. Nothing smoothed, nothing left out.
+      Updated every night from the inverter, with every day included.
       {m.sample && <span class="badge-sample">demo data</span>}
     </p>
     <p class="muted mono">{t.days} days · {range}</p>
@@ -92,22 +92,21 @@ const datasetJsonLd = {
     <div class="chart"><canvas id="chart-payback" height="118"></canvas></div>
     <p class="caption">
       {t.days} days in we're running at <strong>{Math.round((prop.pace ?? 0) * 100)}%</strong> of
-      the pace the proposal assumed — but £{prop.unearnable_gbp} of its year-one total is made up
-      of streams that were not available to us for most of that window: export earned nothing until
-      22 September, and Octopus Saving Sessions only run November to March. Against the streams that <em>are</em>
-      available today the figure is <strong>{Math.round(((t.savings ?? 0) / prop.to_date_earnable_gbp) * 100)}%</strong>.
-      Extrapolating a summer to a whole year flatters us in the other direction, so treat both as
-      early signals rather than verdicts.
+      the pace the proposal assumed. However, £{prop.unearnable_gbp} of its year-one total comes
+      from income we couldn't get for most of that time: export earned nothing until 22 September,
+      and Octopus Saving Sessions only run November to March. Counting only what's available to us now, the figure is <strong>{Math.round(((t.savings ?? 0) / prop.to_date_earnable_gbp) * 100)}%</strong>.
+      On the other hand, a summer's figures make a whole year look better than it will be, so both
+      numbers are only an early indication.
     </p>
   </section>
 
   {(t.unpaid_export_kwh ?? 0) > 0.05 && (
     <div class="note warn">
-      <p><strong>£{fmt(t.foregone_export_gbp, 2)} given away unpaid</strong> — {fmt(t.unpaid_export_kwh, 1)} kWh
-      exported for free between June and 21 September, while the export MPAN was still being
-      registered. The inverter pushed surplus to the grid once the battery was full and we earned
-      nothing for it; this is what it would have earned at 12p. Paid export went live on
-      22 September, so this figure is now fixed and every day after it earns.
+      <p><strong>£{fmt(t.foregone_export_gbp, 2)} of export unpaid</strong>: {fmt(t.unpaid_export_kwh, 1)} kWh
+      went to the grid between June and 21 September while the export MPAN was still being
+      registered. Once the battery was full the surplus was exported, and we weren't paid for it.
+      This is what it would have earned at 12p. Paid export started on 22 September, so this
+      figure won't grow any further.
       <a href="/tariff/">The certification story →</a></p>
     </div>
   )}
@@ -184,8 +183,8 @@ const datasetJsonLd = {
     <div class="chart"><canvas id="chart-grid" height="110"></canvas></div>
     <p class="caption">
       Export above the line, import below. The battery covers almost everything the house needs,
-      so import only shows up on the dullest days — and every blue bar above the line is, for now,
-      energy handed to the grid for nothing.
+      so import only shows up on the dullest days. Every blue bar before 22 September is energy
+      exported without payment; from then on it earns 12p/kWh.
     </p>
   </section>
 
@@ -236,16 +235,16 @@ const datasetJsonLd = {
     <div class="card">
       <h3 style="margin-top:0">The saving</h3>
       <p>A day's saving is a baseline minus what the day actually cost. The baseline is the whole
-      day's consumption priced at a <strong>flat 23.4p/kWh</strong> — a plain no-solar, no-battery,
-      no-clever-tariff house — and it stays at 23.4p even though our own import tariff has changed,
-      so the line means the same thing every day it's plotted. The actual cost comes from Predbat,
-      which prices real imports at the real half-hourly rate, subtracts export earnings, and credits
-      energy banked into the battery (at the rate it later displaces) while debiting energy drawn
-      down, so a day that fills the battery scores higher than a pure avoided-import view. Over a run
-      of days the battery starts and ends at a similar charge and that evens out.</p>
-      <p class="fine">One asymmetry we'd rather state than hide: the actual side includes the daily
-      standing charge and the baseline doesn't, so every day's saving is understated by roughly
-      {tariffs.current.electricity.standing_p.toFixed(0)}p. We'd sooner be pessimistic than flatter ourselves.</p>
+      day's consumption priced at a <strong>flat 23.4p/kWh</strong>, i.e. a house with no solar, no
+      battery and an ordinary tariff. It stays at 23.4p even though our own import tariff has
+      changed, so the line is comparable from day to day. The actual cost comes from Predbat. It
+      prices imports at the half-hourly rate we paid, subtracts export earnings, credits energy
+      stored in the battery (at the rate it later replaces) and debits energy taken out. That means
+      a day that fills the battery scores a bit higher than avoided import alone would suggest, but
+      over several days the battery starts and ends at a similar charge and it evens out.</p>
+      <p class="fine">One inconsistency: the actual cost includes the daily standing charge and the
+      baseline doesn't, so each day's saving is understated by roughly
+      {tariffs.current.electricity.standing_p.toFixed(0)}p. We've left it that way to err on the low side.</p>
     </div>
     <div class="card" id="axle">
       <h3 style="margin-top:0">The Axle column</h3>
@@ -253,16 +252,16 @@ const datasetJsonLd = {
       their app: £{fmt((t.axle_earnings ?? 0) - (t.axle_topups ?? 0), 2)} for {t.axle_events} grid
       events at £1/kWh, plus £{fmt(t.axle_topups, 2)} of monthly top-ups bringing quiet months up
       to the £10 minimum.</p>
-      <p>Our own meters made those events look like £{fmt(t.axle_metered_estimate, 2)} — we log the
+      <p>By our own meters those events came to £{fmt(t.axle_metered_estimate, 2)}. We log the
       battery's export during each dispatch window and price it at £1/kWh. Axle settles on their
-      own metering a day or so later, and the two disagree by a few percent in both directions. On
-      6 September they disagreed completely: the Axle API key had silently expired, Predbat never
-      saw the event coming, and the battery went into it at 2.9%. Our meter caught 0.43 kWh
-      trickling out; Axle paid £0.00. Their number is the one that turns into money, so it is the
-      one published here.</p>
-      <p>The event earnings are <em>already part of</em> the Saved column — Predbat prices the
-      event export into the day's net cost — so don't add them to Saved. The top-ups are not: they
-      arrive as a separate payment and sit outside the daily numbers entirely.</p>
+      own metering a day or so later, and the two usually differ by a few percent either way. On
+      6 September they were completely different: the Axle API key had stopped working without any
+      warning, so Predbat didn't know about the event and the battery started it at 2.9%. Our meter
+      recorded 0.43 kWh going out; Axle paid £0.00. Axle's figure is what we actually get paid, so
+      that's the one shown here.</p>
+      <p>The event earnings are already included in the Saved column (Predbat counts the event
+      export in the day's net cost), so don't add them to Saved again. The top-ups aren't included:
+      they're paid separately and don't appear in the daily numbers.</p>
     </div>
   </div>
 

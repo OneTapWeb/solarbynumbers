@@ -34,25 +34,24 @@ const bars = [
 
 <Base
   title="The car"
-  description="A Skoda Enyaq replacing a petrol Qashqai and a diesel Citroen C4. What 10,000 miles a year costs on an overnight tariff against petrol at 167p and diesel at 189p, and which part of the saving the solar can honestly claim."
+  description="A Skoda Enyaq replacing a petrol Qashqai and a diesel Citroen C4. What 10,000 miles a year costs on an overnight tariff against petrol at 167p and diesel at 189p, and how much of the saving is really down to the solar."
 >
   <div class="page-head">
     <h1>The car</h1>
     <p class="lede">
       A <strong>Skoda Enyaq</strong> arrived in <strong>July 2026</strong> and is now the only car
       on the drive. It replaced two: a <strong>petrol Nissan Qashqai 1.6</strong> and a
-      {' '}<strong>diesel Citroen C4</strong>, which had been splitting the mileage roughly half
-      and half. It's the largest new electricity load this house has ever taken on, and at the same
-      time one of the largest savings on the whole site. Those two facts are easy to confuse, so
-      this page keeps them apart.
+      {' '}<strong>diesel Citroen C4</strong>, which did roughly half the mileage each. It's the
+      biggest new electricity load the house has had, and also one of the biggest savings on this
+      site. This page treats those as two separate things.
     </p>
   </div>
 
   <div class="note warn">
     <p><strong>Modelled, not measured.</strong> The car isn't metered separately from the house, so
-    mileage, efficiency and charging losses here are estimates rather than readings. Both fuel
-    figures use realistic real-world economy rather than manufacturer numbers, at UK average pump
-    prices in September 2026. We'll swap in real figures after a full year of charging.</p>
+    mileage, efficiency and charging losses here are estimates. The fuel figures use the economy
+    we actually got from the two cars (not the manufacturer figures) at UK average pump prices in
+    September 2026. We'll replace them with real figures after a full year of charging.</p>
   </div>
 
   <div class="tiles" style="margin-top:1.4rem">
@@ -82,8 +81,8 @@ const bars = [
   <p class="lede">
     The Qashqai's 1.6 petrol managed about {qashqai.mpg_real} mpg in real use, which at
     {' '}{(qashqai.price_per_litre * 100).toFixed(0)}p a litre is
-    {' '}<strong>{qashqai.pence_per_mile}p a mile</strong>. The C4 diesel was far more frugal at
-    {' '}{c4.mpg_real} mpg, but diesel is the expensive pump now at
+    {' '}<strong>{qashqai.pence_per_mile}p a mile</strong>. The C4 diesel did much better at
+    {' '}{c4.mpg_real} mpg, but diesel is the dearer fuel now at
     {' '}{(c4.price_per_litre * 100).toFixed(0)}p, so it still cost
     {' '}<strong>{c4.pence_per_mile}p</strong>. The Enyaq, charged overnight, costs
     {' '}<strong>{cpm.iog_night}p</strong>.
@@ -102,17 +101,15 @@ const bars = [
       ))}
     </div>
     <p class="caption">
-      Pence per mile. Even charged at the worst possible moment, the middle of a weekday at the
-      full day rate, the electric car is cheaper than the diesel was — and half the cost of the
-      petrol.
+      Pence per mile. Even charged in the middle of a weekday at the full day rate, the Enyaq is
+      cheaper to run than the diesel was, and half the cost of the petrol.
     </p>
   </div>
 
-  <div class="section-head"><h2>Which part can the solar claim?</h2></div>
+  <div class="section-head"><h2>How much of this is the solar?</h2></div>
   <p class="lede">
-    Almost none of it, and it matters that we say so. Most of this saving comes from the car being
-    electric, not from the panels on the roof. Anyone with a driveway and a cheap overnight tariff
-    gets the larger share of it without owning a single solar panel.
+    Very little. Most of the saving comes from the car being electric. Anyone with a driveway and a
+    cheap overnight tariff would get most of it without any solar panels at all.
   </p>
 
   <div class="ledger">
@@ -143,19 +140,19 @@ const bars = [
   </div>
 
   <div class="note">
-    <p><strong>This saving is deliberately kept out of the solar payback.</strong> The
-    {' '}<a href="/stats/">payback tracker</a> measures the panels and the battery against what the
-    same electricity would have cost without them. Folding {gbp(a.saving_total)} of avoided fuel
-    into that number would make the solar look like it pays back in half the time, and it would be
-    nonsense: we'd have saved most of it by buying the same car and plugging it into an ordinary
-    house. Two separate good decisions, counted separately.</p>
+    <p><strong>We've left this saving out of the solar payback.</strong> The
+    {' '}<a href="/stats/">payback tracker</a> compares the panels and battery against what the
+    same electricity would have cost without them. Adding {gbp(a.saving_total)} of avoided fuel
+    would make the solar look as if it paid back in half the time. That wouldn't be fair, because
+    we'd have saved most of it by buying the same car and plugging it in at an ordinary house, so
+    the two are counted separately.</p>
   </div>
 
-  <div class="section-head"><h2>Fuel is the moving part</h2></div>
+  <div class="section-head"><h2>What if fuel prices change?</h2></div>
   <p class="lede">
-    The electric side of this sum is fixed for twelve months. The pumps are not. Diesel is already
-    near {(c4.price_per_litre * 100).toFixed(0)}p and creeping toward £2, and the old fuel bill
-    rises with it while the charging bill doesn't.
+    Our electricity price is fixed for twelve months, but pump prices aren't. Diesel is already
+    about {(c4.price_per_litre * 100).toFixed(0)}p and edging towards £2. The old fuel bill goes up
+    with it and the charging bill stays where it is.
   </p>
 
   <div class="table-scroll">
@@ -182,42 +179,41 @@ const bars = [
   </div>
 
   <p class="lede">
-    Against {gbp(a.ev_on_iog_night)} of electricity, every square on that table is a saving of
+    Against {gbp(a.ev_on_iog_night)} of electricity, every cell in that table is a saving of
     between {gbp(fs.rows[1].cost[0] - a.ev_on_iog_night)} and
-    {' '}{gbp(fs.rows[0].cost[2] - a.ev_on_iog_night)} a year. The electric car doesn't need the
-    pessimistic fuel forecast to win — it wins at today's prices and wins harder at tomorrow's.
+    {' '}{gbp(fs.rows[0].cost[2] - a.ev_on_iog_night)} a year. The electric car is cheaper at
+    today's fuel prices, and the gap only widens if they rise.
   </p>
 
-  <div class="section-head"><h2>Charging it the wrong way round, on purpose</h2></div>
+  <div class="section-head"><h2>Why we don't charge it from the solar</h2></div>
   <p class="lede">
-    Right now the car charges from surplus solar on a granny lead, which looks like the obvious
-    thing to do and is, for the moment, correct: export isn't being paid yet, so a spare kWh is
-    worth nothing to anyone but us. Every unit that goes into the car instead of the grid saves the
-    full import price.
+    Until 22 September the car charged from surplus solar on a granny lead. With export unpaid,
+    that was the right call: a spare kWh was worth nothing unless we used it, and every unit that
+    went into the car instead of the grid saved the full import price.
   </p>
 
   <div class="note quiet">
-    <p><strong>That flips the day export starts paying.</strong> Once the meter earns 12p for
-    exported solar and the overnight rate is under 8p, the sensible move reverses: sell the
-    sunshine, buy the cheap night power, and pocket the difference on every kWh the car takes. It
-    feels wrong to stop charging a car from your own panels, which is exactly why it's worth
-    writing down before the habit sets. See <a href="/tariff/">the tariff</a>.</p>
+    <p><strong>Now that export pays, we do the opposite.</strong> Exported solar earns 12p and the
+    overnight rate is 8p, so it's cheaper to export the solar and charge the car overnight, and
+    we keep the difference on every kWh the car takes. Not charging the car from your own
+    panels feels odd, so we've written it down here before we get into the habit.
+    See <a href="/tariff/">the tariff</a>.</p>
   </div>
 
-  <div class="section-head"><h2>The awkward bit</h2></div>
+  <div class="section-head"><h2>Winter will be tighter</h2></div>
   <p class="lede">
-    The car adds roughly {use.kwh_from_meter.toLocaleString('en-GB')} kWh a year to a house that
-    generates about 9,900. In summer that's absorbed without noticing. In December it lands on top
-    of a <a href="/heat-pump/">heat pump</a> in the same six-hour cheap window, and the battery,
-    the car and the heating all want the same cheap hours. That's a scheduling problem rather than
-    a cost problem, and it's Predbat's to solve. We'll publish how well it copes.
+    The car adds about {use.kwh_from_meter.toLocaleString('en-GB')} kWh a year to a house that
+    generates about 9,900. In summer that makes little difference. From December the
+    {' '}<a href="/heat-pump/">heat pump</a> will be using the same six-hour cheap window, so the
+    battery, the car and the heating will all be competing for the same hours. That's mainly a
+    scheduling problem for Predbat to handle, and we'll publish how it gets on.
   </p>
 
   <div class="card referral" style="margin-top:1.4rem">
     <p class="kicker">Charging an EV at home?</p>
     <h2 style="margin:0.2rem 0 0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
-    <p>The overnight rate is doing most of the work in the sums above. No sponsors on this site,
-    and the referral pays you exactly what it pays us.</p>
+    <p>Most of the saving above comes from the overnight rate. The site has no sponsors, and you
+    get the same referral payment we do.</p>
     <div class="cta">
       <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> Claim £50</a>
       <p class="fine mono">share.octopus.energy/lush-spark-49</p>

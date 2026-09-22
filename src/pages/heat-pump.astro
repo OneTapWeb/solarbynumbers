@@ -27,16 +27,16 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
 
 <Base
   title="The heat pump"
-  description="A 19-year-old gas boiler replaced by an Octopus Cosy 9 air source heat pump in December 2026. What it actually saves once you count the extra electricity, measured against the real gas price rather than a fix that's about to expire."
+  description="A 19-year-old gas boiler replaced by an Octopus Cosy 9 air source heat pump in December 2026. What it saves once the extra electricity is counted, using the market gas price instead of our fix, which ends soon."
 >
   <div class="page-head">
     <h1>The heat pump</h1>
     <p class="lede">
-      The gas boiler is 19 years old, heat-only, and living in a garage we're converting into an
-      office. It owes us nothing. In <strong>December 2026</strong> an
+      The gas boiler is 19 years old, heat-only, and sits in a garage we're converting into an
+      office, so it has had a good innings. In <strong>December 2026</strong> an
       <strong>Octopus Cosy 9</strong> replaces it, the gas meter comes out, and the house goes
-      fully electric. This page is the sum we did first, including the part most heat pump
-      arithmetic quietly skips.
+      fully electric. These are the sums we did beforehand, including the extra electricity the
+      heat pump uses, which a lot of savings estimates leave out.
     </p>
   </div>
 
@@ -44,8 +44,8 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
     <p><strong>Everything on this page is modelled, not measured.</strong> The install hasn't
     happened yet. Heat demand comes from our own historic gas meter readings, and the efficiency
     figure is the manufacturer's at the quoted flow temperature. Unlike the
-    <a href="/stats/">stats</a>, none of it is real yet. We'll replace it with measured numbers
-    after the first winter, and you'll be able to see how wrong we were.</p>
+    <a href="/stats/">stats</a>, none of it has been measured. After the first winter we'll replace
+    it with real numbers, and you'll be able to see how far out we were.</p>
   </div>
 
   <div class="tiles" style="margin-top:1.4rem">
@@ -73,11 +73,11 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
 
   <div class="section-head"><h2>Which gas price?</h2></div>
   <p class="lede">
-    This turns out to be the question that decides everything, so it goes first. We are fixed at
-    {' '}<strong>{g.fixed_p}p/kWh</strong> until <strong>March 2027</strong>. The market average is
-    already <strong>{g.market_p}p</strong>. Comparing a heat pump against a cheap fix that expires
-    in a few months would flatter the boiler and mislead anyone reading this, so every headline
-    figure on this page uses the market price. The fix is the footnote, not the baseline.
+    The gas price makes more difference than anything else, so we'll start there. We're fixed at
+    {' '}<strong>{g.fixed_p}p/kWh</strong> until <strong>March 2027</strong>, and the market average
+    is already <strong>{g.market_p}p</strong>. A cheap fix that ends in a few months would make the
+    boiler look better than it is, so the main figures on this page all use the market price. The
+    fixed-price figures are shown alongside for reference.
   </p>
 
   <div class="cols-2">
@@ -97,13 +97,13 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
     </div>
   </div>
 
-  <div class="section-head"><h2>The trap in the middle</h2></div>
+  <div class="section-head"><h2>The extra electricity</h2></div>
   <p class="lede">
-    Losing a {gbp(gasBillMarket)} gas bill is not the same as saving {gbp(gasBillMarket)}. The heat
-    pump has to make that heat out of electricity, and that's
-    {' '}<strong>{demand.hp_electricity_kwh.toLocaleString('en-GB')} kWh</strong> of new demand
-    landing mostly in the four coldest months. Once you price it, well over half the gas saving
-    gets spent again.
+    Getting rid of a {gbp(gasBillMarket)} gas bill doesn't save {gbp(gasBillMarket)}. The heat pump
+    makes the same heat from electricity, which is
+    {' '}<strong>{demand.hp_electricity_kwh.toLocaleString('en-GB')} kWh</strong> of new demand,
+    most of it in the four coldest months. Once that's paid for, well over half the gas saving has
+    gone.
   </p>
 
   <div class="cols-2">
@@ -128,15 +128,15 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
   </div>
 
   <p class="lede" style="margin-top:1.2rem">
-    <strong>{gbp(a.saving_at_market_gas)} a year.</strong> A real saving, and a much smaller one
-    than the brochure number. Anyone quoting you a heat pump saving that looks suspiciously like
-    your whole gas bill has forgotten to add the electricity back on.
+    That leaves <strong>{gbp(a.saving_at_market_gas)} a year</strong>, which is still a saving but
+    a lot less than the brochure figure. If someone quotes you a heat pump saving close to your
+    whole gas bill, they've probably left out the electricity.
   </p>
 
-  <div class="section-head"><h2>So what's the payback?</h2></div>
+  <div class="section-head"><h2>Payback</h2></div>
   <p class="lede">
-    It depends entirely on what you think the alternative was, and this is where most published
-    paybacks quietly pick the flattering one. All three below use the market gas price.
+    This depends on what you compare it with, and published payback figures tend to use whichever
+    comparison looks best. All three below use the market gas price.
   </p>
 
   <table class="spec">
@@ -144,38 +144,38 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
       <tr>
         <td>{p.at_market.raw} years</td>
         <td><strong>If the old boiler would have run forever, free.</strong> {gbp(cost.paid_gbp)}
-        divided by {gbp(a.saving_at_market_gas)}. This is the honest headline number.</td>
+        divided by {gbp(a.saving_at_market_gas)}. The simplest and most cautious figure.</td>
       </tr>
       <tr>
         <td>{p.at_market.net_of_boiler} years</td>
         <td><strong>If you net off the boiler you'd have bought anyway.</strong> Ours is 19 years
         old and heat-only. A like-for-like replacement is around {gbp(cost.avoided_boiler_gbp)} and
-        was coming within a few years regardless, so only {gbp(netCapital)} of this spend is truly
-        extra.</td>
+        would have been needed within a few years anyway, so only {gbp(netCapital)} of this is
+        extra spending.</td>
       </tr>
       <tr>
         <td>~{p.at_market.realistic} years</td>
-        <td><strong>What we actually believe.</strong> The boiler replacement wasn't due today, it
-        was due at some uncertain point over the next few years. Money spent now to dodge a cost in
-        year four isn't a pound-for-pound offset. Discount it sensibly and you land here.</td>
+        <td><strong>Our best estimate.</strong> The boiler didn't need replacing now, just at some
+        point in the next few years. Money spent now to avoid a cost in year four doesn't cancel it
+        pound for pound, so we've discounted it, which gives roughly this.</td>
       </tr>
     </tbody>
   </table>
 
   <div class="note">
-    <p><strong>We're quoting the middle number, not the best one.</strong> It would be easy to
-    publish {p.at_market.net_of_boiler} years and let it stand. But the avoided boiler is a cost we
-    hadn't paid yet, and treating a future maybe as cash in hand is exactly how payback figures get
-    inflated. Around {p.at_market.realistic} years is the number we'd defend. On our expiring fix
-    it would be {p.at_fixed.realistic} — which is precisely why the fix isn't the baseline.</p>
+    <p><strong>We use the middle figure.</strong> We could have quoted
+    {' '}{p.at_market.net_of_boiler} years, but the boiler we avoided buying was a future cost, and
+    counting it as money already saved inflates the payback. Around {p.at_market.realistic} years
+    is the figure we're comfortable with. On our fixed gas price it would be
+    {' '}{p.at_fixed.realistic}, and since that fix ends in March we don't use it as the baseline.</p>
   </div>
 
-  <div class="section-head"><h2>The gas price does the heavy lifting</h2></div>
+  <div class="section-head"><h2>If gas prices change</h2></div>
   <p class="lede">
-    A heat pump is, among other things, a hedge. Keeping the boiler is a bet that gas stays cheap,
-    and that bet has been losing. Here's the same sum across plausible gas prices and real-world
-    efficiencies. Our fix is the top row and today's market the second — every row below is what
-    happens if the last few years repeat.
+    Keeping the boiler means betting that gas stays cheap, and recently it hasn't. This table runs
+    the same sum across a range of gas prices and real-world efficiencies. Our fix is the top row
+    and today's market price is the second. The rows below show what happens if prices rise the way
+    they have in the last few years.
   </p>
 
   <div class="table-scroll">
@@ -205,38 +205,38 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
   </div>
 
   <p class="lede">
-    At 9p gas, which is not a wild guess for a twenty-year asset, the saving is
-    {' '}{gbp(s.rows[3].saving[1])} a year and the raw payback falls under five years. The
-    boiler's case gets worse every time the wholesale market moves against it, and ours has no
-    remaining life to trade on.
+    At 9p gas, which is quite possible over the twenty-year life of a heat pump, the saving is
+    {' '}{gbp(s.rows[3].saving[1])} a year and the raw payback drops below five years. Each rise
+    in wholesale gas prices makes the boiler look worse, and ours is near the end of its life
+    anyway.
   </p>
 
-  <div class="section-head"><h2>Flow temperature is the free money</h2></div>
+  <div class="section-head"><h2>Turning the flow temperature down</h2></div>
   <p class="lede">
-    Octopus's standard install commissions at <strong>{hardware.flow_temp_c}°C</strong>, which is
-    quick to fit and kind to the radiator schedule, but costs efficiency forever. The Cosy 9 does
-    SCOP 3.6 at 50°C and drifts toward 3.0 as you push it to 65°C. Reading across the market row
-    above, moving from SCOP 3.0 to 3.6 is worth about
-    {' '}{gbp(marketRow.saving[2] - marketRow.saving[0])} a year, and more as gas rises. It costs
-    nothing but an afternoon of tuning and a willingness to live with longer run times. We're doing
-    it in spring, not during a December commissioning, because that's the wrong month to discover
-    you've gone too far.
+    Octopus's standard install is commissioned at <strong>{hardware.flow_temp_c}°C</strong>. That's
+    quick to set up and means fewer radiator changes, but it costs efficiency for as long as it's
+    left there. The Cosy 9 manages SCOP 3.6 at 50°C, falling towards 3.0 at 65°C. On the market row
+    above, going from SCOP 3.0 to 3.6 is worth about
+    {' '}{gbp(marketRow.saving[2] - marketRow.saving[0])} a year, and more if gas goes up. It only
+    takes an afternoon of adjusting and accepting longer run times. We'll do it in spring rather
+    than at commissioning in December, because a cold house in December is a bad way to find out
+    we've turned it down too far.
   </p>
 
-  <div class="section-head"><h2>It only works because of everything else</h2></div>
+  <div class="section-head"><h2>Why it works here</h2></div>
   <p class="lede">
-    This part is worth being blunt about. That {gbp(a.saving_at_market_gas)} is not what a heat
-    pump saves a typical house. It's what one saves <em>here</em>, because
-    {' '}{demand.hp_electricity_kwh.toLocaleString('en-GB')} kWh of new winter demand lands on a
-    house with 10.45 kWp of panels, a 15 kWh battery and an overnight rate under 8p. Drop the same
-    machine into a home on a flat tariff with no battery and it struggles to beat gas at all.
+    That {gbp(a.saving_at_market_gas)} isn't what a heat pump would save a typical house. It's what
+    it saves in <em>this</em> one, where the
+    {' '}{demand.hp_electricity_kwh.toLocaleString('en-GB')} kWh of extra winter demand is covered by
+    10.45 kWp of panels, a 15 kWh battery and an overnight rate under 8p. Put the same unit in a
+    house on a flat tariff with no battery and it would barely beat gas.
   </p>
 
   <div class="note quiet">
     <p><strong>The same house with no solar and no battery</strong>, running this heat pump and the
     car on the same tariff, would pay about <strong>{gbp(a.no_solar_no_battery)}</strong> a year
-    for electricity, because nothing could be shifted into the cheap window. The panels, the
-    battery and the tariff are what turn a marginal heat pump into a paying one. See
+    for electricity, because none of it could be moved into the cheap window. Without the panels,
+    battery and tariff, the heat pump would only just pay its way. See
     {' '}<a href="/tariff/">the tariff</a> for why that window matters so much, and
     {' '}<a href="/ev/">the car</a> for the other half of the electrification bill.</p>
   </div>
@@ -248,7 +248,7 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
       <tr><td>Sized for</td><td>{hardware.heat_loss_kw} kW surveyed heat loss. The Cosy 9 covers up to 8.7 kW at 50°C flow.</td></tr>
       <tr><td>Cylinder</td><td>{hardware.cylinder_litres} L slimline unvented, replacing the old vented tank. The loft header tank comes out with it.</td></tr>
       <tr><td>Radiators</td><td>{hardware.radiators_upgraded} upgraded to type 22 K2, included in the fixed price. The rest of the house keeps what it has.</td></tr>
-      <tr><td>Underfloor</td><td>Already there, already decommissioned from gas, reconnected as part of the install. It runs happily at low flow temperatures, and it's the one part of the house the heat pump will suit perfectly.</td></tr>
+      <tr><td>Underfloor</td><td>Already there, already decommissioned from gas, reconnected as part of the install. Underfloor heating works well at low flow temperatures, so it should suit the heat pump better than anything else in the house.</td></tr>
       <tr><td>Price</td><td>{gbp(cost.list_gbp)} list, less the {gbp(cost.bus_grant_gbp)} Boiler Upgrade Scheme grant that Octopus claim on our behalf, leaving {gbp(cost.paid_gbp)}.</td></tr>
     </tbody>
   </table>
@@ -256,8 +256,8 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
   <div class="card referral" style="margin-top:1.4rem">
     <p class="kicker">Thinking of switching?</p>
     <h2 style="margin:0.2rem 0 0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
-    <p>No sponsors on this site. The referral links are the only money it makes, and they pay you
-    exactly what they pay us. You don't need solar or a heat pump, any tariff counts.</p>
+    <p>The site has no sponsors. The referral links are the only money it makes, and you get the
+    same amount we do. You don't need solar or a heat pump; it works for any tariff.</p>
     <div class="cta">
       <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> Claim £50</a>
       <p class="fine mono">share.octopus.energy/lush-spark-49</p>
@@ -266,10 +266,10 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
 
   <div class="section-head"><h2>What we'll know in March</h2></div>
   <p class="lede">
-    Three numbers on this page are guesses, and they're the three that matter. Heat demand is
-    inferred from gas readings rather than measured at the emitter. SCOP is a manufacturer figure,
-    not our house in a cold snap. And the gas price is a moving target that our fix has been hiding
-    from us until March 2027. One real January fixes the first two, and the market will settle the
-    third whether we like it or not. We'll publish the corrected sum whichever way it falls.
+    The most important figures on this page are estimates. Heat demand is worked out from gas
+    readings instead of being measured at the radiators. SCOP is the manufacturer's figure, not a
+    reading from our house in a cold spell. The gas price will keep changing, and our fix shields us
+    from that until March 2027. A real January will give us the first two, and the market will
+    decide the third. We'll publish the updated figures either way.
   </p>
 </Base>

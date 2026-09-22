@@ -63,8 +63,8 @@ const axleFromEvents = axleEarnings - axleTopups;
         <div>
           <span class="figure hero accent">£{saved.pounds}<span class="minor">.{saved.pence}</span></span>
           <p style="margin-top:1rem; max-width:24rem">
-            Saved against what the same usage would have cost with no solar and no battery.
-            Measured every night, straight off the inverter.
+            Saved compared with what the same usage would have cost with no solar and no battery.
+            Worked out every night from the inverter's readings.
           </p>
         </div>
 
@@ -90,7 +90,7 @@ const axleFromEvents = axleEarnings - axleTopups;
             <div>
               <p class="kicker">Like for like</p>
               <span class="figure md">{earnablePace}%</span>
-              <p class="note-line">minus what we can't earn yet</p>
+              <p class="note-line">excluding income we can't get yet</p>
             </div>
             <div>
               <p class="kicker">At this rate</p>
@@ -120,7 +120,7 @@ const axleFromEvents = axleEarnings - axleTopups;
     <div>
       <p class="kicker">Exported</p>
       <span class="figure lg">{fmt(e.grid_export)}<span class="unit">kWh</span></span>
-      <p class="note-line">{c.export_revenue ? `earned £${c.export_revenue.toFixed(2)} at 12p` : 'exported unpaid — before the tariff went live'}</p>
+      <p class="note-line">{c.export_revenue ? `earned £${c.export_revenue.toFixed(2)} at 12p` : 'unpaid, before the export tariff started'}</p>
     </div>
     <div>
       <p class="kicker">Imported</p>
@@ -140,8 +140,8 @@ const axleFromEvents = axleEarnings - axleTopups;
       <p style="margin-top:0.6rem">
         £{axleFromEvents.toFixed(2)} paid for {axleEvents} grid-balancing {axleEvents === 1 ? 'event' : 'events'} at
         £1/kWh{axleTopups > 0 ? `, plus £${axleTopups.toFixed(2)} topping quiet months up to the £10 minimum` : ''}.
-        Straight from Axle's ledger, not our meter's guess —
-        <a href="/stats/#axle">they differ</a>.
+        These figures come from Axle's own statement, which
+        <a href="/stats/#axle">doesn't always match our meter</a>.
       </p>
       <div class="cta">
         <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><img src="/axle-logo-black.png" alt="Axle" class="axle-mark" /> £25 referral</a>
@@ -154,12 +154,12 @@ const axleFromEvents = axleEarnings - axleTopups;
       <span class="figure lg">{tariffs.current.electricity.night_p}<span class="unit">p overnight</span></span>
       <p style="margin-top:0.6rem">
         We left the {tariffs.current.previous_electricity.unit_p.toFixed(1)}p flat fix on 14 September, five
-        months early and <a href="/tariff/">for good reasons</a>:
+        months early (<a href="/tariff/">reasons here</a>).
         {tariffs.current.electricity.product} gives us {tariffs.current.electricity.night_hours} hours
         at {tariffs.current.electricity.night_p}p every night, in time for the heat pump.
-        Export started paying at 12p on 22 September, after
-        <a href="/stats/">£{(t.foregone_export_gbp ?? 0).toFixed(0)} of surplus</a> had already gone
-        to the grid for nothing.
+        Export started paying 12p on 22 September. Before that,
+        <a href="/stats/">£{(t.foregone_export_gbp ?? 0).toFixed(0)} worth of surplus</a> went to the
+        grid unpaid.
       </p>
       <div class="cta">
         <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> £50 referral</a>
@@ -170,14 +170,14 @@ const axleFromEvents = axleEarnings - axleTopups;
 
   <div class="section-head">
     <h2>What each decision is worth</h2>
-    <span class="meta">modelled · once the heat pump is in and the tariff switch is done</span>
+    <span class="meta">modelled · once the heat pump is in</span>
   </div>
 
   <div class="note warn">
-    <p><strong>This block is a projection, not a reading.</strong> Everything else on this page is
-    measured off the inverter. These figures describe the finished house — heat pump installed, gas
-    gone, on an 8p overnight tariff, export actually paying — and none of those three is true yet.
-    We'll replace them with measured numbers once they are.</p>
+    <p><strong>This section is modelled.</strong> Everything else on this page is measured from
+    the inverter. These figures describe the finished house: heat pump installed, gas gone,
+    on an 8p overnight tariff and paid for export. The tariff and export are live now; the heat
+    pump goes in this December. We'll swap in measured numbers once it's been running a while.</p>
   </div>
 
   <div class="sv-rows">
@@ -216,19 +216,18 @@ const axleFromEvents = axleEarnings - axleTopups;
   </div>
 
   <div class="note">
-    <p><strong>They don't add up, and that's the point.</strong> {savings.overlap_note} The real
-    total is <strong>£{savings.total_saving_gbp.toLocaleString('en-GB')} a year</strong>.</p>
+    <p><strong>These don't add up to the total.</strong> {savings.overlap_note} The combined
+    figure is <strong>£{savings.total_saving_gbp.toLocaleString('en-GB')} a year</strong>.</p>
   </div>
 
   <section style="margin-top:3rem">
     <h2>One roof, every number published</h2>
     <p class="lede">
-      An ordinary UK house with a £12k punt on its roof. A punt that size deserves an honest
-      scoreboard, so rather than take the proposal's payback estimate on trust we publish the real
-      figures every night — cloudy days and all. It's all run with
-      <a href="/stack/">Home Assistant and Predbat</a>, and the
-      <a href="/configs/">config files</a> that make it work are public too, in case they save
-      someone else the faff.
+      An ordinary UK house that spent £12k on solar and a battery. We wanted to know whether the
+      installer's payback estimate was right, so the real figures go up every night, including the
+      cloudy days. It's all run with <a href="/stack/">Home Assistant and Predbat</a>, and the
+      <a href="/configs/">config files</a> are public too, in case they save someone else the
+      faff.
     </p>
 
     <div class="cols-3" style="margin-top:1.4rem">
@@ -241,16 +240,16 @@ const axleFromEvents = axleEarnings - axleTopups;
       </div>
       <div class="card">
         <p class="kicker accent">Software</p>
-        <h3 style="margin-top:0">The brain</h3>
-        <p>Home Assistant on a £50 second-hand Dell, with Predbat planning every half hour against
-        half-hourly prices and a Solcast forecast.</p>
+        <h3 style="margin-top:0">The software</h3>
+        <p>Home Assistant on a £50 second-hand Dell, running Predbat, which replans every half hour
+        using the tariff prices and a Solcast forecast.</p>
         <p style="font-size:0.88rem"><a href="/stack/">How it works <span class="arrow">→</span></a></p>
       </div>
       <div class="card">
         <p class="kicker accent">Copy them</p>
         <h3 style="margin-top:0">The configs</h3>
         <p>The <code>apps.yaml</code>, automations and helpers that run this Sigenergy and Predbat
-        setup. Sanitised, annotated, free to take.</p>
+        setup, with secrets removed and comments added. Free to copy.</p>
         <p style="font-size:0.88rem"><a href="/configs/">Help yourself <span class="arrow">→</span></a></p>
       </div>
     </div>

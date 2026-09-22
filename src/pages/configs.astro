@@ -11,7 +11,7 @@ const files = [
   {
     name: 'apps.yaml', lang: 'yaml', code: appsYaml, dl: '/configs/apps.yaml', tag: 'Predbat',
     desc: 'Predbat entity map for Sigenergy',
-    blurb: 'The full Predbat configuration for a Sigenergy EC-series hybrid (inverter_type: SIG) on Intelligent Octopus Go plus flat 12p export, with Solcast forecasting and Saving Session support. The regex entity matchers mean it should drop onto most single-inverter Sigenergy installs unchanged, and the rate limits are read from sensors rather than hard-coded — which paid off nicely when our inverter turned out to be a different model than the one we ordered.',
+    blurb: 'The full Predbat configuration for a Sigenergy EC-series hybrid (inverter_type: SIG) on Intelligent Octopus Go plus flat 12p export, with Solcast forecasting and Saving Session support. The regex entity matchers should mean it works on most single-inverter Sigenergy installs without changes. The rate limits are read from sensors rather than hard-coded, which saved us some work when our inverter turned out to be a different model from the one we ordered.',
   },
   {
     name: 'predbat_sigenergy_bridge.yaml', lang: 'yaml', code: bridgeYaml, dl: '/configs/predbat_sigenergy_bridge.yaml', tag: 'Bridge',
@@ -26,7 +26,7 @@ const files = [
   {
     name: 'enable_entities.jq', lang: 'text', code: enableJq, dl: '/configs/enable_entities.jq', tag: 'Fix',
     desc: 'Switches on the hidden Sigenergy control entities',
-    blurb: 'The Sigenergy integration ships several control entities switched off by default, including the remote EMS mode select that the whole bridge hangs on. This jq filter flips them on in the entity registry — run it against core.entity_registry with HA stopped, or just enable them by hand in the UI.',
+    blurb: 'The Sigenergy integration ships several control entities switched off by default, including the remote EMS mode select that the whole bridge hangs on. This jq filter turns them on in the entity registry. Run it against core.entity_registry with HA stopped, or enable them by hand in the UI.',
   },
   {
     name: 'energy_prefs.json', lang: 'json', code: energyPrefs, dl: '/configs/energy_prefs.json', tag: 'Dashboard',
@@ -40,18 +40,17 @@ const files = [
   <div class="page-head">
     <h1>The configs</h1>
     <p class="lede">
-      Getting Predbat and Sigenergy talking took more trial and error than it should have.
-      Everything below is sanitised, annotated and free to copy — the actual files running our
-      system, not tidied-up examples. The only changes are that credentials and meter identifiers
-      have been swapped for placeholders.
+      Getting Predbat and Sigenergy working together took a lot of trial and error. These are the
+      actual files running our system, free to copy. The only changes are that credentials and
+      meter identifiers have been replaced with placeholders.
     </p>
   </div>
 
   <div class="note">
     <p><strong>Before you copy:</strong> entity IDs assume the HACS Sigenergy ESS integration's
     default naming (<code>sigen_plant_*</code>) and a single plant. Check yours in Developer Tools
-    → States. Nothing here contains secrets — API keys live in <code>secrets.yaml</code>, which is
-    never published.</p>
+    → States. None of these files contain secrets. API keys are kept in <code>secrets.yaml</code>, which
+    isn't published.</p>
   </div>
 
   {files.map((f) => (
@@ -73,8 +72,8 @@ const files = [
   <div class="section-head"><h2>The stats-publishing pipeline</h2></div>
   <p class="lede">
     The utility_meter helpers and the 00:15 GitHub push that feed the
-    <a href="/stats/">stats page</a> are running on the live system now. They'll go up here once
-    they've survived a few more real midnights. The design is written up on the
+    <a href="/stats/">stats page</a> are running on the live system now. We'll post them here once
+    they've run cleanly for a few more nights. The design is written up on the
     <a href="/stack/#pipeline">stack page</a>.
   </p>
 </Base>

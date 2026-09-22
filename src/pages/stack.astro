@@ -4,11 +4,11 @@ import Base from '../layouts/Base.astro';
 
 <Base title="The stack" description="How Home Assistant, Predbat, Sigenergy, Intelligent Octopus Go and Solcast run a UK solar and battery system automatically, including the pipeline that publishes this site's stats.">
   <div class="page-head">
-    <h1>The brain</h1>
+    <h1>The software</h1>
     <p class="lede">
-      Home Assistant on a <strong>£50 second-hand Dell OptiPlex</strong>, with Predbat re-planning
-      every half hour against half-hourly prices and a Solcast forecast. Four layers, top to bottom.
-      The software didn't cost a penny.
+      Home Assistant on a <strong>£50 second-hand Dell OptiPlex</strong>, running Predbat, which
+      replans every half hour using half-hourly prices and a Solcast forecast. It breaks down into
+      four layers, below. All the software is free.
     </p>
   </div>
 
@@ -18,7 +18,7 @@ import Base from '../layouts/Base.astro';
       <div>
         <h3>Read everything</h3>
         <p>The inverter speaks Modbus TCP over the local network. Every meter, cell voltage and
-        MPPT string lands in Home Assistant — over 250 entities, all local — and nothing leaves the
+        MPPT string ends up in Home Assistant (over 250 entities, all local). Nothing leaves the
         house except the nightly summary that feeds this site.</p>
         <p class="parts">Home Assistant OS · Sigenergy ESS integration · SQLite recorder</p>
       </div>
@@ -28,17 +28,17 @@ import Base from '../layouts/Base.astro';
       <div>
         <h3>Forecast the day</h3>
         <p>Solcast gives two forecasts a day for each roof plane, east and west modelled
-        separately. Octopus publishes tomorrow's rates in the afternoon, so by teatime the planner
-        knows roughly what both sides of the meter will do.</p>
-        <p class="parts">Solcast · Octopus Energy integration · half-hourly rates</p>
+        separately. On Intelligent Octopus Go the prices are fixed (8p overnight, 34.72p the rest
+        of the day, 12p for export), so the unknowns are the weather and the house's load.</p>
+        <p class="parts">Solcast · Octopus Energy integration · tariff rates</p>
       </div>
     </div>
     <div class="step">
       <span class="n">03</span>
       <div>
         <h3>Make a plan</h3>
-        <p>Predbat optimises the next 48 hours: charge windows, discharge windows, and the slots
-        where doing nothing is cheapest. It writes the plan straight to the inverter through three
+        <p>Predbat plans the next 48 hours: when to charge, when to discharge, and when to leave
+        the battery alone. It sends the plan to the inverter through three
         small bridge automations that map its requested mode onto Sigenergy's EMS registers.</p>
         <p class="parts">Predbat via AppDaemon · 48h horizon · 30-minute slots</p>
       </div>
@@ -49,29 +49,29 @@ import Base from '../layouts/Base.astro';
         <h3>Publish it</h3>
         <p>At 00:15 an automation rolls up the day, compares it with Predbat's no-solar baseline,
         and pushes one JSON file to this site's GitHub repo. A GitHub Action rebuilds and deploys.
-        No editing step, which is rather the point.</p>
+        Nobody edits the figures by hand.</p>
         <p class="parts">rest_command → GitHub Contents API · Actions · static build</p>
       </div>
     </div>
   </div>
 
   <section class="card dark" style="margin-top:1rem">
-    <div class="card-head"><h2>What a plan actually looks like</h2></div>
+    <div class="card-head"><h2>What a plan looks like</h2></div>
     <p style="max-width:42rem">
-      Every half hour Predbat picks one of three moves for each upcoming slot. Overnight it buys
-      cheap, at dusk it holds, and mid-morning it decides whether the forecast justifies leaving
-      the battery empty for the sun to fill.
+      Every half hour Predbat chooses one of three actions for each upcoming slot. Typically it
+      charges overnight when power is cheap, holds at dusk, and in the morning works out whether
+      the forecast is good enough to leave room in the battery for solar.
     </p>
     <div class="cols-3" style="margin-top:1.2rem">
       <div class="subcard">
         <p class="kicker" style="color:var(--accent-pale)">Charge</p>
-        <p style="margin:0">Buy in the cheapest slots, but only as much as tomorrow's forecast says
-        we'll need — never so much that we waste capacity the sun would have filled.</p>
+        <p style="margin:0">Charge in the cheapest slots, but only as much as tomorrow's forecast says
+        we'll need, so there's still room for the solar.</p>
       </div>
       <div class="subcard">
         <p class="kicker" style="color:var(--accent-pale)">Hold</p>
-        <p style="margin:0">Sit still through mid-price slots. Doing nothing is very often the
-        cheapest available move, and the one people forget to model.</p>
+        <p style="margin:0">Leave the battery alone through mid-price slots. Quite often that's the
+        cheapest option.</p>
       </div>
       <div class="subcard">
         <p class="kicker" style="color:var(--accent-pale)">Discharge</p>
@@ -82,22 +82,22 @@ import Base from '../layouts/Base.astro';
   </section>
 
   <div class="note">
-    <p><strong>The one rule that explains everything:</strong> the export rate is a flat 12p all
-    day, so there are no export peaks to chase. The battery is there to feed the house, not the
-    grid. For each kWh the order of value goes: avoid evening peak import, then grab the £1/kWh VPP
-    events, then avoid standard-rate import, and only export at 12p as a last resort. Predbat
-    works all of this out from the rates on its own. None of it is hard-coded.</p>
+    <p><strong>How the battery gets used:</strong> the export rate is a flat 12p all day, so
+    there's no export peak to aim for, and the battery mostly feeds the house. In order of value
+    per kWh: avoid evening peak import, then the £1/kWh VPP events, then avoid standard-rate
+    import, and export at 12p only when there's nothing better. Predbat works this out from the
+    rates; we haven't written any of it as fixed rules.</p>
   </div>
 
   <div class="section-head"><h2>The pieces</h2></div>
   <table>
     <thead><tr><th>Layer</th><th>What</th><th>Job</th></tr></thead>
     <tbody>
-      <tr><td>OS</td><td>Home Assistant OS (x86-64)</td><td>Runs on the OptiPlex's SSD, which the statistics database likes a lot more than a Pi's SD card</td></tr>
+      <tr><td>OS</td><td>Home Assistant OS (x86-64)</td><td>Runs on the OptiPlex's SSD, which copes with the statistics database far better than a Pi's SD card</td></tr>
       <tr><td>Inverter link</td><td>Sigenergy ESS integration (HACS)</td><td>Modbus TCP on port 502. Over 250 entities, all local, no cloud</td></tr>
-      <tr><td>Tariff</td><td>Octopus Energy integration (HACS)</td><td>Live half-hourly import and export rates, Saving Sessions, consumption</td></tr>
+      <tr><td>Tariff</td><td>Octopus Energy integration (HACS)</td><td>Import and export rates, Saving Sessions, consumption</td></tr>
       <tr><td>Forecast</td><td>Solcast (HACS)</td><td>7-day rooftop PV forecast, both roof faces, free hobbyist tier</td></tr>
-      <tr><td>Brain</td><td><strong>Predbat</strong> (add-on mode)</td><td>Plans charge and discharge against prices, forecast and learned consumption</td></tr>
+      <tr><td>Planner</td><td><strong>Predbat</strong> (add-on mode)</td><td>Plans charge and discharge against prices, forecast and learned consumption</td></tr>
       <tr><td>Bridge</td><td>Three small HA automations</td><td>Map Predbat's requested mode onto Sigenergy's EMS controls. <a href="/configs/">See configs</a></td></tr>
     </tbody>
   </table>
@@ -112,41 +112,41 @@ import Base from '../layouts/Base.astro';
   on this site yet.</p>
 
   <h3><img src="/axle-logo-black.png" alt="Axle" class="axle-logo-inline" /> VPP, events-only</h3>
-  <p>Signed up in June 2026 in <strong>events-only</strong> mode. Axle dispatches the battery four
-  to eight times a month during grid stress and pays <strong>£1/kWh</strong>, with a £10/month
-  minimum topped up if events are thin. Predbat has Axle support built in, so it pulls upcoming
-  events straight into its plan, pre-charges for them, and steps aside cleanly while one runs. The
-  rest of the time Predbat stays in charge. Because Axle settles through the smart meter directly
-  it paid out for months before our Octopus export was certified, which made it our first real
-  export earner. If an Axle event lands inside a Saving Session you earn from both — the two
-  schemes have no idea about each other.</p>
+  <p>We signed up in June 2026 in <strong>events-only</strong> mode. Axle dispatches the battery four
+  to eight times a month when the grid is under strain and pays <strong>£1/kWh</strong>, with a
+  £10/month minimum if there aren't many events. Predbat has Axle support built in: it adds
+  upcoming events to its plan, charges the battery beforehand and hands over control while the
+  event runs. The rest of the time Predbat is in charge. Axle settles through the smart meter, so
+  it was paying for months before our Octopus export was certified, and it was our first export
+  income. If an Axle event falls inside a Saving Session you get paid by both, as the two schemes
+  don't know about each other.</p>
 
   <h3>Load shifting</h3>
   <p>Tapo P110 smart plugs on the washing machine, dryer and dishwasher, plus a phone notification
-  when solar surplus goes over 2 kW. Low-tech, and worth about £65 a year.</p>
+  when solar surplus goes over 2 kW. Simple, and worth about £65 a year.</p>
 
   <div class="section-head" id="pipeline"><h2>The pipeline behind this site</h2></div>
   <p class="lede">
-    The <a href="/stats/">stats page</a> is fed by Home Assistant itself. No spreadsheets, and no
-    cloud service sitting in the middle:
+    The <a href="/stats/">stats page</a> is fed by Home Assistant directly, with no spreadsheets or
+    cloud service in between:
   </p>
   <ol style="max-width:40rem">
     <li><strong>Six daily utility_meter helpers</strong> wrap the Sigenergy cumulative energy
     sensors. When they reset at midnight, yesterday's total survives in the
-    <code>last_period</code> attribute, which is the trick that makes a 00:15 read reliable.</li>
+    <code>last_period</code> attribute, which is what makes reading them at 00:15 reliable.</li>
     <li><strong>Yesterday's costs</strong> come from Predbat's own tracking sensors
     (<code>cost_yesterday</code> and its no-solar comparison), which are ready right after
-    midnight. The Octopus cost sensors lag a day behind, so they're no good here.</li>
+    midnight. The Octopus cost sensors run a day behind, so they can't be used here.</li>
     <li><strong>At 00:15</strong> an automation builds one JSON file for yesterday and pushes it to
     this site's GitHub repo with a single <code>rest_command</code> against the GitHub Contents
-    API. One file per day, retried five times with backoff if the network blips.</li>
+    API. One file per day, retried up to five times, with increasing delays, if the network drops.</li>
     <li><strong>GitHub Actions</strong> rebuilds the site and rsyncs it to the server. The commit
-    history doubles as an audit log of every day's data.</li>
+    history also serves as a record of every day's data.</li>
   </ol>
   <p>The full pipeline YAML is on the <a href="/configs/">configs page</a> if you want it for your
   own install.</p>
 
-  <div class="section-head"><h2>Maintenance reality</h2></div>
+  <div class="section-head"><h2>Maintenance</h2></div>
   <table>
     <thead><tr><th>Cadence</th><th>Task</th></tr></thead>
     <tbody>
