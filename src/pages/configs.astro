@@ -11,7 +11,7 @@ const files = [
   {
     name: 'apps.yaml', lang: 'yaml', code: appsYaml, dl: '/configs/apps.yaml', tag: 'Predbat',
     desc: 'Predbat entity map for Sigenergy',
-    blurb: 'The full Predbat configuration for a Sigenergy EC-series hybrid (inverter_type: SIG) on Octopus Agile plus fixed export, with Solcast forecasting and Saving Session support. The regex entity matchers mean it should drop onto most single-inverter Sigenergy installs unchanged, and the rate limits are read from sensors rather than hard-coded — which paid off nicely when our inverter turned out to be a different model than the one we ordered.',
+    blurb: 'The full Predbat configuration for a Sigenergy EC-series hybrid (inverter_type: SIG) on Intelligent Octopus Go plus flat 12p export, with Solcast forecasting and Saving Session support. The regex entity matchers mean it should drop onto most single-inverter Sigenergy installs unchanged, and the rate limits are read from sensors rather than hard-coded — which paid off nicely when our inverter turned out to be a different model than the one we ordered.',
   },
   {
     name: 'predbat_sigenergy_bridge.yaml', lang: 'yaml', code: bridgeYaml, dl: '/configs/predbat_sigenergy_bridge.yaml', tag: 'Bridge',
@@ -36,7 +36,7 @@ const files = [
 ];
 ---
 
-<Base title="The configs" description="The exact sanitized Predbat apps.yaml, Sigenergy bridge automations, helpers and energy dashboard config running a UK Sigenergy and Octopus Agile install.">
+<Base title="The configs" description="The exact sanitized Predbat apps.yaml, Sigenergy bridge automations, helpers and energy dashboard config running a UK Sigenergy, Intelligent Octopus Go and Outgoing Octopus install.">
   <div class="page-head">
     <h1>The configs</h1>
     <p class="lede">

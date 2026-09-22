@@ -16,7 +16,7 @@ const faqs: { q: string; a: string; link?: { href: string; label: string } }[] =
   },
   {
     q: 'Is an east/west split roof worth it compared with south-facing solar?',
-    a: 'For a house with a battery and time-of-use pricing, yes. Peak output is lower than a south-facing array, but the generation spreads across the day. Morning sun on the east face, evening sun on the west. So it matches when the house actually uses power, and it clips less against the inverter limit. With a battery and Octopus Agile it suits this place nicely.',
+    a: 'For a house with a battery and time-of-use pricing, yes. Peak output is lower than a south-facing array, but the generation spreads across the day. Morning sun on the east face, evening sun on the west. So it matches when the house actually uses power, and it clips less against the inverter limit. With a battery and a cheap overnight window it suits this place nicely.',
     link: { href: '/system/', label: 'Why east/west works' },
   },
   {
@@ -26,17 +26,17 @@ const faqs: { q: string; a: string; link?: { href: string; label: string } }[] =
   },
   {
     q: 'What is Predbat and what does it do?',
-    a: 'Predbat is free, open-source battery-planning software that runs inside Home Assistant. Every half hour it plans charging and discharging against live Octopus Agile prices, a Solcast solar forecast and learned household consumption. It decides when to charge from the grid, when to run the house off the battery, and when to export. None of the strategy is hard-coded. It gets recomputed from the rates each time. Ours runs on a £50 refurbished Dell OptiPlex 3050 Micro.',
+    a: 'Predbat is free, open-source battery-planning software that runs inside Home Assistant. Every half hour it plans charging and discharging against your live half-hourly import and export rates, a Solcast solar forecast and learned household consumption. It decides when to charge from the grid, when to run the house off the battery, and when to export. None of the strategy is hard-coded. It gets recomputed from the rates each time. Ours runs on a £50 refurbished Dell OptiPlex 3050 Micro.',
     link: { href: '/stack/', label: 'The full software stack' },
   },
   {
     q: 'Is Octopus Agile worth it with a home battery?',
-    a: 'For a battery home running Predbat, yes. The bigger prize is cheap-import arbitrage, not export. The battery fills up in the cheapest overnight half-hours (often low-to-mid teens p/kWh) and then runs the house through the evening import peak (mid-20s to high-30s p/kWh in winter). Dodging peak-rate import is worth about as much per kWh as the old Flux export peak ever was.',
+    a: 'We modelled it seriously and picked something else. The prize for a battery home is cheap-import arbitrage, not export: fill the battery in the cheapest hours, then run the house through the evening peak. Agile does that at a different price every half hour; Intelligent Octopus Go does it with a guaranteed block at 8p. On our own consumption, with a heat pump and an EV to schedule, IOG modelled 591 pounds a year against Agile at 946 — a guaranteed cheap block beats Agile\'s average once the battery is big enough to fill in one go. Agile still wins if you have genuinely flexible loads and no fixed overnight window to fill. Either way, dodging peak-rate import is worth about as much per kWh as the old Flux export peak ever was.',
     link: { href: '/tariff/', label: 'The full tariff story' },
   },
   {
     q: 'What happened to Octopus Flux, and what should battery owners run instead?',
-    a: 'Octopus Flux and Intelligent Octopus Flux closed to new customers in March 2026. We now run Octopus Agile for import with Outgoing Octopus fixed 12p export. Losing Flux\'s 30p evening export peak only cost around 10% of the projected year-one return, because under Agile the battery\'s job flips from exporting at a peak rate to avoiding importing at a peak rate. The lesson? Don\'t pin a multi-year payback sum on one tariff sticking around. Model your second-best option too.',
+    a: 'Octopus Flux and Intelligent Octopus Flux closed to new customers in March 2026. We now run Intelligent Octopus Go for import with Outgoing Octopus flat 12p export. Losing Flux\'s 30p evening export peak only cost around 10% of the projected year-one return, because on a time-of-use import tariff the battery\'s job flips from exporting at a peak rate to avoiding importing at a peak rate. The lesson? Don\'t pin a multi-year payback sum on one tariff sticking around. Model your second-best option too.',
     link: { href: '/tariff/', label: 'The Flux plot twist' },
   },
   {
@@ -69,7 +69,7 @@ const faqJsonLd = {
 
 <Base
   title="FAQ: UK solar, battery, Sigenergy & Predbat"
-  description="Straight answers about a real UK solar and battery install: cost of a 10.45 kWp system, Aiko 475W east/west output, Sigenergy with Home Assistant and Predbat, Octopus Agile vs Flux, and publishing HA data automatically."
+  description="Straight answers about a real UK solar and battery install: cost of a 10.45 kWp system, Aiko 475W east/west output, Sigenergy with Home Assistant and Predbat, Intelligent Octopus Go vs Agile vs Flux, and publishing HA data automatically."
   jsonLd={faqJsonLd}
 >
   <div class="page-head">

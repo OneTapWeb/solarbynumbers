@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import stats from '../data/stats.json';
+import tariffs from '../../data/tariffs.json';
 
 const t = stats.totals as Record<string, number>;
 const m = stats.meta as any;
@@ -51,7 +52,7 @@ const datasetJsonLd = {
   '@type': 'Dataset',
   name: 'Solar by Numbers: daily UK solar & battery performance data',
   description:
-    'Daily measured performance of a 10.45 kWp (22× Aiko 475W) UK solar array with a 15.06 kWh SigenStor battery and Sigenergy EC 8.0 SP inverter on Octopus Agile: PV generation, grid import and export, house consumption, battery charge/discharge, daily cost and savings versus a no-solar baseline. Published automatically every night from Home Assistant and Predbat. Location: Hampshire, UK. East/west roof.',
+    'Daily measured performance of a 10.45 kWp (22× Aiko 475W) UK solar array with a 15.06 kWh SigenStor battery and Sigenergy EC 8.0 SP inverter on Intelligent Octopus Go: PV generation, grid import and export, house consumption, battery charge/discharge, daily cost and savings versus a no-solar baseline. Published automatically every night from Home Assistant and Predbat. Location: Hampshire, UK. East/west roof.',
   url: 'https://solarbynumbers.co.uk/stats/',
   license: 'https://creativecommons.org/licenses/by/4.0/',
   isAccessibleForFree: true,
@@ -234,12 +235,17 @@ const datasetJsonLd = {
   <div class="cols-2">
     <div class="card">
       <h3 style="margin-top:0">The saving</h3>
-      <p>A day's saving comes from Predbat's no-solar comparison: what the day's usage would have
-      cost if it were all imported at the actual half-hourly Agile rates, minus what it actually
-      cost. Predbat also credits energy banked into the battery during the day (priced at the rate
-      it later displaces) and debits energy drawn down, so a day that fills the battery scores
-      higher than a pure avoided-import view. Over a run of days the battery starts and ends at a
-      similar charge and it evens out. Standing charges hit both sides equally, so they cancel.</p>
+      <p>A day's saving is a baseline minus what the day actually cost. The baseline is the whole
+      day's consumption priced at a <strong>flat 23.4p/kWh</strong> — a plain no-solar, no-battery,
+      no-clever-tariff house — and it stays at 23.4p even though our own import tariff has changed,
+      so the line means the same thing every day it's plotted. The actual cost comes from Predbat,
+      which prices real imports at the real half-hourly rate, subtracts export earnings, and credits
+      energy banked into the battery (at the rate it later displaces) while debiting energy drawn
+      down, so a day that fills the battery scores higher than a pure avoided-import view. Over a run
+      of days the battery starts and ends at a similar charge and that evens out.</p>
+      <p class="fine">One asymmetry we'd rather state than hide: the actual side includes the daily
+      standing charge and the baseline doesn't, so every day's saving is understated by roughly
+      {tariffs.current.electricity.standing_p.toFixed(0)}p. We'd sooner be pessimistic than flatter ourselves.</p>
     </div>
     <div class="card" id="axle">
       <h3 style="margin-top:0">The Axle column</h3>

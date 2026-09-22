@@ -15,8 +15,8 @@ running on the box rather than what we *think* we set up. It found three things 
 Two of the three automations that translate Predbat's wishes into Sigenergy register writes ran
 in `mode: single`. That means if a second trigger arrives while the automation is still
 mid-flight, the second one is **silently dropped**, and the inverter is left holding a stale
-charge or discharge limit until the next write comes along. The window's tiny, but Agile
-charging is exactly the kind of thing that fires rapid back-to-back updates.
+charge or discharge limit until the next write comes along. The window's tiny, but half-hourly
+rate changes are exactly the kind of thing that fire rapid back-to-back updates.
 
 `mode: restart` is the right semantics for "always mirror the latest value": a new trigger
 cancels the in-flight run and starts over with fresh state. One word changed, one failure mode
@@ -27,7 +27,7 @@ automations, take the new version.
 
 `best_soc_keep` was 0, meaning Predbat was free to plan the battery right down to the 4% hardware
 reserve with zero margin for error. That's fine when the forecast is perfect. When Solcast is
-optimistic by a couple of kWh, and it will be, the difference arrives as peak-rate Agile
+optimistic by a couple of kWh, and it will be, the difference arrives as peak-rate
 import at 35p+.
 
 This matters more for us than for most Predbat users because **we still earn nothing for

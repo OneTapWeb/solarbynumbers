@@ -2,12 +2,12 @@
 import Base from '../layouts/Base.astro';
 ---
 
-<Base title="The stack" description="How Home Assistant, Predbat, Sigenergy, Octopus Agile and Solcast run a UK solar and battery system automatically, including the pipeline that publishes this site's stats.">
+<Base title="The stack" description="How Home Assistant, Predbat, Sigenergy, Intelligent Octopus Go and Solcast run a UK solar and battery system automatically, including the pipeline that publishes this site's stats.">
   <div class="page-head">
     <h1>The brain</h1>
     <p class="lede">
       Home Assistant on a <strong>£50 second-hand Dell OptiPlex</strong>, with Predbat re-planning
-      every half hour against Agile prices and a Solcast forecast. Four layers, top to bottom.
+      every half hour against half-hourly prices and a Solcast forecast. Four layers, top to bottom.
       The software didn't cost a penny.
     </p>
   </div>
@@ -28,9 +28,9 @@ import Base from '../layouts/Base.astro';
       <div>
         <h3>Forecast the day</h3>
         <p>Solcast gives two forecasts a day for each roof plane, east and west modelled
-        separately. Octopus publishes tomorrow's Agile prices around 4pm, so by teatime the planner
+        separately. Octopus publishes tomorrow's rates in the afternoon, so by teatime the planner
         knows roughly what both sides of the meter will do.</p>
-        <p class="parts">Solcast · Octopus Energy integration · Agile half-hourly</p>
+        <p class="parts">Solcast · Octopus Energy integration · half-hourly rates</p>
       </div>
     </div>
     <div class="step">
@@ -95,7 +95,7 @@ import Base from '../layouts/Base.astro';
     <tbody>
       <tr><td>OS</td><td>Home Assistant OS (x86-64)</td><td>Runs on the OptiPlex's SSD, which the statistics database likes a lot more than a Pi's SD card</td></tr>
       <tr><td>Inverter link</td><td>Sigenergy ESS integration (HACS)</td><td>Modbus TCP on port 502. Over 250 entities, all local, no cloud</td></tr>
-      <tr><td>Tariff</td><td>Octopus Energy integration (HACS)</td><td>Live Agile half-hourly rates, export rate, Saving Sessions, consumption</td></tr>
+      <tr><td>Tariff</td><td>Octopus Energy integration (HACS)</td><td>Live half-hourly import and export rates, Saving Sessions, consumption</td></tr>
       <tr><td>Forecast</td><td>Solcast (HACS)</td><td>7-day rooftop PV forecast, both roof faces, free hobbyist tier</td></tr>
       <tr><td>Brain</td><td><strong>Predbat</strong> (add-on mode)</td><td>Plans charge and discharge against prices, forecast and learned consumption</td></tr>
       <tr><td>Bridge</td><td>Three small HA automations</td><td>Map Predbat's requested mode onto Sigenergy's EMS controls. <a href="/configs/">See configs</a></td></tr>
@@ -117,7 +117,7 @@ import Base from '../layouts/Base.astro';
   minimum topped up if events are thin. Predbat has Axle support built in, so it pulls upcoming
   events straight into its plan, pre-charges for them, and steps aside cleanly while one runs. The
   rest of the time Predbat stays in charge. Because Axle settles through the smart meter directly
-  it pays out even though our Octopus export isn't certified yet, which makes it our first real
+  it paid out for months before our Octopus export was certified, which made it our first real
   export earner. If an Axle event lands inside a Saving Session you earn from both — the two
   schemes have no idea about each other.</p>
 

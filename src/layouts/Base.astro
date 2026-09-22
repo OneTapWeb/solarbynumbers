@@ -18,7 +18,7 @@ interface Props {
 }
 const {
   title,
-  description = 'A UK solar and battery install, documented in numbers. 10.45 kWp of Aiko panels, a Sigenergy inverter, Octopus Agile, and Home Assistant with Predbat. Real daily performance data, published automatically.',
+  description = 'A UK solar and battery install, documented in numbers. 10.45 kWp of Aiko panels, a Sigenergy inverter, Intelligent Octopus Go, and Home Assistant with Predbat. Real daily performance data, published automatically.',
   ogType = 'website',
   jsonLd,
 } = Astro.props;
@@ -36,11 +36,11 @@ const siteJsonLd = {
       url: siteUrl,
       inLanguage: 'en-GB',
       description:
-        'Real daily performance data from a UK solar and battery install: 22× Aiko 475W panels (10.45 kWp), a Sigenergy EC 8.0 SP hybrid inverter, 15.06 kWh SigenStor battery, Octopus Agile, and Home Assistant with Predbat.',
+        'Real daily performance data from a UK solar and battery install: 22× Aiko 475W panels (10.45 kWp), a Sigenergy EC 8.0 SP hybrid inverter, 15.06 kWh SigenStor battery, Intelligent Octopus Go, and Home Assistant with Predbat.',
       publisher: { '@id': `${siteUrl}#publisher` },
       keywords: [
         'UK solar', 'home battery', 'Aiko 475W', 'Sigenergy', 'SigenStor', 'Predbat',
-        'Home Assistant', 'Octopus Agile', 'Outgoing Octopus', 'Solcast', 'east west solar',
+        'Home Assistant', 'Intelligent Octopus Go', 'Outgoing Octopus', 'Solcast', 'east west solar',
         'solar payback UK', 'battery storage', 'Axle VPP',
       ],
     },

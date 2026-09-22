@@ -11,7 +11,7 @@ our electricity bill.
 The full chain is live:
 
 - **Sigenergy ESS integration**: Modbus to the inverter, over 250 entities, all local
-- **Octopus Energy integration**: live Agile half-hourly rates and Saving Sessions
+- **Octopus Energy integration**: live half-hourly rates and Saving Sessions
 - **Solcast**: rooftop forecast for both roof faces
 - **Predbat** (add-on mode): planning every half-hour slot against prices and the forecast
 - **Energy dashboard**: wired to the Sigenergy cumulative meters
