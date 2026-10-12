@@ -65,7 +65,7 @@ async function loadDaily() {
   return days;
 }
 
-// Axle's own settled ledger (data/axle.json), transcribed from the app.
+// Axle's own settled ledger (data/axle.json), transcribed from the app up to its as_of date.
 // It is the authority on money: the per-day `axle` blocks that Home Assistant
 // pushes are our metered-export estimate of each dispatch, which runs a few
 // percent out and knows nothing about the monthly top-ups to the £10 minimum.
@@ -82,7 +82,8 @@ async function loadAxleLedger() {
     console.warn('aggregate: data/axle.json has no usable transactions — falling back to metered estimates');
     return null;
   }
-  return { as_of: raw.as_of ?? null, source: raw.source ?? null, transactions: tx };
+  const eventDates = new Set(tx.filter((t) => t.type === 'event').map((t) => t.date));
+  return { as_of: raw.as_of ?? null, source: raw.source ?? null, transactions: tx, eventDates };
 }
 
 // Deterministic pseudo-random (no Math.random — reproducible builds)
@@ -167,6 +168,7 @@ function aggregate(days, ledger) {
     unpaid_export_kwh: 0, foregone_export_gbp: 0,
     axle_earnings: 0, axle_events: 0, axle_topups: 0, axle_export_kwh: 0,
     axle_metered_estimate: 0,
+    axle_metered_events: 0, axle_metered_gbp: 0,
   };
   for (const d of days) {
     const m = d.date.slice(0, 7);
@@ -176,14 +178,19 @@ function aggregate(days, ledger) {
     const c = d.cost_gbp ?? {};
     // Axle VPP dispatches as our own meters saw them (optional block in the daily
     // JSON; absent on pre-Axle days). The kWh are ours to measure; the money is
-    // only an estimate, and is replaced below by Axle's settled ledger if we have it.
+    // what we count from its as_of date onwards: days up to then are covered by
+    // Axle's settled figures below, every event after it is our meter at £1/kWh.
     const ax = d.axle ?? {};
+    const useMeter = !ledger || (!ledger.eventDates.has(d.date) && (!ledger.as_of || d.date > ledger.as_of));
     if (ax.export_kwh != null) { mo.axle_export_kwh += ax.export_kwh; totals.axle_export_kwh += ax.export_kwh; }
     if (ax.earnings_gbp != null) {
-      totals.axle_metered_estimate += ax.earnings_gbp;
-      if (!ledger) { mo.axle_earnings += ax.earnings_gbp; totals.axle_earnings += ax.earnings_gbp; }
+      if (!useMeter) totals.axle_metered_estimate += ax.earnings_gbp;
+      else { mo.axle_earnings += ax.earnings_gbp; totals.axle_earnings += ax.earnings_gbp; if (ledger) totals.axle_metered_gbp += ax.earnings_gbp; }
     }
-    if (ax.events != null && !ledger) { mo.axle_events += ax.events; totals.axle_events += ax.events; }
+    if (ax.events != null && useMeter) {
+      mo.axle_events += ax.events; totals.axle_events += ax.events;
+      if (ledger) totals.axle_metered_events += ax.events;
+    }
     for (const k of ['pv_generation', 'grid_import', 'grid_export', 'house_consumption', 'battery_charge', 'battery_discharge']) {
       if (e[k] != null) { mo[k] += e[k]; totals[k] += e[k]; }
     }

@@ -248,13 +248,15 @@ const datasetJsonLd = {
     </div>
     <div class="card" id="axle">
       <h3 style="margin-top:0">The Axle column</h3>
-      <p><strong>Axle £</strong> is what Axle has actually paid, taken from the transaction list in
-      their app: £{fmt((t.axle_earnings ?? 0) - (t.axle_topups ?? 0), 2)} for {t.axle_events} grid
+      <p><strong>Axle £</strong> is £{fmt((t.axle_earnings ?? 0) - (t.axle_topups ?? 0), 2)} for {t.axle_events} grid
       events at £1/kWh, plus £{fmt(t.axle_topups, 2)} of monthly top-ups bringing quiet months up
       to the £10 minimum.</p>
-      <p>By our own meters those events came to £{fmt(t.axle_metered_estimate, 2)}. We log the
-      battery's export during each dispatch window and price it at £1/kWh. Axle settles on their
-      own metering a day or so later, and the two usually differ by a few percent either way. On
+      <p>Each event is counted automatically: Home Assistant logs the battery's export during the
+      dispatch window and prices it at £1/kWh, and it lands here the next morning.
+      {(t.axle_metered_events ?? 0) > 0 && ` The ${t.axle_metered_events === 1 ? 'latest event' : `latest ${t.axle_metered_events} events`} (£${fmt(t.axle_metered_gbp, 2)}) ${t.axle_metered_events === 1 ? 'is' : 'are'} counted that way.`}
+      {m.axle_ledger_as_of && ` Events up to ${new Date(m.axle_ledger_as_of + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })} use the amount Axle actually paid, copied from their app.`}</p>
+      <p>For those paid events our own meter came to £{fmt(t.axle_metered_estimate, 2)}. Axle settles on
+      their own metering a day or so later, and the two usually differ by a few percent either way. On
       6 September they were completely different: the Axle API key had stopped working without any
       warning, so Predbat didn't know about the event and the battery started it at 2.9%. Our meter
       recorded 0.43 kWh going out; Axle paid £0.00. Axle's figure is what we actually get paid, so

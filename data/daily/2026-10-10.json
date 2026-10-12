@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-10",
+  "tz": "Europe/London",
+  "generated_at": "2026-10-12T15:30:00+01:00",
+  "source": "backfill",
+  "_note": "HA was unplugged 10-10 12:02 to 10-12 15:03. Energy from the mySigen app day view; costs unavailable (Predbat was offline).",
+  "energy_kwh": {
+    "pv_generation": 15.44,
+    "grid_import": 7.18,
+    "grid_export": 1.32,
+    "house_consumption": 32,
+    "battery_charge": 8.41,
+    "battery_discharge": 19.11
+  },
+  "cost_gbp": {
+    "import_cost": null,
+    "export_revenue": null,
+    "net_cost": null,
+    "baseline_no_solar_cost": null
+  }
+}
