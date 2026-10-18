@@ -1,12 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
+import stats from '../data/stats.json';
+
+const prop = (stats.meta as any).proposal;
 
 // One source of truth: rendered on the page AND emitted as FAQPage structured data.
 // Answers are plain text (safe for schema.org acceptedAnswer); `link` adds an on-page "more" pointer.
 const faqs: { q: string; a: string; link?: { href: string; label: string } }[] = [
   {
     q: 'What does a 10.45 kWp solar and battery system cost in the UK in 2026?',
-    a: 'Ours cost £11,999 fully installed at 0% VAT. That covered 22× Aiko 475W panels (10.45 kWp), a Sigenergy EC 8.0 SP hybrid inverter and a 15.06 kWh SigenStor battery. That\'s about £1,148 per kWp including the battery. Before install, the modelling put year-one value at roughly £1,900–£2,060, with payback at around six and a half years. This site tracks how that\'s going.',
+    a: `Ours cost £11,999 fully installed at 0% VAT. That covered 22× Aiko 475W panels (10.45 kWp), a Sigenergy EC 8.0 SP hybrid inverter and a 15.06 kWh SigenStor battery. That\'s about £1,148 per kWp including the battery. The installer's proposal put year one at £${prop.year1_gbp.toLocaleString('en-GB')} and payback at about ${prop.payback_years} years. At the rate it's actually going that's nearer ${prop.payback_years_at_rate} years, and this site tracks it every day.`,
     link: { href: '/system/', label: 'Full specification & business case' },
   },
   {

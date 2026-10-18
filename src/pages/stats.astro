@@ -14,6 +14,8 @@ const monthName = (mo: string) =>
   new Date(mo + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 const ukDate = (iso: string) =>
   new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+// en-GB gives "Sept"; tables and axes want three letters throughout
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const range = m.first_date && m.last_date ? `${ukDate(m.first_date)} → ${ukDate(m.last_date)}` : '';
 
 // --- generation heatmap: one row per month, one cell per day of that month ---
@@ -24,19 +26,23 @@ const heatMonths = stats.monthly.map((mo: any) => {
   const dayCount = new Date(Date.UTC(y, mm, 0)).getUTCDate();
   const cells = Array.from({ length: dayCount }, (_, i) => {
     const iso = `${mo.month}-${String(i + 1).padStart(2, '0')}`;
-    return { iso, kwh: byDate.has(iso) ? (byDate.get(iso) as number | null) : undefined };
+    const inRecord = iso >= m.first_date && iso <= m.last_date;
+    return { iso, kwh: byDate.has(iso) ? (byDate.get(iso) as number | null) : inRecord ? 'gap' : undefined };
   });
   return {
     month: mo.month,
-    short: new Date(mo.month + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'short' }),
+    short: MON[mm - 1],
+    long: monthName(mo.month),
     total: mo.pv_generation,
     cells,
   };
 });
 // 5 steps of the accent hue, palest to full — plus a distinct "no data" tone
 const STEPS = ['#e8eefc', '#c9d8f8', '#9ab4f2', '#5b83e6', '#1d4ed8'];
-const cellStyle = (kwh: number | null | undefined) => {
-  if (kwh === undefined) return 'background:transparent';        // day not in the dataset
+const gapDays = heatMonths.flatMap((mo: any) => mo.cells).filter((c: any) => c.kwh === 'gap').length;
+const cellStyle = (kwh: number | null | undefined | 'gap') => {
+  if (kwh === undefined) return 'background:transparent';        // before install, or not yet happened
+  if (kwh === 'gap') return '';                                  // inside the record, no upload (.gap)
   if (kwh == null) return 'background:var(--track)';             // logged, but no figure
   const step = Math.min(STEPS.length - 1, Math.floor((kwh / heatMax) * STEPS.length));
   return `background:${STEPS[step]}`;
@@ -44,6 +50,11 @@ const cellStyle = (kwh: number | null | undefined) => {
 
 const axleMonths = stats.monthly.filter((mo: any) => (mo.axle_earnings ?? 0) > 0 || (mo.axle_events ?? 0) > 0);
 const axleMax = Math.max(...axleMonths.map((mo: any) => mo.axle_earnings ?? 0), 1);
+
+// one-sentence summaries so the canvases say something to a screen reader
+const fmtGbp = (v: number) => `£${v.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const paybackLabel = `Line chart of cumulative savings. After ${t.days} days the actual saving is ${fmtGbp(t.savings ?? 0)}; the proposal's estimate for the same period is ${fmtGbp(prop.to_date_gbp ?? 0)}. Monthly figures are in the ledger table below.`;
+const gridLabel = `Bar chart of daily grid export above the line and import below, since ${ukDate(m.first_date)}. In total ${fmt(t.grid_export)} kWh exported and ${fmt(t.grid_import)} kWh imported. Monthly figures are in the ledger table below.`;
 
 const selfConsumed = (t.pv_generation ?? 0) - (t.grid_export ?? 0);
 
@@ -89,7 +100,7 @@ const datasetJsonLd = {
         <span class="projected"><i></i>proposal estimate</span>
       </div>
     </div>
-    <div class="chart"><canvas id="chart-payback" height="118"></canvas></div>
+    <div class="chart"><canvas id="chart-payback" height="118" role="img" aria-label={paybackLabel}></canvas></div>
     <p class="caption">
       {t.days} days in we're running at <strong>{Math.round((prop.pace ?? 0) * 100)}%</strong> of
       the pace the proposal assumed. However, £{prop.unearnable_gbp} of its year-one total comes
@@ -101,12 +112,12 @@ const datasetJsonLd = {
   </section>
 
   {(t.unpaid_export_kwh ?? 0) > 0.05 && (
-    <div class="note warn">
-      <p><strong>£{fmt(t.foregone_export_gbp, 2)} of export unpaid</strong>: {fmt(t.unpaid_export_kwh, 1)} kWh
+    <div class="note quiet">
+      <p><strong>£{fmt(t.foregone_export_gbp, 2)} of export went unpaid</strong>: {fmt(t.unpaid_export_kwh, 1)} kWh
       went to the grid between June and 21 September while the export MPAN was still being
       registered. Once the battery was full the surplus was exported, and we weren't paid for it.
-      This is what it would have earned at 12p. Paid export started on 22 September, so this
-      figure won't grow any further.
+      This is what it would have earned at 12p. It's a closed account: paid export started on
+      22 September.
       <a href="/tariff/">The certification story →</a></p>
     </div>
   )}
@@ -119,24 +130,29 @@ const datasetJsonLd = {
     <div class="heat">
       {heatMonths.map((mo: any) => (
         <div class="hrow">
-          <span class="hlabel">{mo.short}</span>
-          <span class="hcells">
+          <span class="hlabel" aria-hidden="true">{mo.short}</span>
+          <span class="hcells" aria-hidden="true">
             {mo.cells.map((c: any) => (
-              <i style={cellStyle(c.kwh)} title={c.kwh == null ? c.iso : `${c.iso}: ${c.kwh} kWh`}></i>
+              <i
+                class={c.kwh === 'gap' ? 'gap' : undefined}
+                style={cellStyle(c.kwh)}
+                title={c.kwh === 'gap' ? `${c.iso}: no upload` : c.kwh == null ? c.iso : `${c.iso}: ${c.kwh} kWh`}
+              ></i>
             ))}
           </span>
-          <span class="htotal">{fmt(mo.total)} kWh</span>
+          <span class="htotal"><span class="sr-only">{mo.long}: </span>{fmt(mo.total)} kWh</span>
         </div>
       ))}
-      <div class="hscale">
+      <div class="hscale" aria-hidden="true">
         <span>0 kWh</span>
         {STEPS.map((s) => <i style={`background:${s}`}></i>)}
         <span>{fmt(heatMax)} kWh</span>
+        {gapDays > 0 && <span style="display:inline-flex; align-items:center; gap:0.35rem; margin-left:0.9rem"><i class="gap"></i>no upload ({gapDays} {gapDays === 1 ? 'day' : 'days'})</span>}
       </div>
     </div>
   </section>
 
-  <div class="cols-2" style="margin-top:1rem">
+  <div class="cols-2" style="margin-top:1rem; align-items:start">
     <section class="card dark">
       <div class="card-head">
         <h2>VPP earnings</h2>
@@ -147,8 +163,8 @@ const datasetJsonLd = {
           <div class="vbar">
             <span class="v">£{(mo.axle_earnings ?? 0).toFixed(2)}</span>
             <span class="b" style={`height:${Math.max(6, ((mo.axle_earnings ?? 0) / axleMax) * 100)}%`}></span>
-            <span class="l">{new Date(mo.month + '-15T12:00:00Z').toLocaleDateString('en-GB', { month: 'short' })}</span>
-            <span class="s">{mo.axle_events ?? 0} ev</span>
+            <span class="l">{MON[Number(mo.month.slice(5, 7)) - 1]}</span>
+            <span class="s">{mo.axle_events ?? 0} {(mo.axle_events ?? 0) === 1 ? 'event' : 'events'}</span>
           </div>
         ))}
       </div>
@@ -176,11 +192,11 @@ const datasetJsonLd = {
     <div class="card-head">
       <h2>Grid flows</h2>
       <div class="chart-key">
-        <span style="color:#1d4ed8"><i></i>export</span>
-        <span style="color:#b4422c"><i></i>import</span>
+        <span class="actual"><i></i>export</span>
+        <span class="import"><i></i>import</span>
       </div>
     </div>
-    <div class="chart"><canvas id="chart-grid" height="110"></canvas></div>
+    <div class="chart"><canvas id="chart-grid" height="110" role="img" aria-label={gridLabel}></canvas></div>
     <p class="caption">
       Export above the line, import below. The battery covers almost everything the house needs,
       so import only shows up on the dullest days. Every blue bar before 22 September is energy
@@ -278,10 +294,11 @@ const datasetJsonLd = {
       text-align: center;
       font-family: var(--mono);
     }
-    .vpp-bars .vbar .v { font-size: 0.7rem; color: var(--accent-pale); padding-bottom: 0.3rem; }
+    .chart-key .import { color: #b4422c; }
+    .vpp-bars .vbar .v { font-size: 0.75rem; color: var(--accent-pale); padding-bottom: 0.3rem; }
     .vpp-bars .vbar .b { background: var(--accent-pale); border-radius: 3px 3px 0 0; align-self: end; }
     .vpp-bars .vbar .l { font-size: 0.72rem; color: var(--dark-ink); padding-top: 0.4rem; }
-    .vpp-bars .vbar .s { font-size: 0.66rem; color: var(--dark-ink-dim); }
+    .vpp-bars .vbar .s { font-size: 0.72rem; color: var(--dark-ink-dim); }
   </style>
 
   <script src="../scripts/charts.js"></script>

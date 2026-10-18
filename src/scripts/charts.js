@@ -16,11 +16,11 @@ const css = (name) => getComputedStyle(document.documentElement).getPropertyValu
 const ACCENT = css('--accent') || '#1d4ed8';
 const INK_400 = css('--ink-400') || '#8c867c';
 const RULE = css('--rule') || '#e4e1dc';
-const PROJECTED = '#c7bdae';
+const PROJECTED = '#8a7f70'; // dashed, so it can sit darker without competing with actual
 const IMPORT = '#b4422c';
 
 Chart.defaults.font.family = "'IBM Plex Mono', monospace";
-Chart.defaults.font.size = 10.5;
+Chart.defaults.font.size = 11.5;
 Chart.defaults.color = INK_400;
 Chart.defaults.borderColor = RULE;
 // the pages draw their own keys, so the built-in legend stays off everywhere
@@ -32,7 +32,9 @@ const daily = stats.daily;
 const proposal = stats.meta.proposal;
 
 // Month-boundary labels only: a 95-point axis labelled every day is noise.
-const monthTick = (iso) => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { month: 'short' });
+// fixed three-letter months: en-GB's short form gives "Sept"
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthTick = (iso) => MON[Number(iso.slice(5, 7)) - 1];
 const labels = daily.map((d, i) => {
   const isFirstOfMonth = i === 0 || d.date.slice(5, 7) !== daily[i - 1].date.slice(5, 7);
   return isFirstOfMonth ? monthTick(d.date) : '';

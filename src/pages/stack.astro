@@ -16,7 +16,7 @@ import Base from '../layouts/Base.astro';
     <div class="step">
       <span class="n">01</span>
       <div>
-        <h3>Read everything</h3>
+        <h2>Read everything</h2>
         <p>The inverter speaks Modbus TCP over the local network. Every meter, cell voltage and
         MPPT string ends up in Home Assistant (over 250 entities, all local). Nothing leaves the
         house except the nightly summary that feeds this site.</p>
@@ -26,7 +26,7 @@ import Base from '../layouts/Base.astro';
     <div class="step">
       <span class="n">02</span>
       <div>
-        <h3>Forecast the day</h3>
+        <h2>Forecast the day</h2>
         <p>Solcast gives two forecasts a day for each roof plane, east and west modelled
         separately. On Intelligent Octopus Go the prices are fixed (8p overnight, 34.72p the rest
         of the day, 12p for export), so the unknowns are the weather and the house's load.</p>
@@ -36,7 +36,7 @@ import Base from '../layouts/Base.astro';
     <div class="step">
       <span class="n">03</span>
       <div>
-        <h3>Make a plan</h3>
+        <h2>Make a plan</h2>
         <p>Predbat plans the next 48 hours: when to charge, when to discharge, and when to leave
         the battery alone. It sends the plan to the inverter through three
         small bridge automations that map its requested mode onto Sigenergy's EMS registers.</p>
@@ -46,7 +46,7 @@ import Base from '../layouts/Base.astro';
     <div class="step">
       <span class="n">04</span>
       <div>
-        <h3>Publish it</h3>
+        <h2>Publish it</h2>
         <p>At 00:15 an automation rolls up the day, compares it with Predbat's no-solar baseline,
         and pushes one JSON file to this site's GitHub repo. A GitHub Action rebuilds and deploys.
         Nobody edits the figures by hand.</p>

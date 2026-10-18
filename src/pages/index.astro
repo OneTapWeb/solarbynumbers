@@ -42,6 +42,8 @@ const earnablePace = prop.to_date_earnable_gbp > 0
 // marker position for where the proposal said we'd be, on the same £0–£11,999 scale
 const markerPct = (prop.to_date_gbp / m.system_cost_gbp) * 100;
 const dayNo = t.days;
+// More out than in: the battery was exporting too (an Axle event, or a full battery at dusk).
+const exportBeyondSolar = e.grid_export != null && e.pv_generation != null && e.grid_export > e.pv_generation;
 
 const axleEarnings = t.axle_earnings ?? 0;
 const axleEvents = t.axle_events ?? 0;
@@ -51,9 +53,16 @@ const axleFromEvents = axleEarnings - axleTopups;
 
 <Base title="Real UK solar & battery data, published daily">
   <section>
-    <p class="kicker">22 panels · 15 kWh battery · Hampshire</p>
+    <div class="page-head" style="margin-bottom:1.4rem">
+      <h1>What one Hampshire roof has actually saved</h1>
+      <p class="lede">
+        22 panels and a 15 kWh battery, measured every night against the installer's proposal.
+        On day {dayNo}, it's on course to pay back in <strong>{prop.payback_years_at_rate} years</strong>,
+        not the {prop.payback_years} quoted.
+      </p>
+    </div>
 
-    <div class="card" style="margin-top:0.8rem">
+    <div class="card">
       <div class="card-head">
         <h2>Payback so far</h2>
         <span class="meta">day {dayNo} · £{m.system_cost_gbp.toLocaleString('en-GB')} system</span>
@@ -90,7 +99,7 @@ const axleFromEvents = axleEarnings - axleTopups;
             <div>
               <p class="kicker">Like for like</p>
               <span class="figure md">{earnablePace}%</span>
-              <p class="note-line">excluding income we can't get yet</p>
+              <p class="note-line">of the pace, counting only income open to us now</p>
             </div>
             <div>
               <p class="kicker">At this rate</p>
@@ -108,9 +117,13 @@ const axleFromEvents = axleEarnings - axleTopups;
   </section>
 
   <div class="section-head">
-    <h2>Yesterday</h2>
-    <span class="meta">{lastDate} {m.sample && <span class="badge-sample">demo data</span>}</span>
+    <h2>Latest day</h2>
+    <span class="meta" data-latest={last?.date}>{lastDate} {m.sample && <span class="badge-sample">demo data</span>}</span>
   </div>
+  <p class="note quiet stale" hidden>
+    The nightly upload is late, so these figures are <span data-age></span> days old. They'll catch up
+    when Home Assistant next reports in.
+  </p>
 
   <div class="tiles">
     <div>
@@ -120,7 +133,14 @@ const axleFromEvents = axleEarnings - axleTopups;
     <div>
       <p class="kicker">Exported</p>
       <span class="figure lg">{fmt(e.grid_export)}<span class="unit">kWh</span></span>
-      <p class="note-line">{c.export_revenue ? `earned £${c.export_revenue.toFixed(2)} at 12p` : 'unpaid, before the export tariff started'}</p>
+      <p class="note-line">
+        {c.export_revenue
+          ? `earned £${c.export_revenue.toFixed(2)} at 12p`
+          : c.export_revenue === 0 && last.date < '2026-09-22'
+            ? 'unpaid, before the export tariff started'
+            : c.export_revenue == null ? 'earnings not recorded that day' : 'nothing earned'}
+        {exportBeyondSolar && <><br />more than generated: the battery exported too</>}
+      </p>
     </div>
     <div>
       <p class="kicker">Imported</p>
@@ -129,42 +149,7 @@ const axleFromEvents = axleEarnings - axleTopups;
     <div>
       <p class="kicker">Day's saving</p>
       <span class="figure lg accent">{daySaving == null ? 'n/a' : `£${daySaving.toFixed(2)}`}</span>
-      <p class="note-line">vs a no-solar baseline</p>
-    </div>
-  </div>
-
-  <div class="cols-2" style="margin-top:1rem">
-    <div class="card dark referral">
-      <p class="kicker"><img src="/axle-logo-black.png" alt="Axle" class="axle-logo-inline" style="filter:brightness(0) invert(1); opacity:0.75" /> VPP earnings · grid events</p>
-      <span class="figure lg">£{axleEarnings.toFixed(2)}</span>
-      <p style="margin-top:0.6rem">
-        £{axleFromEvents.toFixed(2)} paid for {axleEvents} grid-balancing {axleEvents === 1 ? 'event' : 'events'} at
-        £1/kWh{axleTopups > 0 ? `, plus £${axleTopups.toFixed(2)} topping quiet months up to the £10 minimum` : ''}.
-        These figures come from Axle's own statement, which
-        <a href="/stats/#axle">doesn't always match our meter</a>.
-      </p>
-      <div class="cta">
-        <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><img src="/axle-logo-black.png" alt="Axle" class="axle-mark" /> £25 referral</a>
-        <p class="fine">Got a battery? We both get £25.</p>
-      </div>
-    </div>
-
-    <div class="card referral">
-      <p class="kicker">Tariff · {tariffs.current.electricity.product}</p>
-      <span class="figure lg">{tariffs.current.electricity.night_p}<span class="unit">p overnight</span></span>
-      <p style="margin-top:0.6rem">
-        We left the {tariffs.current.previous_electricity.unit_p.toFixed(1)}p flat fix on 14 September, five
-        months early (<a href="/tariff/">reasons here</a>).
-        {tariffs.current.electricity.product} gives us {tariffs.current.electricity.night_hours} hours
-        at {tariffs.current.electricity.night_p}p every night, in time for the heat pump.
-        Export started paying 12p on 22 September. Before that,
-        <a href="/stats/">£{(t.foregone_export_gbp ?? 0).toFixed(0)} worth of surplus</a> went to the
-        grid unpaid.
-      </p>
-      <div class="cta">
-        <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> £50 referral</a>
-        <p class="fine">Switching? We both get £50.</p>
-      </div>
+      <p class="note-line">{daySaving == null ? 'not recorded that day: Predbat was offline' : 'vs a no-solar baseline'}</p>
     </div>
   </div>
 
@@ -182,7 +167,7 @@ const axleFromEvents = axleEarnings - axleTopups;
 
   <div class="sv-rows">
     {savings.marginal_gbp.map((row: any) => (
-      <a class="svrow" href={row.href}>
+      <a class="svrow" href={row.href} aria-label={`${row.what}: £${row.saving.toLocaleString('en-GB')} a year. ${row.note}`}>
         <span class="svlabel">
           <strong>{row.what}</strong>
           <span class="svnote">{row.note}</span>
@@ -232,21 +217,18 @@ const axleFromEvents = axleEarnings - axleTopups;
 
     <div class="cols-3" style="margin-top:1.4rem">
       <div class="card">
-        <p class="kicker accent">Hardware</p>
         <h3 style="margin-top:0">The system</h3>
         <p>22 Aiko 475W panels on an east/west roof, a Sigenergy hybrid inverter and 15.06 kWh of
         battery. £11,999 fully installed.</p>
         <p style="font-size:0.88rem"><a href="/system/">Specs &amp; warranties <span class="arrow">→</span></a></p>
       </div>
       <div class="card">
-        <p class="kicker accent">Software</p>
         <h3 style="margin-top:0">The software</h3>
         <p>Home Assistant on a £50 second-hand Dell, running Predbat, which replans every half hour
         using the tariff prices and a Solcast forecast.</p>
         <p style="font-size:0.88rem"><a href="/stack/">How it works <span class="arrow">→</span></a></p>
       </div>
       <div class="card">
-        <p class="kicker accent">Copy them</p>
         <h3 style="margin-top:0">The configs</h3>
         <p>The <code>apps.yaml</code>, automations and helpers that run this Sigenergy and Predbat
         setup, with secrets removed and comments added. Free to copy.</p>
@@ -254,13 +236,52 @@ const axleFromEvents = axleEarnings - axleTopups;
       </div>
     </div>
   </section>
+
+  <div class="section-head"><h2>The tariff and the VPP</h2></div>
+  <div class="cols-2" >
+    <div class="card dark referral">
+      <p class="kicker"><img src="/axle-logo-black.png" alt="Axle" class="axle-logo-inline" style="filter:brightness(0) invert(1); opacity:0.75" /> VPP earnings · grid events</p>
+      <span class="figure lg">£{axleEarnings.toFixed(2)}</span>
+      <p style="margin-top:0.6rem">
+        £{axleFromEvents.toFixed(2)} paid for {axleEvents} grid-balancing {axleEvents === 1 ? 'event' : 'events'} at
+        £1/kWh{axleTopups > 0 ? `, plus £${axleTopups.toFixed(2)} topping quiet months up to the £10 minimum` : ''}.
+        These figures come from Axle's own statement, which
+        <a href="/stats/#axle">doesn't always match our meter</a>.
+      </p>
+      <div class="cta">
+        <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><img src="/axle-logo-black.png" alt="Axle" class="axle-mark" /> £25 referral</a>
+        <p class="fine">Got a battery? We both get £25.</p>
+      </div>
+    </div>
+
+    <div class="card referral">
+      <p class="kicker">Tariff · {tariffs.current.electricity.product}</p>
+      <span class="figure lg">{tariffs.current.electricity.night_p}<span class="unit">p overnight</span></span>
+      <p style="margin-top:0.6rem">
+        We left the {tariffs.current.previous_electricity.unit_p.toFixed(1)}p flat fix on 14 September, five
+        months early (<a href="/tariff/">reasons here</a>).
+        {tariffs.current.electricity.product} gives us {tariffs.current.electricity.night_hours} hours
+        at {tariffs.current.electricity.night_p}p every night, in time for the heat pump.
+        Export started paying 12p on 22 September. Before that,
+        <a href="/stats/">£{(t.foregone_export_gbp ?? 0).toFixed(0)} worth of surplus</a> went to the
+        grid unpaid.
+      </p>
+      <div class="cta">
+        <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> £50 referral</a>
+        <p class="fine">Switching? We both get £50.</p>
+      </div>
+    </div>
+  </div>
+
   <style>
     .sv-rows { display:flex; flex-direction:column; gap:0.6rem; margin-top:1.2rem; }
     .svrow { display:grid; grid-template-columns:16rem 1fr 5rem; align-items:center; gap:0.9rem;
              text-decoration:none; color:inherit; padding:0.55rem 0.7rem; border-radius:8px; }
     .svrow:hover { background:var(--tile); }
+    .svlabel strong { color:var(--accent); text-decoration:underline; text-decoration-color:rgba(29,78,216,0.35); text-underline-offset:3px; font-weight:600; }
+    .svrow:hover .svlabel strong { text-decoration-color:var(--accent); }
     .svlabel { display:flex; flex-direction:column; font-size:0.9rem; }
-    .svnote { font-size:0.74rem; color:var(--ink-400); margin-top:0.15rem; }
+    .svnote { font-size:0.8rem; color:var(--ink-400); margin-top:0.15rem; }
     .svtrack { background:var(--track); border-radius:999px; height:14px; overflow:hidden; }
     .svfill { display:block; height:100%; border-radius:999px; background:var(--accent); min-width:8px; }
     .svval { font-family:var(--mono); font-size:0.92rem; text-align:right; }

@@ -8,6 +8,11 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+// neighbours in date order, for previous / next links
+const all = (await getCollection('journey')).sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
+const at = all.findIndex((p) => p.id === post.id);
+const prev = at > 0 ? all[at - 1] : null;
+const next = at < all.length - 1 ? all[at + 1] : null;
 const { Content } = await render(post);
 const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -25,16 +30,20 @@ const jsonLd = {
 ---
 
 <Base title={post.data.title} description={post.data.summary} ogType="article" jsonLd={jsonLd}>
-  <article style="max-width:40rem">
-    <p class="kicker">{fmtDate(post.data.date)}</p>
+  <article class="post">
     <h1>{post.data.title}</h1>
+    <p class="muted mono" style="margin-top:0.6rem"><time datetime={post.data.date.toISOString().slice(0, 10)}>{fmtDate(post.data.date)}</time></p>
     <div style="margin-top:1.4rem">
       <Content />
     </div>
     <hr />
-    <p class="muted">
-      ← <a href="/journey/">All diary entries</a> ·
-      <a href="/stats/">Today's numbers</a>
+    <nav class="post-nav" aria-label="More diary entries">
+      {prev && <a href={`/journey/${prev.id}/`} rel="prev"><small>Earlier</small>{prev.data.title}</a>}
+      {next && <a class="next" href={`/journey/${next.id}/`} rel="next"><small>Later</small>{next.data.title}</a>}
+    </nav>
+    <p class="muted" style="margin-top:1.6rem">
+      <a href="/journey/">All diary entries</a> ·
+      <a href="/stats/">Latest numbers</a>
     </p>
   </article>
 </Base>

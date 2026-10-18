@@ -21,7 +21,7 @@ const shade = (v: number) => {
   if (k > 0.22) return '#c9d8f8';
   return '#e8eefc';
 };
-const ink = (v: number) => ((v - lo) / (hi - lo) > 0.72 ? '#fff' : 'inherit');
+const ink = (v: number) => ((v - lo) / (hi - lo) > 0.72 ? 'var(--ink-900)' : 'inherit');
 const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
 ---
 
@@ -254,9 +254,8 @@ const marketRow = s.rows.find((r: any) => r.gas_p === g.market_p);
   </table>
 
   <div class="card referral" style="margin-top:1.4rem">
-    <p class="kicker">Thinking of switching?</p>
-    <h2 style="margin:0.2rem 0 0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
-    <p>The site has no sponsors. The referral links are the only money it makes, and you get the
+    <h2 style="margin:0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
+    <p>Thinking of switching? The site has no sponsors. The referral links are the only money it makes, and you get the
     same amount we do. You don't need solar or a heat pump; it works for any tariff.</p>
     <div class="cta">
       <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> Claim £50</a>

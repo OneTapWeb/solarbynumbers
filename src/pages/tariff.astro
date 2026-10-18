@@ -10,6 +10,8 @@ const { current: cur, comparison: cmp } = t;
 const elec = cur.electricity;
 const prev = cur.previous_electricity;
 const gbp = (n: number) => `£${Math.round(n).toLocaleString('en-GB')}`;
+// Octopus quote rates to four decimals; two is all anyone can use
+const pp = (n: number) => `${Number(n.toFixed(2))}`;
 const ukDate = (iso: string) =>
   new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 const chosen = cmp.rows.find((r: any) => r.chosen);
@@ -44,48 +46,60 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     <p class="lede">
       The tariff decides what each stored kWh is worth, so it matters about as much as the
       hardware does. For the first six months we were on a
-      {' '}<strong>plain 12-month fix at {prev.unit_p}p</strong>. It was already a poor fit for
+      {' '}<strong>plain 12-month fix at {pp(prev.unit_p)}p</strong>. It was already a poor fit for
       this house and would have got worse once the heat pump arrived. On 14 September we moved to
       {' '}<strong>{elec.product}</strong>. Below is what we're on now, what we left, and the
       modelling behind the decision.
     </p>
   </div>
 
-  <div class="section-head"><h2>What we're on now</h2></div>
+  <nav class="toc" aria-label="On this page">
+    <span class="fine">On this page:</span>
+    <ul>
+      <li><a href="#now">What we're on now</a></li>
+      <li><a href="#why">Why the fix stopped working</a></li>
+      <li><a href="#iog">{elec.product}</a></li>
+      <li><a href="#agile">The half-hourly price</a></li>
+      <li><a href="#flux">What happened to Flux</a></li>
+      <li><a href="#export">Flat 12p export</a></li>
+    </ul>
+  </nav>
+
+  <div class="section-head" id="now"><h2>What we're on now</h2></div>
   <table class="spec">
     <tbody>
       <tr>
         <td>Import</td>
         <td>
-          <strong>{elec.product}</strong> — <strong>{elec.night_p}p/kWh</strong> for
-          {' '}{elec.night_hours} hours ({elec.night_window}), {elec.day_p}p the rest of the day,
-          standing charge {elec.standing_p}p/day. Started {ukDate(elec.started)}, runs to
-          {' '}{ukDate(elec.ends)}. Replaced a {prev.unit_p}p flat fix we left on
+          <strong>{elec.product}</strong>: <strong>{elec.night_p}p/kWh</strong> for
+          {' '}{elec.night_hours} hours ({elec.night_window}), {pp(elec.day_p)}p the rest of the day,
+          standing charge {pp(elec.standing_p)}p/day. Started {ukDate(elec.started)}, runs to
+          {' '}{ukDate(elec.ends)}. Replaced a {pp(prev.unit_p)}p flat fix we left on
           {' '}{ukDate(prev.left)}, five months early.
-          <span class="mono fine"> {elec.tariff_code}</span>
+          <span class="mono fine code">{elec.tariff_code}</span>
         </td>
       </tr>
       <tr>
         <td>Gas</td>
         <td>
-          <strong>{cur.gas.product}</strong> — {cur.gas.unit_p}p/kWh, standing charge
-          {' '}{cur.gas.standing_p}p/day. {cur.gas.note}
-          <span class="mono fine"> {cur.gas.tariff_code}</span>
+          <strong>{cur.gas.product}</strong>: {pp(cur.gas.unit_p)}p/kWh, standing charge
+          {' '}{pp(cur.gas.standing_p)}p/day. {cur.gas.note}
+          <span class="mono fine code">{cur.gas.tariff_code}</span>
         </td>
       </tr>
       <tr>
         <td>Export</td>
         <td>
-          <strong>{cur.export.product}</strong> — flat {cur.export.unit_p}p/kWh at any time of day.
+          <strong>{cur.export.product}</strong>: flat {cur.export.unit_p}p/kWh at any time of day.
           We chose it because the rate is guaranteed.
           <strong> Paying since 22 September 2026</strong>, after three and a half months of
-          exporting for nothing. <span class="mono fine">{cur.export.tariff_code}</span>
+          exporting for nothing. <span class="mono fine code">{cur.export.tariff_code}</span>
         </td>
       </tr>
       <tr>
         <td>VPP</td>
         <td>
-          <strong>{cur.vpp.product}</strong> — £{cur.vpp.rate_gbp_per_kwh}/kWh with a
+          <strong>{cur.vpp.product}</strong>: £{cur.vpp.rate_gbp_per_kwh}/kWh with a
           £{cur.vpp.monthly_minimum_gbp}/month minimum. It settles through the smart meter, so it was
           paying for months before the export certification came through. <a href="/stats/#axle">What it's paid us so far →</a>
         </td>
@@ -93,7 +107,7 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     </tbody>
   </table>
 
-  <div class="note warn">
+  <div class="note quiet">
     <p><strong>We gave our export away for 110 days.</strong> The panels exported
     {' '}<strong>{cur.export.kwh_given_away.toLocaleString('en-GB')} kWh</strong> between
     {' '}{ukDate(cur.export.since)} and {ukDate(cur.export.given_away_until)} and earned <strong>£0</strong> for it,
@@ -105,14 +119,15 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
   </div>
 
   <div class="note quiet">
-    <p><strong>VAT on electricity drops from 5% to 0% on 1 October 2026.</strong> Every rate on this
-    page falls by about 4.8% without us doing anything. It applies to every tariff, so none of the
-    comparisons change, but the figures above are the last ones that include VAT.</p>
+    <p><strong>VAT on electricity dropped from 5% to 0% on 1 October 2026.</strong> Every
+    electricity rate fell by about 4.8% without us doing anything. The rates above were read on
+    {' '}{ukDate(t.as_of)}, so they still include the 5%. The comparison below is already at 0%,
+    and since the change applies to every tariff, none of the rankings move.</p>
   </div>
 
-  <div class="section-head"><h2>Why the fix stopped working</h2></div>
+  <div class="section-head" id="why"><h2>Why the fix stopped working</h2></div>
   <p class="lede">
-    A flat {prev.unit_p}p is fine for a house that just uses electricity. With a battery it makes
+    A flat {pp(prev.unit_p)}p is fine for a house that just uses electricity. With a battery it makes
     less sense, and with {' '}<a href="/ev/">an EV</a> and <a href="/heat-pump/">a heat pump</a> on
     the way it makes very little. When every hour costs the same, the battery can't buy cheap and
     use later, and the heat pump can't be run in cheaper hours. All the new demand would have been
@@ -148,12 +163,12 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     </p>
   </div>
 
-  <div class="section-head"><h2>What we moved to: {elec.product}</h2></div>
+  <div class="section-head" id="iog"><h2>What we moved to: {elec.product}</h2></div>
   <table class="spec">
     <tbody>
-      <tr><td>Night</td><td><strong>{elec.night_p}p/kWh</strong>, {elec.night_window} — {elec.night_hours} hours, and it covers the whole house as well as the car. There are also occasional smart dispatch slots outside the window.</td></tr>
-      <tr><td>Day</td><td>{elec.day_p}p/kWh. That's expensive, so the aim is to buy as little as possible at this rate. The battery and the heat pump's thermal store are what let us do that.</td></tr>
-      <tr><td>Standing</td><td>{elec.standing_p}p/day.</td></tr>
+      <tr><td>Night</td><td><strong>{elec.night_p}p/kWh</strong>, {elec.night_window}: {elec.night_hours} hours, and it covers the whole house as well as the car. There are also occasional smart dispatch slots outside the window.</td></tr>
+      <tr><td>Day</td><td>{pp(elec.day_p)}p/kWh. That's expensive, so the aim is to buy as little as possible at this rate. The battery and the heat pump's thermal store are what let us do that.</td></tr>
+      <tr><td>Standing</td><td>{pp(elec.standing_p)}p/day.</td></tr>
       <tr><td>Timing</td><td>Live from <strong>{ukDate(elec.started)}</strong>, a few months before the heat pump goes in in December. If we'd waited for the fix to end in March 2027, we'd have spent a whole heating season on the wrong tariff.</td></tr>
     </tbody>
   </table>
@@ -177,9 +192,8 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
 
   <div class="cols-2" style="margin-top:1rem">
     <div class="card referral">
-      <p class="kicker">Thinking of switching?</p>
-      <h2 style="margin:0.2rem 0 0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
-      <p>The site has no sponsors. The referral links are the only money it makes, and you get the
+      <h2 style="margin:0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
+      <p>Thinking of switching? The site has no sponsors. The referral links are the only money it makes, and you get the
       same amount we do. You don't need solar; it works for any tariff.</p>
       <div class="cta">
         <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> Claim £50</a>
@@ -187,9 +201,8 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
       </div>
     </div>
     <div class="card referral">
-      <p class="kicker">Got a battery already?</p>
-      <h2 style="margin:0.2rem 0 0"><img src="/axle-logo-black.png" alt="" class="axle-logo-inline" /> Axle · we both get £25</h2>
-      <p>Paid at £1/kWh for each grid-balancing event, with a £10 monthly minimum. In events-only
+      <h2 style="margin:0"><img src="/axle-logo-black.png" alt="" class="axle-logo-inline" /> Axle · we both get £25</h2>
+      <p>Got a battery already? Axle pays £1/kWh for each grid-balancing event, with a £10 monthly minimum. In events-only
       mode Predbat runs the battery the rest of the time. <a href="/stats/#axle">What it's paid us so far →</a></p>
       <div class="cta">
         <a class="btn axle" href={AXLE_REFERRAL} rel="noopener"><img src="/axle-logo-black.png" alt="Axle" class="axle-mark" /> Claim £25</a>
@@ -197,7 +210,7 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     </div>
   </div>
 
-  <div class="section-head"><h2>The half-hourly price we modelled against</h2></div>
+  <div class="section-head" id="agile"><h2>The half-hourly price we modelled against</h2></div>
   <p class="lede">
     We're not on Agile, but a year of its published half-hourly rates is a good free record of when
     electricity is expensive. Every comparison above was modelled against it.
@@ -213,7 +226,7 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
         <span
           class="bar"
           style={`height:${((v - lo * 0.72) / (hi - lo * 0.72)) * 100}%; background:${isPeak(i) ? 'var(--dark)' : shade(v)}`}
-          title={`${slotTime(i)} — ${v.toFixed(2)}p`}
+          title={`${slotTime(i)}: ${v.toFixed(2)}p`}
         ></span>
       ))}
     </div>
@@ -228,7 +241,7 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     </p>
   </section>
 
-  <div class="section-head"><h2>What happened to Flux</h2></div>
+  <div class="section-head" id="flux"><h2>What happened to Flux</h2></div>
   <p class="lede">
     The original business case assumed <strong>Octopus Flux</strong>, the usual battery tariff,
     with a cheap overnight window and a 30p evening export peak. The plan was to charge cheaply
@@ -251,7 +264,7 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
     about three hours, which isn't enough for a 45 kWh winter day plus a car.
   </p>
 
-  <div class="section-head"><h2>Why we're on flat 12p export</h2></div>
+  <div class="section-head" id="export"><h2>Why we're on flat 12p export</h2></div>
   <p class="lede">
     Agile Outgoing pays a half-hourly export price, uncapped, with no exit fees. We ran a year of
     real rates against our own generation. Flat 12p comes to {gbp(t.export_comparison.outgoing_fixed_12p)} and Agile Outgoing to {gbp(t.export_comparison.agile_outgoing)}, an average of only {t.export_comparison.agile_achieved_p}p. That's {gbp(t.export_comparison.outgoing_fixed_12p - t.export_comparison.agile_outgoing)} a year in favour of flat 12p. Agile
@@ -283,20 +296,20 @@ const barMax = Math.max(...cmp.rows.map((r: any) => r.net));
       display: flex;
       justify-content: space-between;
       font-family: var(--mono);
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: var(--ink-400);
       margin-top: 0.4rem;
     }
     .tar-bars { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.4rem; }
     .trow { display: grid; grid-template-columns: 15rem 1fr 4rem; align-items: center; gap: 0.8rem; }
     .tlabel { font-size: 0.86rem; display: flex; flex-direction: column; }
-    .tverdict { font-size: 0.74rem; color: var(--ink-400); }
+    .tverdict { font-size: 0.8rem; color: var(--ink-400); }
     .ttrack { background: var(--track); border-radius: 999px; height: 12px; overflow: hidden; }
     .tfill { display: block; height: 100%; border-radius: 999px; min-width: 6px; background: #9ab4f2; }
     .tfill.accent { background: var(--accent); }
     .tfill.dark { background: var(--dark); }
     .tfill.mid { background: #9ab4f2; }
-    .tval { font-family: var(--mono); font-size: 0.78rem; text-align: right; color: var(--ink-400); }
+    .tval { font-family: var(--mono); font-size: 0.8rem; text-align: right; color: var(--ink-600); }
     @media (max-width: 620px) {
       .trow { grid-template-columns: 1fr 4rem; }
       .tlabel { grid-column: 1 / -1; margin-bottom: -0.3rem; }

@@ -18,7 +18,7 @@ const shade = (v: number) => {
   if (k > 0.22) return '#c9d8f8';
   return '#e8eefc';
 };
-const ink = (v: number) => ((v - lo) / (hi - lo) > 0.72 ? '#fff' : 'inherit');
+const ink = (v: number) => ((v - lo) / (hi - lo) > 0.72 ? 'var(--ink-900)' : 'inherit');
 
 // pence per mile, scaled against the thirstiest thing we used to drive
 const barMax = cpm.petrol_qashqai;
@@ -210,9 +210,8 @@ const bars = [
   </p>
 
   <div class="card referral" style="margin-top:1.4rem">
-    <p class="kicker">Charging an EV at home?</p>
-    <h2 style="margin:0.2rem 0 0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
-    <p>Most of the saving above comes from the overnight rate. The site has no sponsors, and you
+    <h2 style="margin:0"><img src="/octopus-mark.png" alt="" class="octopus-logo-inline" /> Octopus · we both get £50</h2>
+    <p>Charging an EV at home? Most of the saving above comes from the overnight rate. The site has no sponsors, and you
     get the same referral payment we do.</p>
     <div class="cta">
       <a class="btn octopus" href={OCTOPUS_REFERRAL} rel="noopener"><img src="/octopus-mark.png" alt="Octopus Energy" class="octopus-mark" /> Claim £50</a>
