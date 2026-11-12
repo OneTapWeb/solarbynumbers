@@ -1,0 +1,44 @@
+name: Update pump prices
+
+# GOV.UK publishes the weekly road fuel prices on a Monday/Tuesday. Check Wednesday and
+# again Friday in case of a late release; a run with nothing new commits nothing.
+on:
+  schedule:
+    - cron: '17 7 * * 3,5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write # to dispatch the deploy: pushes made with GITHUB_TOKEN don't trigger it
+
+concurrency:
+  group: pump-prices
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Fetch latest weekly prices
+        run: node scripts/update-pump-prices.mjs
+
+      - name: Commit and deploy if changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet data/car.json; then
+            echo "No new prices."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/car.json
+          git commit -m "data: UK pump prices to $(node -e "console.log(require('./data/car.json').tracker.pump_prices_weekly.at(-1)[0])")"
+          git pull --rebase origin main
+          git push
+          gh workflow run deploy.yml --ref main
