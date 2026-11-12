@@ -6,7 +6,27 @@
   "car": {
     "model": "Skoda Enyaq",
     "bought": "2026-07-16",
-    "battery_kwh_usable": 77
+    "battery_kwh_usable": 77,
+    "odometer_at_purchase_miles": 63473
+  },
+  "tracker": {
+    "_comment": "Running cost tracker, built by scripts/aggregate.mjs from the `car` blocks in data/daily/*.json (MySkoda odometer + SoC; charging kWh estimated from the car's reported charging state/power, split home off-peak / home peak / away). Each day's EV cost = home kWh at the import tariff in force + away kWh at away_p_per_kwh + the net battery drop over the window (SoC) priced at the off-peak rate grossed up for charging losses. Each day's fuel cost = miles driven x the two old cars' blended pence-per-mile at that week's UK pump prices (DESNZ weekly road fuel prices). Starts at the first full day of MySkoda data.",
+    "home_tariff": [
+      { "from": "2026-09-15", "name": "Intelligent Octopus Go", "offpeak_p": 8.0, "peak_p": 34.72 }
+    ],
+    "away_p_per_kwh": 79,
+    "away_is_assumption": true,
+    "away_note": "Public charging (trips). Placeholder at a typical UK rapid-charger price until the actual receipts are entered.",
+    "pump_prices_source": "https://www.gov.uk/government/statistics/weekly-road-fuel-prices",
+    "pump_prices_weekly": [
+      ["2026-07-06", 149.80, 164.77], ["2026-07-13", 150.53, 164.52], ["2026-07-20", 152.29, 167.08],
+      ["2026-07-27", 156.13, 173.97], ["2026-08-03", 159.89, 179.19], ["2026-08-10", 162.15, 181.97],
+      ["2026-08-17", 161.80, 182.45], ["2026-08-24", 161.63, 182.82], ["2026-08-31", 161.61, 183.49],
+      ["2026-09-07", 164.40, 186.36], ["2026-09-14", 168.14, 190.72], ["2026-09-21", 172.01, 195.53],
+      ["2026-09-28", 173.46, 197.58], ["2026-10-05", 174.88, 199.52], ["2026-10-12", 175.28, 200.04],
+      ["2026-10-19", 174.57, 199.33], ["2026-10-26", 174.07, 199.22], ["2026-11-02", 172.78, 198.58],
+      ["2026-11-09", 170.71, 198.19]
+    ]
   },
   "replaced": {
     "note": "Two cars, roughly half the mileage each. The Enyaq is now the only car.",

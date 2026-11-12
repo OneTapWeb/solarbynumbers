@@ -238,6 +238,98 @@ const sample = real.length === 0;
 const days = sample ? sampleDays() : real;
 const ledger = await loadAxleLedger();
 const { monthly, totals } = aggregate(days, ledger);
+const car = await carTracker(days);
+
+// Running EV-vs-fuel cost from the daily `car` blocks (MySkoda via Home Assistant).
+// The first day with an odometer reading is the baseline; every later day adds its
+// miles (odometer delta) and its charging. Charging is priced at the tariff in force
+// that day, and the net battery drop across the window is added at the off-peak rate,
+// so a car that's been driven but not yet recharged isn't counted as free.
+// The fuel side prices the same miles in the two cars it replaced, at that week's
+// UK pump prices. See data/car.json `tracker`.
+async function carTracker(days) {
+  let cfg;
+  try {
+    cfg = JSON.parse(await readFile(join(root, 'data', 'car.json'), 'utf8'));
+  } catch {
+    return null;
+  }
+  const t = cfg.tracker;
+  const withCar = days.filter((d) => d.car?.odometer_km != null);
+  if (!t || withCar.length < 2) return null;
+
+  const KM_PER_MILE = 1.609344;
+  const L_PER_GALLON = 4.54609;
+  const weekPrice = (date) => {
+    let p = t.pump_prices_weekly[0];
+    for (const w of t.pump_prices_weekly) if (w[0] <= date) p = w;
+    return { petrol: p[1], diesel: p[2], week: p[0] };
+  };
+  const fuelPencePerMile = (date) => {
+    const pr = weekPrice(date);
+    return cfg.replaced.cars.reduce((s, c) => s + c.share * (c.fuel === 'diesel' ? pr.diesel : pr.petrol) / (c.mpg_real / L_PER_GALLON), 0);
+  };
+  const tariff = (date) => {
+    let r = t.home_tariff[0];
+    for (const x of t.home_tariff) if (x.from <= date) r = x;
+    return r;
+  };
+
+  const base = withCar[0];
+  let prev = base;
+  const acc = { miles: 0, kwh_offpeak: 0, kwh_peak: 0, kwh_away: 0, ev_p: 0, fuel_p: 0, ev_charge_p: 0 };
+  const series = [];
+  for (const d of withCar.slice(1)) {
+    const c = d.car;
+    const miles = Math.max(0, (c.odometer_km - prev.car.odometer_km) / KM_PER_MILE);
+    const r = tariff(d.date);
+    const charge_p = (c.home_offpeak_kwh ?? 0) * r.offpeak_p + (c.home_peak_kwh ?? 0) * r.peak_p + (c.away_kwh ?? 0) * t.away_p_per_kwh;
+    acc.miles += miles;
+    acc.kwh_offpeak += c.home_offpeak_kwh ?? 0;
+    acc.kwh_peak += c.home_peak_kwh ?? 0;
+    acc.kwh_away += c.away_kwh ?? 0;
+    acc.ev_charge_p += charge_p;
+    acc.fuel_p += miles * fuelPencePerMile(d.date);
+    series.push({ date: d.date, miles: round2(acc.miles), ev_charged_gbp: round2(acc.ev_charge_p / 100), fuel_gbp: round2(acc.fuel_p / 100) });
+    prev = d;
+  }
+  // Battery drawn down (or topped up) over the window, at the overnight rate.
+  const last = withCar[withCar.length - 1];
+  const eff = cfg.use?.charging_efficiency ?? 0.9;
+  const socFrom = base.car.soc_pct, socTo = last.car.soc_pct;
+  const socKwh = socFrom != null && socTo != null ? ((socFrom - socTo) / 100) * cfg.car.battery_kwh_usable : 0;
+  const soc_adj_p = (socKwh / eff) * tariff(last.date).offpeak_p;
+  acc.ev_p = acc.ev_charge_p + soc_adj_p;
+
+  const odoMiles = last.car.odometer_km / KM_PER_MILE;
+  const bought = cfg.car.bought;
+  const daysOwned = Math.round((Date.parse(last.date) - Date.parse(bought)) / 86400000) + 1;
+  const sincePurchase = odoMiles - cfg.car.odometer_at_purchase_miles;
+  const latestWeek = weekPrice(last.date);
+  return {
+    from: base.date,
+    to: last.date,
+    miles: round2(acc.miles),
+    kwh: { home_offpeak: round2(acc.kwh_offpeak), home_peak: round2(acc.kwh_peak), away: round2(acc.kwh_away) },
+    soc_from: socFrom, soc_to: socTo,
+    battery_drawdown_kwh: round2(socKwh),
+    ev_gbp: round2(acc.ev_p / 100),
+    ev_charged_gbp: round2(acc.ev_charge_p / 100),
+    ev_battery_adj_gbp: round2(soc_adj_p / 100),
+    fuel_gbp: round2(acc.fuel_p / 100),
+    saved_gbp: round2((acc.fuel_p - acc.ev_p) / 100),
+    ev_p_per_mile: acc.miles > 0 ? round2(acc.ev_p / acc.miles) : null,
+    fuel_p_per_mile: acc.miles > 0 ? round2(acc.fuel_p / acc.miles) : null,
+    away_p_per_kwh: t.away_p_per_kwh,
+    away_is_assumption: !!t.away_is_assumption,
+    pump_week: latestWeek.week, pump_petrol: latestWeek.petrol, pump_diesel: latestWeek.diesel,
+    odometer_miles: Math.round(odoMiles),
+    miles_since_purchase: Math.round(sincePurchase),
+    days_owned: daysOwned,
+    miles_per_year_pace: Math.round((sincePurchase / daysOwned) * 365),
+    series,
+  };
+}
 
 // Pace against the proposal, and what the current run rate implies for payback.
 // Both are honestly summer-weighted this early on — the pages say so.
@@ -275,6 +367,7 @@ const out = {
   },
   totals,
   monthly,
+  car,
   daily: days,
 };
 
