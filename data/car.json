@@ -14,9 +14,9 @@
     "home_tariff": [
       { "from": "2026-09-15", "name": "Intelligent Octopus Go", "offpeak_p": 8.0, "peak_p": 34.72 }
     ],
-    "away_p_per_kwh": 79,
-    "away_is_assumption": true,
-    "away_note": "Public charging (trips). Placeholder at a typical UK rapid-charger price until the actual receipts are entered.",
+    "away_p_per_kwh": 50,
+    "away_is_assumption": false,
+    "away_note": "Public charging on trips (France and the Netherlands, Oct 2026), about 50p/kWh as reported by the owner. Home charging is nearly all on the IOG overnight rate.",
     "pump_prices_source": "https://www.gov.uk/government/statistics/weekly-road-fuel-prices",
     "pump_prices_weekly": [
       ["2026-07-06", 149.80, 164.77], ["2026-07-13", 150.53, 164.52], ["2026-07-20", 152.29, 167.08],

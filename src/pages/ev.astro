@@ -1,12 +1,20 @@
 ---
 import Base from '../layouts/Base.astro';
 import car from '../../data/car.json';
+import stats from '../data/stats.json';
 
 const OCTOPUS_REFERRAL = 'https://share.octopus.energy/lush-spark-49';
 
 const { use, annual_gbp: a, cost_per_mile_p: cpm, replaced, fuel_sensitivity: fs } = car;
 const gbp = (n: number) => `£${Math.round(n).toLocaleString('en-GB')}`;
 const [qashqai, c4] = replaced.cars;
+
+// Measured running tracker (scripts/aggregate.mjs → stats.car); null until there's data.
+const m: any = (stats as any).car;
+const gbp2 = (n: number) => `£${n.toFixed(2)}`;
+const day = (iso: string) =>
+  new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const homeKwh = m ? m.kwh.home_offpeak + m.kwh.home_peak : 0;
 
 const allCosts = fs.rows.flatMap((r: any) => r.cost);
 const lo = Math.min(...allCosts);
@@ -48,10 +56,12 @@ const bars = [
   </div>
 
   <div class="note warn">
-    <p><strong>Modelled, not measured.</strong> The car isn't metered separately from the house, so
-    mileage, efficiency and charging losses here are estimates. The fuel figures use the economy
-    we actually got from the two cars (not the manufacturer figures) at UK average pump prices in
-    September 2026. We'll replace them with real figures after a full year of charging.</p>
+    <p><strong>A projection, with a measured tracker underneath.</strong> The yearly figures below
+    are modelled: the car isn't metered separately from the house, so annual mileage, efficiency
+    and charging losses are estimates. The fuel figures use the economy we actually got from the
+    two cars (not the manufacturer figures) at UK average pump prices in September 2026.
+    {m && <> Since {day(m.from)} the car itself reports its mileage, battery and charging to
+    Home Assistant, and <a href="#so-far">the running total</a> uses those real numbers.</>}</p>
   </div>
 
   <div class="tiles" style="margin-top:1.4rem">
@@ -76,6 +86,82 @@ const bars = [
       <p class="note-line">{replaced.blended_pence_per_mile}p a mile down to {cpm.iog_night}p</p>
     </div>
   </div>
+
+  {m && (
+    <>
+      <div class="section-head" id="so-far"><h2>So far, measured</h2></div>
+      <p class="lede">
+        The car has done <strong>{m.miles_since_purchase.toLocaleString('en-GB')} miles</strong> in
+        {' '}{m.days_owned} days since we bought it, a pace of about
+        {' '}<strong>{m.miles_per_year_pace.toLocaleString('en-GB')} a year</strong>. Since
+        {' '}{day(m.from)}, when it started reporting to Home Assistant, we've kept a running
+        total: what its charging actually cost against what the same miles would have cost in the
+        two old cars, at the pump prices of the week they were driven.
+      </p>
+
+      <div class="tiles">
+        <div>
+          <p class="kicker">Driven since {day(m.from)}</p>
+          <span class="figure md">{Math.round(m.miles).toLocaleString('en-GB')}<span class="unit">mi</span></span>
+          <p class="note-line">from the car's odometer</p>
+        </div>
+        <div>
+          <p class="kicker">Electric</p>
+          <span class="figure md">{gbp2(m.ev_gbp)}</span>
+          <p class="note-line">{m.ev_p_per_mile.toFixed(1)}p a mile</p>
+        </div>
+        <div>
+          <p class="kicker">Petrol and diesel</p>
+          <span class="figure md">{gbp2(m.fuel_gbp)}</span>
+          <p class="note-line">{m.fuel_p_per_mile.toFixed(1)}p a mile</p>
+        </div>
+        <div>
+          <p class="kicker">Saved</p>
+          <span class={`figure md${m.saved_gbp >= 0 ? ' accent' : ''}`}>{m.saved_gbp < 0 ? '−' : ''}{gbp2(Math.abs(m.saved_gbp))}</span>
+          <p class="note-line">to {day(m.to)}</p>
+        </div>
+      </div>
+
+      <div class="ledger">
+        <div class="row">
+          <span class="k">Charged at home, overnight ({m.kwh.home_offpeak.toFixed(0)} kWh at {car.tracker.home_tariff.at(-1).offpeak_p}p)</span>
+          <span class="v">{gbp2((m.kwh.home_offpeak * car.tracker.home_tariff.at(-1).offpeak_p) / 100)}</span>
+        </div>
+        <div class="row">
+          <span class="k">Charged at home, daytime ({m.kwh.home_peak.toFixed(0)} kWh at {car.tracker.home_tariff.at(-1).peak_p}p)</span>
+          <span class="v">{gbp2((m.kwh.home_peak * car.tracker.home_tariff.at(-1).peak_p) / 100)}</span>
+        </div>
+        <div class="row">
+          <span class="k">Public chargers in France and the Netherlands ({m.kwh.away.toFixed(0)} kWh at ~{m.away_p_per_kwh}p)</span>
+          <span class="v">{gbp2((m.kwh.away * m.away_p_per_kwh) / 100)}</span>
+        </div>
+        <div class="row">
+          <span class="k">Battery used but not yet recharged ({m.soc_from}% → {m.soc_to}%, at the overnight rate)</span>
+          <span class="v">{m.ev_battery_adj_gbp < 0 ? '−' : ''}{gbp2(Math.abs(m.ev_battery_adj_gbp))}</span>
+        </div>
+        <div class="row">
+          <span class="k"><strong>Electric, total</strong></span>
+          <span class="v"><strong>{gbp2(m.ev_gbp)}</strong></span>
+        </div>
+        <div class="row">
+          <span class="k">Same miles, Qashqai and C4 at 50/50, at that week's UK pump prices</span>
+          <span class="v">{gbp2(m.fuel_gbp)}</span>
+        </div>
+      </div>
+
+      <p class="caption">
+        Updated nightly. The mileage and battery level come from the car itself; the charging kWh
+        are estimated from when the car reports it's charging, because the granny cable isn't metered
+        separately. This first stretch includes a road trip to the Netherlands, so
+        {' '}{Math.round((m.kwh.away / (m.kwh.away + homeKwh)) * 100)}% of the charging was on public
+        chargers. Day to day, nearly all of it is at home overnight, and the cost per mile falls a
+        long way as the home-charged weeks add up. The fuel side uses the economy we actually got
+        from the two cars ({qashqai.mpg_real} and {c4.mpg_real} mpg) and the government's weekly UK
+        average pump prices, including for the miles driven abroad
+        (latest: week of {day(m.pump_week)}, {m.pump_petrol.toFixed(0)}p petrol, {m.pump_diesel.toFixed(0)}p diesel).
+      </p>
+    </>
+  )}
 
   <div class="section-head"><h2>What a mile costs</h2></div>
   <p class="lede">
