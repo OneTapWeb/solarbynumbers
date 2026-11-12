@@ -43,3 +43,15 @@ Conventions:
 - `source` is `home_assistant` (nightly push), `backfill` (historical script) or
   `sample` (synthesized demo data — never committed).
 - Schema changes bump `schema_version`; the aggregator must keep reading old versions.
+
+Optional `car` block (from 2026-10-24; MySkoda via Home Assistant, pushed nightly):
+
+```json
+"car": {"odometer_km": 106963, "home_offpeak_kwh": 6.3, "home_peak_kwh": 2.0, "away_kwh": 0, "soc_pct": 29, "source": "myskoda"}
+```
+
+- `odometer_km` and `soc_pct` are end-of-day readings; daily miles = odometer delta.
+- Charging kWh are **estimates** from the car's reported charging state/power (granny
+  cable assumed 2.3 kW when the car reports 0), split by HA template sensors in
+  `/config/packages/enyaq.yaml`: away = not home or > 3 kW; off-peak = IOG 23:30–05:30.
+- Used by `aggregate.mjs` → `stats.json` `car` (running EV-vs-fuel cost tracker).
